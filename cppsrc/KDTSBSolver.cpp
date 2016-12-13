@@ -1,0 +1,20 @@
+//
+//  KDTSBSolver.cpp
+//  274F16NearestSB
+//
+//  Created by Yunlong Liu on 12/10/16.
+//  Copyright © 2016 Yunlong Liu. All rights reserved.
+//
+
+#include "KDTSBSolver.hpp"
+
+
+void KDTSBSolver::build(const std::vector<SBLoc> &sbData) {
+    std::for_each(sbData.begin(), sbData.end(), [&](const SBLoc &loc){
+        kdt.insert(transLatLngToXYZPt(loc.lng, loc.lat), loc);});
+    std::cout << "Tree height is " << kdt.height() << std::endl;
+}
+
+SBLoc KDTSBSolver::findNearest(double lng, double lat) {
+    return kdt.kNNValue(transLatLngToXYZPt(lng, lat), 1);
+}
