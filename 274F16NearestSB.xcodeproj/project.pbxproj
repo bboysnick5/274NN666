@@ -6,6 +6,13 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */; };
+		82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */; };
+		82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */; };
+		82A66E371E003B0800D5FAFD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E311E003B0800D5FAFD /* main.cpp */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		82A66E1C1E00382500D5FAFD /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -20,6 +27,18 @@
 
 /* Begin PBXFileReference section */
 		82A66E1E1E00382500D5FAFD /* 274F16NearestSB */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 274F16NearestSB; sourceTree = BUILT_PRODUCTS_DIR; };
+		82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BFSBSolver.cpp; sourceTree = "<group>"; };
+		82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BFSBSolver.hpp; sourceTree = "<group>"; };
+		82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BKDTSBSolver.cpp; sourceTree = "<group>"; };
+		82A66E2C1E003B0800D5FAFD /* BKDTSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BKDTSBSolver.hpp; sourceTree = "<group>"; };
+		82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BoundedPQueue.hpp; sourceTree = "<group>"; };
+		82A66E2E1E003B0800D5FAFD /* KDTree.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KDTree.hpp; sourceTree = "<group>"; };
+		82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KDTSBSolver.cpp; sourceTree = "<group>"; };
+		82A66E301E003B0800D5FAFD /* KDTSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KDTSBSolver.hpp; sourceTree = "<group>"; };
+		82A66E311E003B0800D5FAFD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		82A66E321E003B0800D5FAFD /* Point.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Point.hpp; sourceTree = "<group>"; };
+		82A66E331E003B0800D5FAFD /* SBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBSolver.hpp; sourceTree = "<group>"; };
+		82A66E381E003B5400D5FAFD /* starbucks.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = starbucks.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,6 +57,7 @@
 			children = (
 				82A66E281E00383F00D5FAFD /* cppsrc */,
 				82A66E1F1E00382500D5FAFD /* Products */,
+				82A66E381E003B5400D5FAFD /* starbucks.csv */,
 			);
 			sourceTree = "<group>";
 		};
@@ -52,6 +72,17 @@
 		82A66E281E00383F00D5FAFD /* cppsrc */ = {
 			isa = PBXGroup;
 			children = (
+				82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */,
+				82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */,
+				82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */,
+				82A66E2C1E003B0800D5FAFD /* BKDTSBSolver.hpp */,
+				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
+				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
+				82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */,
+				82A66E301E003B0800D5FAFD /* KDTSBSolver.hpp */,
+				82A66E311E003B0800D5FAFD /* main.cpp */,
+				82A66E321E003B0800D5FAFD /* Point.hpp */,
+				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
 			);
 			path = cppsrc;
 			sourceTree = "<group>";
@@ -113,6 +144,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */,
+				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
+				82A66E371E003B0800D5FAFD /* main.cpp in Sources */,
+				82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +244,7 @@
 		82A66E261E00382500D5FAFD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -216,6 +252,7 @@
 		82A66E271E00382500D5FAFD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
