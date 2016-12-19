@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
 		82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */; };
 		82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */; };
 		82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */; };
@@ -26,6 +27,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
+		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
+		823641461E00D1AE007AE0FD /* SBLoc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBLoc.hpp; sourceTree = "<group>"; };
 		82A66E1E1E00382500D5FAFD /* 274F16NearestSB */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 274F16NearestSB; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BFSBSolver.cpp; sourceTree = "<group>"; };
 		82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BFSBSolver.hpp; sourceTree = "<group>"; };
@@ -80,9 +84,12 @@
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
 				82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */,
 				82A66E301E003B0800D5FAFD /* KDTSBSolver.hpp */,
+				823641421E00C98B007AE0FD /* GridSBSolver.cpp */,
+				823641431E00C98B007AE0FD /* GridSBSolver.hpp */,
 				82A66E311E003B0800D5FAFD /* main.cpp */,
 				82A66E321E003B0800D5FAFD /* Point.hpp */,
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
+				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
 			);
 			path = cppsrc;
 			sourceTree = "<group>";
@@ -147,6 +154,7 @@
 				82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */,
 				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
 				82A66E371E003B0800D5FAFD /* main.cpp in Sources */,
+				823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */,
 				82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -276,6 +284,7 @@
 				82A66E271E00382500D5FAFD /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -33,8 +33,8 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
         double y = 24.0 + 25.0*dist(mt);
         auto testLoc = testSolver->findNearest(x, y);
         auto refLoc = refSolver->findNearest(x, y);
-        testTotal += SBLoc::distance(testLoc.lng, testLoc.lat, x, y);
-        refTotal += SBLoc::distance(refLoc.lng, refLoc.lat, x, y);
+        testTotal += SBLoc::havDist(testLoc.lng, testLoc.lat, x, y);
+        refTotal += SBLoc::havDist(refLoc.lng, refLoc.lat, x, y);
     }
     
     double error = testTotal/refTotal;
@@ -75,8 +75,8 @@ void timeNN(SBSolver *solver) {
         << " ms per search, " << numTrials << " trials" << std::endl;
 }
 
-
 int main(int argc, const char * argv[]) {
+    
     
     std::ifstream sbFile(argv[1]);
     std::string line;

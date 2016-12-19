@@ -34,11 +34,11 @@ public:
     // Constructs an empty KDTree.
     KDTree();
     
-    // Constructor: KDTree();
-    // Usage: KDTree<3, int> myTree;
+    // Constructor: KDTree(FwdItType begin, FwdItType end);
+    // Usage: KDTree<3, int> myTree(vec.begin(), bec.end());
     // ----------------------------------------------------
-    // Constructs an empty KDTree.
-    
+    // Constructs a KDTree from a collection. The tree will
+    // be balanced using median constructing method
     template <class FwdItType>
     KDTree(FwdItType begin, FwdItType end);
     
@@ -53,9 +53,18 @@ public:
     // Usage: KDTree<3, int> one = two;
     // Usage: one = two;
     // -----------------------------------------------------
-    // Deep-copies the contents of another KDTree into this one.
+    // Copy constructor and copy assignment operator.
     KDTree(const KDTree& rhs);
     KDTree& operator=(const KDTree& rhs);
+    
+    // KDTree(const KDTree& rhs);
+    // KDTree& operator=(const KDTree& rhs);
+    // Usage: KDTree<3, int> one = two;
+    // Usage: one = two;
+    // -----------------------------------------------------
+    // Move constructor and move assignment operator.
+    KDTree(KDTree&& rhs);
+    KDTree& operator=(KDTree&& rhs);
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
@@ -114,7 +123,6 @@ public:
     // chosen.
     ElemType kNNValue(const Point<N>& key, size_t k) const;
     
-    
 private:
     
     struct TreeNode {
@@ -135,30 +143,50 @@ private:
     TreeNode *root;
     size_t treeSize;
     
+    // ----------------------------------------------------
+    // Helper method for finding the height of a tree
     size_t heightHelper(TreeNode *n) const;
     
+    // ----------------------------------------------------
+    // Helper method for range constructor
     template <class FwdItType>
-    void rangeCtorHelper(TreeNode*& cur, int level, FwdItType begin, FwdItType end);
+    void
+    rangeCtorHelper(TreeNode*& cur, int level, FwdItType begin, FwdItType end);
     
+    // ----------------------------------------------------
+    // Helper method for kNNValue search
     void kNNValueHelper(TreeNode *cur, int level, const Point<N> &pt,
                         BoundedPQueue<ElemType> &bpq) const;
     
-    // Identical to kNNValue method with k equals 1. This is used to speed up
-    // the search when only need to find the nearest neighbor.
+    // ----------------------------------------------------
+    // Identical to kNNValue method with k equals 1. NNValue
+    // and its helper method are used to speed up the search
+    // when finding the nearest neighbor only.
     ElemType NNValue(const Point<N>& key) const;
     void NNValueHelper(TreeNode *cur, int level, const Point<N> &pt,
                        double &bestDist, ElemType *&bestValue) const;
+    
+    // ----------------------------------------------------
+    // Helper meothod for deep copy
     void treeCopy(TreeNode *thisNode, TreeNode *otherNode);
     
+    // TreeNode** findNodePtr(const Point<N>& pt);
+    // TreeNode*const* findNodePtr(const Point<N>& pt) const;
+    // Usage: TreeNode **nodePtr = findNodePtr(pt);
+    // ----------------------------------------------------
+    // Returns the pointer pointing to the node address
+    // corresponding to the given Point. In this double pointing
+    // fashion, we can construct a node at that location.
     TreeNode** findNodePtr(const Point<N>& pt);
     TreeNode*const* findNodePtr(const Point<N>& pt) const;
-
 
 };
 
 /** KDTree class implementation details */
 
-// ------------ CONSTRUCTOR AND DESTRUCTOR ------------------
+// ----------------------------------------------------------
+// ----------------------- BIG FIVE -------------------------
+// ----------------------------------------------------------
 
 template <size_t N, typename ElemType>
 KDTree<N, ElemType>::KDTree() : root(nullptr), treeSize(0) {}
@@ -167,6 +195,40 @@ template <size_t N, typename ElemType>
 template <class FwdItType>
 KDTree<N, ElemType>::KDTree(FwdItType begin, FwdItType end) {
     rangeCtorHelper(root, 0, begin, end);
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>::KDTree(const KDTree& rhs)
+: root(new TreeNode()), treeSize(rhs.treeSize) {
+    treeCopy(root, rhs.root);
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>& KDTree<N, ElemType>::operator=(const KDTree& rhs) {
+    if (this != &rhs) {
+        treeSize = rhs.treeSize;
+        root = new TreeNode();
+        treeCopy(root, rhs.root);
+    }
+    return *this;
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>::KDTree(KDTree&& rhs) : root(rhs.root), treeSize(rhs.treeSize) {
+    rhs.root = nullptr;
+    rhs.treeSize = 0;
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>& KDTree<N, ElemType>::operator=(KDTree&& rhs) {
+    if (this != &rhs) {
+        delete root;
+        root = rhs.root;
+        treeSize = rhs.treeSize;
+        rhs.root = nullptr;
+        rhs.treeSize = 0;
+    }
+    return *this;
 }
 
 template <size_t N, typename ElemType>
@@ -184,6 +246,27 @@ void KDTree<N, ElemType>::rangeCtorHelper(TreeNode*& curNdPtr, int level,
     }
 }
 
+template <size_t N, typename ElemType>
+void KDTree<N, ElemType>::treeCopy(TreeNode *thisNode, TreeNode *otherNode) {
+    thisNode->object = otherNode->object;
+    thisNode->key = otherNode->key;
+    if (otherNode->left) {
+        if (!thisNode->left)
+            thisNode->left = new TreeNode();
+        treeCopy(thisNode->left, otherNode->left);
+    } else if (thisNode->left) {
+        delete thisNode->left;
+        thisNode->left = nullptr;
+    }
+    if (otherNode->right) {
+        if (!thisNode->right)
+            thisNode->right = new TreeNode();
+        treeCopy(thisNode->right, otherNode->right);
+    } else if (thisNode->right) {
+        delete thisNode->right;
+        thisNode->left = nullptr;
+    }
+}
 
 template <size_t N, typename ElemType>
 KDTree<N, ElemType>::~KDTree() {
@@ -192,25 +275,13 @@ KDTree<N, ElemType>::~KDTree() {
 }
 
 
+// ----------------------------------------------------------
+// ----------------- TREE INFORMATION  ----------------------
+// ----------------------------------------------------------
+
 template <size_t N, typename ElemType>
 size_t KDTree<N, ElemType>::dimension() const {
     return N;
-}
-
-template <size_t N, typename ElemType>
-KDTree<N, ElemType>::KDTree(const KDTree& rhs)
-    : root(new TreeNode()), treeSize(rhs.treeSize) {
-    treeCopy(root, rhs.root);
-}
-
-template <size_t N, typename ElemType>
-KDTree<N, ElemType>& KDTree<N, ElemType>::operator=(const KDTree& rhs) {
-    if (this != &rhs) {
-        treeSize = rhs.treeSize;
-        root = new TreeNode();
-        treeCopy(root, rhs.root);
-    }
-    return *this;
 }
 
 template <size_t N, typename ElemType>
@@ -233,6 +304,11 @@ template <size_t N, typename ElemType>
 bool KDTree<N, ElemType>::empty() const {
     return treeSize == 0;
 }
+
+
+// ----------------------------------------------------------
+// ----------------- MODIFIERS AND ACCESS -------------------
+// ----------------------------------------------------------
 
 template <size_t N, typename ElemType>
 void KDTree<N, ElemType>::insert(const Point<N>& pt, const ElemType& value) {
@@ -378,30 +454,6 @@ void KDTree<N, ElemType>::NNValueHelper(TreeNode *cur, int level,
         NNValueHelper(other, level+1, pt, bestDist, bestValue);
     }
 }
-
-template <size_t N, typename ElemType>
-void KDTree<N, ElemType>::treeCopy(TreeNode *thisNode, TreeNode *otherNode) {
-    thisNode->object = otherNode->object;
-    thisNode->key = otherNode->key;
-    if (otherNode->left) {
-        if (!thisNode->left)
-            thisNode->left = new TreeNode();
-        treeCopy(thisNode->left, otherNode->left);
-    } else if (thisNode->left) {
-        delete thisNode->left;
-        thisNode->left = nullptr;
-    }
-    if (otherNode->right) {
-        if (!thisNode->right)
-            thisNode->right = new TreeNode();
-        treeCopy(thisNode->right, otherNode->right);
-    } else if (thisNode->right) {
-        delete thisNode->right;
-        thisNode->left = nullptr;
-    }
-}
-
-
 
 
 #endif // KDTREE_INCLUDED
