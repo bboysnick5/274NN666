@@ -13,9 +13,10 @@
 #include <unordered_set>
 #include "SBSolver.hpp"
 
-class GridSBSolver : SBSolver {
+class GridSBSolver : public SBSolver {
     
 public:
+        
     void build(const std::vector<SBLoc> &sbData);
     SBLoc findNearest(double lng, double lat);
     

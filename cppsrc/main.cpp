@@ -20,6 +20,7 @@
 #include "KDTSBSolver.hpp"
 #include "BFSBSolver.hpp"
 #include "BKDTSBSolver.hpp"
+#include "GridSBSolver.hpp"
 
 
 bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
@@ -91,8 +92,9 @@ int main(int argc, const char * argv[]) {
     
     std::vector<shared_ptr<SBSolver>> solvers{
         std::make_shared<BFSBSolver>(),
-        std::make_shared<KDTSBSolver>(),
-        std::make_shared<BKDTSBSolver>()
+        //std::make_shared<KDTSBSolver>(),
+        //std::make_shared<BKDTSBSolver>(),
+        std::make_shared<GridSBSolver>()
     };
     
     for (int i = 0; i < solvers.size(); ++i) {

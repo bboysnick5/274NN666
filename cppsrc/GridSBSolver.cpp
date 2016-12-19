@@ -12,6 +12,7 @@
 #include <cmath>
 
 
+
 std::vector<double> findBoundaryPtsInLngLat(const std::vector<SBLoc> &sbData) {
     double minLng = std::numeric_limits<double>::min(),
            minLat = minLng, maxLng = minLng, maxLat = minLng;
@@ -38,8 +39,8 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
 }
 
 std::pair<int, int> GridSBSolver::getIdx(double lng, double lat) const {
-    return std::make_pair(SBLoc::havDist(lng, lat, lng, midLat) + xSize/2,
-                          SBLoc::havDist(lng, lat, midLng, lat) + ySize/2);
+    return std::make_pair(SBLoc::havDist(lng, lat, lng, midLat)/sideLen + xSize/2,
+                          SBLoc::havDist(lng, lat, midLng, lat)/sideLen + ySize/2);
 }
 
 void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
