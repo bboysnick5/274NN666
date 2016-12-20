@@ -30,7 +30,7 @@ private:
     
     std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
     double sideLen, midLng, midLat;
-    int xSize, ySize;
+    int rowSize, colSize;
     
 };
 
