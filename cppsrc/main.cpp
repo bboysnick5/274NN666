@@ -34,6 +34,9 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
         double y = 24.0 + 25.0*dist(mt);
         auto testLoc = testSolver->findNearest(x, y);
         auto refLoc = refSolver->findNearest(x, y);
+        if (!(testLoc == refLoc))
+            std::cout << "Test Point: Lng: " << x << ", Lat: " << y << std::endl
+                      << "Return point: " << testLoc << "Ref point: " << refLoc;
         testTotal += SBLoc::havDist(testLoc.lng, testLoc.lat, x, y);
         refTotal += SBLoc::havDist(refLoc.lng, refLoc.lat, x, y);
     }

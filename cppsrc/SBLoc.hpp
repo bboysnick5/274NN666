@@ -60,6 +60,11 @@ namespace std
     };
 }
 
+inline std::ostream& operator<<(std::ostream &os, SBLoc &l) {
+    return os << "Lng: " << l.lng << ", Lat: " << l.lat << std::endl
+        << "City: " << l.city << std::endl << "Addr: " << l.addr << std::endl;
+}
+
 inline std::istream& operator>>(std::istream &is, SBLoc &l) {
     std::getline(is, l.city, ',');
     is >> l.lat;

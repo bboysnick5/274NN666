@@ -12,7 +12,6 @@
 #include <cmath>
 
 
-
 std::vector<double> findBoundaryPtsInLngLat(const std::vector<SBLoc> &sbData) {
     double minLng = std::numeric_limits<double>::max(), minLat = minLng;
     double maxLng = std::numeric_limits<double>::lowest(), maxLat = maxLng;
@@ -22,7 +21,8 @@ std::vector<double> findBoundaryPtsInLngLat(const std::vector<SBLoc> &sbData) {
         maxLng = std::max(maxLng, loc.lng);
         maxLat = std::max(maxLat, loc.lat);
     }
-    return {minLng, maxLng, minLat, maxLat};
+    return {std::floor(minLng), std::ceil(maxLng),
+            std::floor(minLat), std::ceil(maxLat)};
 }
 
 
@@ -33,6 +33,7 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
     
     rowSize = sqrt(sbData.size());
     sideLen = SBLoc::havDist(0, boundaryPts[2], 0, boundaryPts[3])/rowSize;
+    //rowSize += 200;
     colSize = SBLoc::havDist(boundaryPts[0], boundaryPts[2],
                              boundaryPts[1], boundaryPts[2])/sideLen;
     grid = std::vector<std::vector<std::unordered_set<SBLoc>>>(rowSize,
@@ -41,7 +42,7 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
 
 std::pair<int, int> GridSBSolver::getIdx(double lng, double lat) const {
     double unsignedRowDistFromCenter = SBLoc::havDist(lng, lat, lng, midLat),
-           unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
+    unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter
                            : unsignedRowDistFromCenter)/sideLen + rowSize/2,
                           (lng < midLng ? -unsignedColDistFromCenter :
@@ -58,9 +59,9 @@ void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
         cell.insert(l);
     }
     
-    
+    // ------------------ DEBUG USE --------------------
+    // -------------------------------------------------
     std::unordered_set<size_t> hashes;
-    
     int count = 0;
     for (int x = 0; x < grid.size(); ++x) {
         for (int y = 0; y < grid[0].size(); ++y) {
@@ -80,43 +81,47 @@ void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
     std::cout << "hashes size: " << hashes.size() << std::endl;
 }
 
-SBLoc GridSBSolver::findNearest(double lng, double lat) {
-    /*
-    // (di, dj) is a vector - direction in which we move right now
-    int di = 1;
-    int dj = 0;
-    // length of current segment
-    int segment_length = 1;
-    
-    // current position (i, j) and how much of current segment we passed
-    int i = 0;
-    int j = 0;
-    int segment_passed = 0;
-    for (int k = 0; k < NUMBER_OF_POINTS; ++k) {
-        // make a step, add 'direction' vector (di, dj) to current position (i, j)
-        i += di;
-        j += dj;
-        ++segment_passed;
-        System.out.println(i + " " + j);
-        
-        if (segment_passed == segment_length) {
-            // done with current segment
-            segment_passed = 0;
-            
-            // 'rotate' directions
-            int buffer = di;
-            di = -dj;
-            dj = buffer;
-            
-            // increase segment length if necessary
-            if (dj == 0) {
-                ++segment_length;
-            }
+
+void GridSBSolver::NNInCell(const std::unordered_set<SBLoc> &cell, double lng,
+                              double lat, double &minDist, SBLoc &best) {
+    for (const auto &l : cell) {
+        double dist = SBLoc::havDist(lng, lat, l.lng, l.lat);
+        if (dist < minDist) {
+            minDist = dist;
+            best = l;
         }
     }
-    */
+}
+
+
+SBLoc GridSBSolver::findNearest(double lng, double lat) {
+    // todo: out of boundary
     
-    return SBLoc();
+    auto idxPr = getIdx(lng, lat);
+    int r0 = idxPr.first, c0 = idxPr.second;
+    double minDist = std::numeric_limits<double>::max();
+    SBLoc best;
+    // exact cell check
+    NNInCell(grid[r0][c0], lng, lat, minDist, best);
+    
+    for (int d = 0; ; ++d) {
+        for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
+            if (c0-d >= 0)
+                NNInCell(grid[r][c0-d], lng, lat, minDist, best);
+            if (c0+d < colSize)
+                NNInCell(grid[r][c0+d], lng, lat, minDist, best);
+        }
+        for (int c = std::max(0, c0-d+1); c < std::min(c0+d, colSize); c++) {
+            if (r0 - d >= 0)
+                NNInCell(grid[r0-d][c], lng, lat, minDist, best);
+            if (r0 + d < rowSize)
+                NNInCell(grid[r0+d][c], lng, lat, minDist, best);
+        }
+        if (minDist < d*sideLen)
+            return best;
+    }
+    
+    return best;
 }
 
 
