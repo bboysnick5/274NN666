@@ -33,9 +33,8 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
     
     rowSize = sqrt(sbData.size());
     sideLen = SBLoc::havDist(0, boundaryPts[2], 0, boundaryPts[3])/rowSize;
-    //rowSize += 200;
     colSize = SBLoc::havDist(boundaryPts[0], boundaryPts[2],
-                             boundaryPts[1], boundaryPts[2])/sideLen;
+                             boundaryPts[1], boundaryPts[2])/sideLen + 1;
     grid = std::vector<std::vector<std::unordered_set<SBLoc>>>(rowSize,
            std::vector<std::unordered_set<SBLoc>>(colSize));
 }
@@ -83,7 +82,7 @@ void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
 
 
 void GridSBSolver::NNInCell(const std::unordered_set<SBLoc> &cell, double lng,
-                              double lat, double &minDist, SBLoc &best) {
+                              double lat, double &minDist, SBLoc &best) const {
     for (const auto &l : cell) {
         double dist = SBLoc::havDist(lng, lat, l.lng, l.lat);
         if (dist < minDist) {
@@ -94,7 +93,7 @@ void GridSBSolver::NNInCell(const std::unordered_set<SBLoc> &cell, double lng,
 }
 
 
-SBLoc GridSBSolver::findNearest(double lng, double lat) {
+SBLoc GridSBSolver::findNearest(double lng, double lat) const {
     // todo: out of boundary
     
     auto idxPr = getIdx(lng, lat);

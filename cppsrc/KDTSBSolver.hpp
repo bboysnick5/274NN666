@@ -16,7 +16,7 @@
 class KDTSBSolver : public SBSolver {
 public:
     void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat);
+    SBLoc findNearest(double lng, double lat) const;
     
 private:
     KDTree<3, SBLoc> kdt;

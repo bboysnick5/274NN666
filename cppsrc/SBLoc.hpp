@@ -27,7 +27,12 @@ struct SBLoc {
         return other.lng == lng && other.lat == lat;
     }
     
-    inline static double havDist(double lng1, double lat1, double lng2, double lat2){
+    inline bool operator!=(const SBLoc &other) const {
+        return other.lng != lng || other.lat != lat;
+    }
+    
+    inline static double
+    havDist(double lng1, double lat1, double lng2, double lat2) {
         double dLat = (lat2-lat1)*M_PI/180;
         double dLon = (lng2-lng1)*M_PI/180;
         lat1 = lat1*M_PI/180;
@@ -47,8 +52,7 @@ struct SBLoc {
     }
 };
 
-namespace std
-{
+namespace std {
     template <>
     struct hash<SBLoc> {
         size_t operator()(const SBLoc& l) const {
@@ -60,9 +64,9 @@ namespace std
     };
 }
 
-inline std::ostream& operator<<(std::ostream &os, SBLoc &l) {
-    return os << "Lng: " << l.lng << ", Lat: " << l.lat << std::endl
-        << "City: " << l.city << std::endl << "Addr: " << l.addr << std::endl;
+inline std::ostream& operator<<(std::ostream &os, const SBLoc &l) {
+    return os << "Lng: " << l.lng << ", Lat: " << l.lat << std::endl << "City: "
+              << l.city << std::endl << "Addr: " << l.addr << std::endl;
 }
 
 inline std::istream& operator>>(std::istream &is, SBLoc &l) {

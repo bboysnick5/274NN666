@@ -34,7 +34,7 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
         double y = 24.0 + 25.0*dist(mt);
         auto testLoc = testSolver->findNearest(x, y);
         auto refLoc = refSolver->findNearest(x, y);
-        if (!(testLoc == refLoc))
+        if (testLoc != refLoc)
             std::cout << "Test Point: Lng: " << x << ", Lat: " << y << std::endl
                       << "Return point: " << testLoc << "Ref point: " << refLoc;
         testTotal += SBLoc::havDist(testLoc.lng, testLoc.lat, x, y);
@@ -101,9 +101,8 @@ int main(int argc, const char * argv[]) {
     };
     
     for (int i = 0; i < solvers.size(); ++i) {
-        //sbData = std::vector<SBLoc>(sbData.begin(), sbData.begin()+sbData.size()/2);
         timeBuild(sbData, solvers[i].get());
-        if (i != 0 &&!accuracyTest(solvers[i].get(), solvers[0].get()))
+        if (i != 0 && !accuracyTest(solvers[i].get(), solvers[0].get()))
             continue;
         timeNN(solvers[i].get());
         std::cout << std::endl;

@@ -18,7 +18,7 @@
 class BFSBSolver : public SBSolver {
 public:
     void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat);
+    SBLoc findNearest(double lng, double lat) const;
     
 private:
     std::vector<SBLoc> sbData;

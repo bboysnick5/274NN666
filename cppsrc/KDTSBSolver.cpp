@@ -15,6 +15,6 @@ void KDTSBSolver::build(const std::vector<SBLoc> &sbData) {
     std::cout << "Tree height is " << kdt.height() << std::endl;
 }
 
-SBLoc KDTSBSolver::findNearest(double lng, double lat) {
+SBLoc KDTSBSolver::findNearest(double lng, double lat) const {
     return kdt.kNNValue(SBLoc::latLngToCart3DXYZ(lng, lat), 1);
 }

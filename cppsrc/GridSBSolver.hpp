@@ -19,7 +19,7 @@ class GridSBSolver : public SBSolver {
 public:
         
     void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat);
+    SBLoc findNearest(double lng, double lat) const;
     
     
 private:
@@ -28,7 +28,7 @@ private:
                        const std::vector<double>& boundaryPts);
     std::pair<int, int> getIdx(double lng, double lat) const;
     void NNInCell(const std::unordered_set<SBLoc> &,
-                  double, double, double&, SBLoc&);
+                  double, double, double&, SBLoc&) const;
     
     std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
     double sideLen, midLng, midLat;
