@@ -41,7 +41,7 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
 
 std::pair<int, int> GridSBSolver::getIdx(double lng, double lat) const {
     double unsignedRowDistFromCenter = SBLoc::havDist(lng, lat, lng, midLat),
-    unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
+           unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter
                            : unsignedRowDistFromCenter)/sideLen + rowSize/2,
                           (lng < midLng ? -unsignedColDistFromCenter :
@@ -57,27 +57,6 @@ void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
         cell.erase(l);
         cell.insert(l);
     }
-    
-    // ------------------ DEBUG USE --------------------
-    // -------------------------------------------------
-    std::unordered_set<size_t> hashes;
-    int count = 0;
-    for (int x = 0; x < grid.size(); ++x) {
-        for (int y = 0; y < grid[0].size(); ++y) {
-            auto &set = grid[x][y];
-            if (!set.empty()) {
-                for (auto &l : set) {
-                    hashes.insert(std::hash<SBLoc>()(l));
-                }
-                std::cout << x << " " << y << "  set size: " <<
-                set.size() << std::endl;
-                
-            }
-            count += set.size();
-        }
-    }
-    std::cout << "size: " << count << std::endl;
-    std::cout << "hashes size: " << hashes.size() << std::endl;
 }
 
 
@@ -94,7 +73,6 @@ void GridSBSolver::NNInCell(const std::unordered_set<SBLoc> &cell, double lng,
 
 
 SBLoc GridSBSolver::findNearest(double lng, double lat) const {
-    // todo: out of boundary
     
     auto idxPr = getIdx(lng, lat);
     int r0 = idxPr.first, c0 = idxPr.second;
