@@ -10,16 +10,11 @@
 #define BKDTSBSolver_hpp
 
 #include <stdio.h>
-#include "SBSolver.hpp"
-#include "KDTree.hpp"
+#include "KDTSBSolver.hpp"
 
-class BKDTSBSolver : public SBSolver {
+class BKDTSBSolver : public KDTSBSolver {
 public:
     void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat) const;
-    
-private:
-    KDTree<3, SBLoc> kdt;
 };
 
 

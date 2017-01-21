@@ -43,6 +43,20 @@ struct SBLoc {
         return EARTH_RADIUS * c;
     }
     
+    inline static double latFromHavDist(double dist, double lat1) {
+        double c = dist/EARTH_RADIUS;
+        double sum = sin(c/2);
+        double dLat = asin(sum)*2;
+        return dLat*180/M_PI + lat1;
+    }
+    
+    inline static double lngFromHavDist(double dist, double lng1, double lat) {
+        double c = dist/EARTH_RADIUS;
+        double sum = sin(c/2);
+        double dLng = asin(sum/cos(lat/180*M_PI))*2;
+        return dLng*180/M_PI + lng1;
+    }
+    
     inline static Point<3> latLngToCart3DXYZ(double lng, double lat) {
         Point<3> p;
         p[0] = cos(lat*M_PI/180)*cos(lng*M_PI/180);

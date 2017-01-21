@@ -39,6 +39,9 @@ public:
     // ----------------------------------------------------
     // Constructs a KDTree from a collection. The tree will
     // be balanced using median constructing method
+    // NOTE: The tree will no eliminate duplicates and the
+    //       intended behavior will not be comprimised, tho
+    //       less efficient with extra wasteful space.
     template <class FwdItType>
     KDTree(FwdItType begin, FwdItType end);
     
@@ -241,6 +244,7 @@ void KDTree<N, ElemType>::rangeCtorHelper(TreeNode*& curNdPtr, int level,
             ElemType>& p1, const std::pair<Point<N>, ElemType>& p2) {
             return p1.first[level%N] < p2.first[level%N];});
         curNdPtr = new TreeNode(median->first, median->second);
+        treeSize++;
         rangeCtorHelper(curNdPtr->left, level+1, begin, median);
         rangeCtorHelper(curNdPtr->right, level+1, median+1, end);
     }
@@ -248,23 +252,25 @@ void KDTree<N, ElemType>::rangeCtorHelper(TreeNode*& curNdPtr, int level,
 
 template <size_t N, typename ElemType>
 void KDTree<N, ElemType>::treeCopy(TreeNode *thisNode, TreeNode *otherNode) {
-    thisNode->object = otherNode->object;
-    thisNode->key = otherNode->key;
-    if (otherNode->left) {
-        if (!thisNode->left)
-            thisNode->left = new TreeNode();
-        treeCopy(thisNode->left, otherNode->left);
-    } else if (thisNode->left) {
-        delete thisNode->left;
-        thisNode->left = nullptr;
-    }
-    if (otherNode->right) {
-        if (!thisNode->right)
-            thisNode->right = new TreeNode();
-        treeCopy(thisNode->right, otherNode->right);
-    } else if (thisNode->right) {
-        delete thisNode->right;
-        thisNode->left = nullptr;
+    if (otherNode) {
+        thisNode->object = otherNode->object;
+        thisNode->key = otherNode->key;
+        if (otherNode->left) {
+            if (!thisNode->left)
+                thisNode->left = new TreeNode();
+            treeCopy(thisNode->left, otherNode->left);
+        } else if (thisNode->left) {
+            delete thisNode->left;
+            thisNode->left = nullptr;
+        }
+        if (otherNode->right) {
+            if (!thisNode->right)
+                thisNode->right = new TreeNode();
+            treeCopy(thisNode->right, otherNode->right);
+        } else if (thisNode->right) {
+            delete thisNode->right;
+            thisNode->left = nullptr;
+        }
     }
 }
 
@@ -415,8 +421,8 @@ ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& pt, size_t k) const {
 }
 
 template <size_t N, typename ElemType>
-void KDTree<N, ElemType>::kNNValueHelper(TreeNode *cur, int level, const Point<N>& pt,
-                                         BoundedPQueue<ElemType> &bpq) const {
+void KDTree<N, ElemType>::kNNValueHelper(TreeNode *cur, int level,
+const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
     if (!cur)
         return;
     bpq.enqueue(cur->object, Distance(cur->key, pt));

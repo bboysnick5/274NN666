@@ -17,17 +17,19 @@
 class GridSBSolver : public SBSolver {
     
 public:
-        
-    void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat) const;
+    virtual void build(const std::vector<SBLoc> &sbData);
+    virtual SBLoc findNearest(double lng, double lat) const;
     
     
-private:
+protected:
+    static constexpr double DISTORT_FACTOR = 0.9;
     
-    void constructGrid(const std::vector<SBLoc> &sbData,
-                       const std::vector<double>& boundaryPts);
+    static std::vector<double> findMaxLngLat(const std::vector<SBLoc>&);
     std::pair<int, int> getIdx(double lng, double lat) const;
-    void NNInCell(const std::unordered_set<SBLoc> &,
+
+    void constructGrid(const std::vector<SBLoc>&, const std::vector<double>&);
+    void fillGrid(const std::vector<SBLoc>&);
+    void NNOneCell(const std::unordered_set<SBLoc>&,
                   double, double, double&, SBLoc&) const;
     
     std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
