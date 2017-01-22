@@ -53,7 +53,10 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
         minDist = std::min(minDist, thisMinDist);
         std::copy(thisValidLocs.begin(), thisValidLocs.end(), std::back_inserter(validLocs));
     }
-    validLocs.erase(std::remove_if(validLocs.begin(), validLocs.end(), [=](const std::pair<Point<3>, SBLoc> &locPair){return SBLoc::havDist(locPair.second.lng, locPair.second.lat, cellCtrLng, cellCtrLat) > minDist + sideLen * sqrt(2);}), validLocs.end());
+    validLocs.erase(std::remove_if(validLocs.begin(), validLocs.end(),
+        [=](const std::pair<Point<3>, SBLoc> &locPair){ return
+        SBLoc::havDist(locPair.second.lng, locPair.second.lat, cellCtrLng,
+        cellCtrLat) > minDist + sideLen * sqrt(2);}), validLocs.end());
     totalTreeSize += validLocs.size();
     gridCache[r0][c0] = KDTree<3, SBLoc>(validLocs.begin(), validLocs.end());
 }
