@@ -35,10 +35,6 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
         double x = -125.0 + 73.0*dist(mt);
         double y = 24.0 + 25.0*dist(mt);
         auto testLoc = testSolver->findNearest(x, y);
-        
-        if (testLoc.lat == 0)
-            break;
-        
         auto refLoc = refSolver->findNearest(x, y);
         if (testLoc != refLoc) {
             errorCount++;
@@ -107,7 +103,7 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<KDTSBSolver>(),
         //std::make_shared<BKDTSBSolver>(),
         //std::make_shared<GridSBSolver>(),
-        std::make_shared<BKDTGridSBSolver>(),
+        std::make_shared<BKDTGridSBSolver>(0.3),
     };
     
     for (int i = 0; i < solvers.size(); ++i) {

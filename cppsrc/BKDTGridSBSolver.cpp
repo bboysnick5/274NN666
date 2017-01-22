@@ -29,10 +29,9 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
                                               midLng, cellCtrLat);
     double minDist = std::numeric_limits<double>::max();
     std::vector<std::pair<Point<3>, SBLoc>> validLocs;
-    int maxD = std::numeric_limits<int>::max();
     // exact cell check
     checkOneCell(grid[r0][c0], cellCtrLng, cellCtrLat, minDist, validLocs);
-    for (int d = 1; d <= maxD; ++d) {
+    for (int d = 1; validLocs.size() < numLocs; ++d) {
         double thisMinDist = std::numeric_limits<double>::max();
         std::vector<std::pair<Point<3>, SBLoc>> thisValidLocs;
 
@@ -49,7 +48,7 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
                 checkOneCell(grid[r0+d][c], cellCtrLng, cellCtrLat, thisMinDist, thisValidLocs);
         }
         if (thisMinDist != std::numeric_limits<double>::max()
-            && thisMinDist - minDist > sideLen * sqrt(2)*(1+d*0.35))
+            && thisMinDist - minDist > sideLen * sqrt(2)*(1+d*0.5))
             break;
         minDist = std::min(minDist, thisMinDist);
         std::copy(thisValidLocs.begin(), thisValidLocs.end(), std::back_inserter(validLocs));

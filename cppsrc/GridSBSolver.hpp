@@ -33,7 +33,7 @@ protected:
     const double AVE_LOC_PER_CELL;
     std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
     double sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
-    int rowSize, colSize;
+    int rowSize, colSize, numLocs = 0;
     
 private:
     static constexpr double DISTORT_FACTOR = 0.95;

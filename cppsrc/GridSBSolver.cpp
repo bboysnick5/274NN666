@@ -54,7 +54,7 @@ void GridSBSolver::fillGrid(const std::vector<SBLoc>& sbData) {
     for (auto l : sbData) {
         auto idxPr = getIdx(l.lng, l.lat);
         auto &cell = grid[idxPr.first][idxPr.second];
-        cell.erase(l);
+        numLocs = numLocs - static_cast<int>(cell.erase(l)) + 1;
         cell.insert(l);
     }
 }

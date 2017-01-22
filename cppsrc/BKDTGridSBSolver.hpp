@@ -26,8 +26,8 @@ private:
     std::vector<std::vector<KDTree<3, SBLoc>>> gridCache;
     void fillCacheOneCell(int r0, int c0);
     void fillGridCache();
-    void checkOneCell(const std::unordered_set<SBLoc>&, double, double,
-                      double&, std::vector<std::pair<Point<3>, SBLoc>>&) const;
+    void checkOneCell(const std::unordered_set<SBLoc>&, double, double, double&,
+                      std::vector<std::pair<Point<3>, SBLoc>>&) const;
 };
 
 
