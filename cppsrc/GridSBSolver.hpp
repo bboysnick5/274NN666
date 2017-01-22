@@ -19,22 +19,24 @@ class GridSBSolver : public SBSolver {
 public:
     virtual void build(const std::vector<SBLoc> &sbData);
     virtual SBLoc findNearest(double lng, double lat) const;
-    
+    GridSBSolver(double aveLocPerCell = 1);
     
 protected:
-    static constexpr double DISTORT_FACTOR = 0.9;
-    
-    static std::vector<double> findMaxLngLat(const std::vector<SBLoc>&);
+    void findKeyLngLat(const std::vector<SBLoc>&);
     std::pair<int, int> getIdx(double lng, double lat) const;
 
-    void constructGrid(const std::vector<SBLoc>&, const std::vector<double>&);
+    void constructGrid(const std::vector<SBLoc>&);
     void fillGrid(const std::vector<SBLoc>&);
     void NNOneCell(const std::unordered_set<SBLoc>&,
                   double, double, double&, SBLoc&) const;
     
+    const double AVE_LOC_PER_CELL;
     std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
-    double sideLen, midLng, midLat;
+    double sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
     int rowSize, colSize;
+    
+private:
+    static constexpr double DISTORT_FACTOR = 0.95;
     
 };
 

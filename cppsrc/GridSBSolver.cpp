@@ -11,35 +11,31 @@
 #include <algorithm>
 #include <cmath>
 
+GridSBSolver::GridSBSolver(double alpc) :
+    AVE_LOC_PER_CELL(alpc),
+    maxLng(std::numeric_limits<double>::lowest()),
+    maxLat(std::numeric_limits<double>::lowest()),
+    minLng(std::numeric_limits<double>::max()),
+    minLat(std::numeric_limits<double>::max()) {}
 
-
-std::vector<double>
-GridSBSolver::findMaxLngLat(const std::vector<SBLoc> &sbData) {
-    double minLng = std::numeric_limits<double>::max(), minLat = minLng;
-    double maxLng = std::numeric_limits<double>::lowest(), maxLat = maxLng;
+void GridSBSolver::findKeyLngLat(const std::vector<SBLoc> &sbData) {
     for (const auto &loc : sbData) {
         minLng = std::min(minLng, loc.lng);
         minLat = std::min(minLat, loc.lat);
         maxLng = std::max(maxLng, loc.lng);
         maxLat = std::max(maxLat, loc.lat);
     }
-    return {std::floor(minLng), std::ceil(maxLng),
-            std::floor(minLat), std::ceil(maxLat)};
+    minLng = std::floor(minLng), minLat = std::floor(minLat);
+    maxLng = std::ceil(maxLng), maxLat = std::ceil(maxLat);
+    midLng = (minLng + maxLng)/2, midLat = (minLat + maxLat)/2;
 }
 
-
-void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
-                                 const std::vector<double>& boundaryPts) {
-    midLng = (boundaryPts[0] + boundaryPts[1])/2;
-    midLat = (boundaryPts[2] + boundaryPts[3])/2;
-    
-    rowSize = sqrt(sbData.size());
-    rowSize *= 3;
-    sideLen = SBLoc::havDist(0, boundaryPts[2], 0, boundaryPts[3])/rowSize;
-    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS *
-                                   cos(boundaryPts[2]/180*M_PI);
+void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData) {
+    rowSize = sqrt(sbData.size()) / AVE_LOC_PER_CELL;
+    sideLen = SBLoc::havDist(0, minLat, 0, maxLat) / rowSize;
+    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos(minLat/180*M_PI);
     double longestColDistSpan = 2 * M_PI * lowestLatCircleRadius *
-                                (std::fabs(boundaryPts[1]-boundaryPts[0])/360);
+                                (std::fabs(maxLng - minLng)/360);
     colSize = longestColDistSpan/sideLen + 1;
     grid = std::vector<std::vector<std::unordered_set<SBLoc>>>(rowSize,
            std::vector<std::unordered_set<SBLoc>>(colSize));
@@ -48,11 +44,6 @@ void GridSBSolver::constructGrid(const std::vector<SBLoc> &sbData,
 std::pair<int, int> GridSBSolver::getIdx(double lng, double lat) const {
     double unsignedRowDistFromCenter = SBLoc::havDist(lng, lat, lng, midLat),
            unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
-    //double z = SBLoc::havDist(midLng, midLat, lng, lat);
-    //unsignedColDistFromCenter = sqrt(z*z-unsignedRowDistFromCenter*unsignedRowDistFromCenter);
-    //double aveLat = (midLat + lat)/2;
-    //unsignedColDistFromCenter = SBLoc::havDist(lng, aveLat, midLng, aveLat);
-
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter :
                            unsignedRowDistFromCenter)/sideLen + rowSize/2,
                           (lng < midLng ? -unsignedColDistFromCenter :
@@ -69,11 +60,10 @@ void GridSBSolver::fillGrid(const std::vector<SBLoc>& sbData) {
 }
 
 void GridSBSolver::build(const std::vector<SBLoc> &sbData) {
-    auto minMaxLngLat = findMaxLngLat(sbData);
-    constructGrid(sbData, minMaxLngLat);
+    findKeyLngLat(sbData);
+    constructGrid(sbData);
     fillGrid(sbData);
 }
-
 
 void GridSBSolver::NNOneCell(const std::unordered_set<SBLoc> &cell, double lng,
                              double lat, double &minDist, SBLoc &best) const {
@@ -95,6 +85,7 @@ SBLoc GridSBSolver::findNearest(double lng, double lat) const {
     // exact cell check
     NNOneCell(grid[r0][c0], lng, lat, minDist, best);
     
+    // Spiral Search
     for (int d = 1; ; ++d) {
         for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
             if (c0-d >= 0)
@@ -108,7 +99,7 @@ SBLoc GridSBSolver::findNearest(double lng, double lat) const {
             if (r0 + d < rowSize)
                 NNOneCell(grid[r0+d][c], lng, lat, minDist, best);
         }
-        if (minDist < d*sideLen*0.95)
+        if (minDist < d*sideLen*DISTORT_FACTOR)
             return best;
     }
     return best;

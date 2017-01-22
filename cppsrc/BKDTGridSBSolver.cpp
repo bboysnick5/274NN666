@@ -8,17 +8,7 @@
 
 #include "BKDTGridSBSolver.hpp"
 
-/*
-double BKDTGridSBSolver::distFromMidPtInCell(double lng, double lat,
-            double rowDistCellCtrGridCtr, double colDistCellCtrGridCtr) const {
-    double rowDistFromGridCenter = SBLoc::havDist(lng, lat, lng, midLat),
-           colDistFromGridCenter = SBLoc::havDist(lng, lat, midLng, lat);
-    double rowDiff = (lat < midLat ? -rowDistFromGridCenter
-                      : rowDistFromGridCenter) - rowDistCellCtrGridCtr,
-           colDiff = (lng < midLng ? -colDistFromGridCenter
-                      : colDistFromGridCenter) - colDistCellCtrGridCtr;
-    return sqrt(rowDiff*rowDiff + colDiff*colDiff);
-}*/
+BKDTGridSBSolver::BKDTGridSBSolver(double alpc) : GridSBSolver(alpc) {}
 
 void BKDTGridSBSolver::checkOneCell(const std::unordered_set<SBLoc>& cell,
 double cellCtrLng, double cellCtrLat, double& minDist,
@@ -46,7 +36,6 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
         double thisMinDist = std::numeric_limits<double>::max();
         std::vector<std::pair<Point<3>, SBLoc>> thisValidLocs;
 
-
         for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
             if (c0-d >= 0)
                 checkOneCell(grid[r][c0-d], cellCtrLng, cellCtrLat, thisMinDist, thisValidLocs);
@@ -64,30 +53,6 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
             break;
         minDist = std::min(minDist, thisMinDist);
         std::copy(thisValidLocs.begin(), thisValidLocs.end(), std::back_inserter(validLocs));
-
-        
-        
-        /*
-        int prevVLSize = validLocs.size();
-        for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
-            if (c0-d >= 0)
-                checkOneCell(grid[r][c0-d], cellCtrLng, cellCtrLat, minDist, validLocs);
-            if (c0+d < colSize)
-                checkOneCell(grid[r][c0+d], cellCtrLng, cellCtrLat, minDist, validLocs);
-        }
-        for (int c = std::max(0, c0-d+1); c < std::min(c0+d, colSize); c++) {
-            if (r0 - d >= 0)
-                checkOneCell(grid[r0-d][c], cellCtrLng, cellCtrLat, minDist, validLocs);
-            if (r0 + d < rowSize)
-                checkOneCell(grid[r0+d][c], cellCtrLng, cellCtrLat, minDist, validLocs);
-        }
-        if (minDist != std::numeric_limits<double>::max()
-            && maxD == std::numeric_limits<int>::max()) {
-            if (minDist < (d-sqrt(2)/2)*sideLen)
-                break;
-            else
-                maxD = d+1;
-        }*/
     }
     validLocs.erase(std::remove_if(validLocs.begin(), validLocs.end(), [=](const std::pair<Point<3>, SBLoc> &locPair){return SBLoc::havDist(locPair.second.lng, locPair.second.lat, cellCtrLng, cellCtrLat) > minDist + sideLen * sqrt(2);}), validLocs.end());
     totalTreeSize += validLocs.size();
@@ -106,8 +71,8 @@ void BKDTGridSBSolver::fillGridCache() {
 
 
 void BKDTGridSBSolver::build(const std::vector<SBLoc> &sbData) {
-    auto minMaxLngLat = findMaxLngLat(sbData);
-    constructGrid(sbData, minMaxLngLat);
+    findKeyLngLat(sbData);
+    constructGrid(sbData);
     fillGrid(sbData);
     fillGridCache();
     std::cout << "ave tree size: " << totalTreeSize/(rowSize*colSize) << "\n\n";
