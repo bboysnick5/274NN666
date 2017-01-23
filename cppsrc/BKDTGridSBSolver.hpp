@@ -23,11 +23,12 @@ public:
     
     
 private:
-    std::vector<std::vector<KDTree<3, SBLoc>>> gridCache;
+    std::vector<std::vector<KDTree<3, const SBLoc*>>> gridTreeCache;
+    //std::vector<std::vector<std::vector<SBLoc>>> gridVecCache;
     void fillCacheOneCell(int r0, int c0);
     void fillGridCache();
     void checkOneCell(const std::unordered_set<SBLoc>&, double, double, double&,
-                      std::vector<std::pair<Point<3>, SBLoc>>&) const;
+                      std::vector<std::pair<Point<3>,const SBLoc*>>&) const;
 };
 
 

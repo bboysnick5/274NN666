@@ -67,7 +67,7 @@ void timeBuild(const std::vector<SBLoc> &sbData, SBSolver *solver) {
 void timeNN(SBSolver *solver) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsedSeconds;
-    int numTrials = 1000;
+    int numTrials = 10000;
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);

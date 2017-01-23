@@ -12,11 +12,11 @@ BKDTGridSBSolver::BKDTGridSBSolver(double alpc) : GridSBSolver(alpc) {}
 
 void BKDTGridSBSolver::checkOneCell(const std::unordered_set<SBLoc>& cell,
 double cellCtrLng, double cellCtrLat, double& minDist,
-std::vector<std::pair<Point<3>, SBLoc>>& validLocs) const {
+std::vector<std::pair<Point<3>, const SBLoc*>>& validLocs) const {
     for (const auto &l : cell) {
         double dist = SBLoc::havDist(cellCtrLng, cellCtrLat, l.lng, l.lat);
         minDist = std::min(minDist, dist);
-        validLocs.emplace_back(SBLoc::latLngToCart3DXYZ(l.lng, l.lat), l);
+        validLocs.emplace_back(SBLoc::latLngToCart3DXYZ(l.lng, l.lat), &l);
     }
 }
 
@@ -28,12 +28,12 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
            cellCtrLng = SBLoc::lngFromHavDist(colDistCellCtrGridCtr,
                                               midLng, cellCtrLat);
     double minDist = std::numeric_limits<double>::max();
-    std::vector<std::pair<Point<3>, SBLoc>> validLocs;
+    std::vector<std::pair<Point<3>, const SBLoc*>> validLocs;
     // exact cell check
     checkOneCell(grid[r0][c0], cellCtrLng, cellCtrLat, minDist, validLocs);
     for (int d = 1; validLocs.size() < numLocs; ++d) {
         double thisMinDist = std::numeric_limits<double>::max();
-        std::vector<std::pair<Point<3>, SBLoc>> thisValidLocs;
+        std::vector<std::pair<Point<3>, const SBLoc*>> thisValidLocs;
 
         for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
             if (c0-d >= 0)
@@ -54,16 +54,16 @@ void BKDTGridSBSolver::fillCacheOneCell(int r0, int c0) {
         std::copy(thisValidLocs.begin(), thisValidLocs.end(), std::back_inserter(validLocs));
     }
     validLocs.erase(std::remove_if(validLocs.begin(), validLocs.end(),
-        [=](const std::pair<Point<3>, SBLoc> &locPair){ return
-        SBLoc::havDist(locPair.second.lng, locPair.second.lat, cellCtrLng,
+        [=](const std::pair<Point<3>, const SBLoc*> &locPair){ return
+        SBLoc::havDist(locPair.second->lng, locPair.second->lat, cellCtrLng,
         cellCtrLat) > minDist + sideLen * sqrt(2);}), validLocs.end());
     totalTreeSize += validLocs.size();
-    gridCache[r0][c0] = KDTree<3, SBLoc>(validLocs.begin(), validLocs.end());
+    gridTreeCache[r0][c0] = KDTree<3, const SBLoc*>(validLocs.begin(), validLocs.end());
 }
 
 void BKDTGridSBSolver::fillGridCache() {
-    gridCache = std::vector<std::vector<KDTree<3, SBLoc>>>(rowSize,
-                std::vector<KDTree<3, SBLoc>>(colSize));
+    gridTreeCache = std::vector<std::vector<KDTree<3, const SBLoc*>>>(rowSize,
+                std::vector<KDTree<3, const SBLoc*>>(colSize));
     for (int r = 0; r < rowSize; ++r) {
         for (int c = 0; c < colSize; ++c) {
             fillCacheOneCell(r, c);
@@ -82,6 +82,6 @@ void BKDTGridSBSolver::build(const std::vector<SBLoc> &sbData) {
 
 SBLoc BKDTGridSBSolver::findNearest(double lng, double lat) const {
     auto idxPr = getIdx(lng, lat);
-    return gridCache[idxPr.first][idxPr.second].
+    return *gridTreeCache[idxPr.first][idxPr.second].
            kNNValue(SBLoc::latLngToCart3DXYZ(lng, lat), 1);
 }
