@@ -14,24 +14,27 @@
 #include <vector>
 #include "SBSolver.hpp"
 
+const double DOUBLE_MAX = std::numeric_limits<double>::max();
+const double DOUBLE_MIN = std::numeric_limits<double>::lowest();
+
 class GridSBSolver : public SBSolver {
     
 public:
-    virtual void build(const std::vector<SBLoc> &sbData);
-    virtual SBLoc findNearest(double lng, double lat) const;
+    virtual void build();
+    virtual const SBLoc* findNearest(double lng, double lat) const;
     GridSBSolver(double aveLocPerCell = 1);
     
 protected:
-    void findKeyLngLat(const std::vector<SBLoc>&);
+    void findKeyLngLat();
     std::pair<int, int> getIdx(double lng, double lat) const;
 
-    void constructGrid(const std::vector<SBLoc>&);
-    void fillGrid(const std::vector<SBLoc>&);
-    void NNOneCell(const std::unordered_set<SBLoc>&,
-                  double, double, double&, SBLoc&) const;
+    void constructGrid();
+    void fillGrid();
+    void NNOneCell(const std::unordered_set<const SBLoc*>&,
+                  double, double, double&, const SBLoc*&) const;
     
     const double AVE_LOC_PER_CELL;
-    std::vector<std::vector<std::unordered_set<SBLoc>>> grid;
+    std::vector<std::vector<std::unordered_set<const SBLoc*>>> grid;
     double sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
     int rowSize, colSize, numLocs = 0;
     

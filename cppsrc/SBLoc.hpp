@@ -76,6 +76,19 @@ namespace std {
                    std::numeric_limits<double>::epsilon());
         }
     };
+    
+    template <>
+    struct hash<const SBLoc*> {
+        size_t operator()(const SBLoc* l) const {
+            return std::hash<SBLoc>()(*l);
+        }
+    };
+    
+    template <>
+    struct equal_to<const SBLoc*> {
+        constexpr bool operator()(const SBLoc* l1, const SBLoc* l2) const {          return *l1==*l2;
+        }
+    };
 }
 
 inline std::ostream& operator<<(std::ostream &os, const SBLoc &l) {

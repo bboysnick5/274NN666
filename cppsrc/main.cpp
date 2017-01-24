@@ -36,14 +36,14 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
         double y = 24.0 + 25.0*dist(mt);
         auto testLoc = testSolver->findNearest(x, y);
         auto refLoc = refSolver->findNearest(x, y);
-        if (testLoc != refLoc) {
+        if (*testLoc != *refLoc) {
             errorCount++;
             std::cout << "Test Point: Lng: " << x << ", Lat: " << y << std::endl
-                      << "Return point: " << testLoc << "Ref point: " << refLoc
+                      << "Return point: " << *testLoc << "Ref point: " << *refLoc
                       << std::endl;
         }
-        testTotal += SBLoc::havDist(testLoc.lng, testLoc.lat, x, y);
-        refTotal += SBLoc::havDist(refLoc.lng, refLoc.lat, x, y);
+        testTotal += SBLoc::havDist(testLoc->lng, testLoc->lat, x, y);
+        refTotal += SBLoc::havDist(refLoc->lng, refLoc->lat, x, y);
     }
     
     double error = testTotal/refTotal;
@@ -54,7 +54,8 @@ bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
     return error <= 1 + epsilon && error >= 1 - epsilon;
 }
 
-void timeBuild(const std::vector<SBLoc> &sbData, SBSolver *solver) {
+void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &sbData,
+               SBSolver *solver) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
     solver->build(sbData);
@@ -88,15 +89,14 @@ void timeNN(SBSolver *solver) {
 
 int main(int argc, const char * argv[]) {
     
-    
     std::ifstream sbFile(argv[1]);
     sbFile.ignore(256, '\r');
     sbFile.ignore(256, '\r');
     
-    std::vector<SBLoc> sbData;
+    auto sbData = std::make_shared<std::vector<SBLoc>>();
     std::copy(std::istream_iterator<SBLoc>(sbFile),
-              std::istream_iterator<SBLoc>(), std::back_inserter(sbData));
-    std::random_shuffle(sbData.begin(), sbData.end());
+              std::istream_iterator<SBLoc>(), std::back_inserter(*sbData));
+    std::random_shuffle(sbData->begin(), sbData->end());
     
     std::vector<shared_ptr<SBSolver>> solvers{
         std::make_shared<BFSBSolver>(),

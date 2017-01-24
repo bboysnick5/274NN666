@@ -9,12 +9,12 @@
 #include "KDTSBSolver.hpp"
 #include <algorithm>
 
-void KDTSBSolver::build(const std::vector<SBLoc> &sbData) {
-    std::for_each(sbData.begin(), sbData.end(), [&](const SBLoc &loc){
-        kdt.insert(SBLoc::latLngToCart3DXYZ(loc.lng, loc.lat), loc);});
+void KDTSBSolver::build() {
+    std::for_each(sbData->begin(), sbData->end(), [&](const SBLoc &loc){
+        kdt.insert(SBLoc::latLngToCart3DXYZ(loc.lng, loc.lat), &loc);});
     std::cout << "Tree height is " << kdt.height() << std::endl;
 }
 
-SBLoc KDTSBSolver::findNearest(double lng, double lat) const {
+const SBLoc* KDTSBSolver::findNearest(double lng, double lat) const {
     return kdt.kNNValue(SBLoc::latLngToCart3DXYZ(lng, lat), 1);
 }

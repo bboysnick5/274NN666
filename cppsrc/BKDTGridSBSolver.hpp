@@ -18,17 +18,17 @@
 class BKDTGridSBSolver : public GridSBSolver {
 public:
     BKDTGridSBSolver(double aveLocPerCell = 1);
-    void build(const std::vector<SBLoc> &sbData);
-    SBLoc findNearest(double lng, double lat) const;
+    void build();
+    const SBLoc* findNearest(double lng, double lat) const;
     
     
 private:
     std::vector<std::vector<KDTree<3, const SBLoc*>>> gridTreeCache;
     //std::vector<std::vector<std::vector<SBLoc>>> gridVecCache;
-    void fillCacheOneCell(int r0, int c0);
+    std::vector<const SBLoc*> spiralSearchAllPossibleLocsOneCell(int r0, int c0);
     void fillGridCache();
-    void checkOneCell(const std::unordered_set<SBLoc>&, double, double, double&,
-                      std::vector<std::pair<Point<3>,const SBLoc*>>&) const;
+    inline void checkOneCell(const std::unordered_set<const SBLoc*>&, double,
+                             double, double&, std::vector<const SBLoc*>&) const;
 };
 
 

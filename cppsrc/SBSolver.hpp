@@ -11,15 +11,24 @@
 
 #include <stdio.h>
 #include <vector>
+#include "memory"
 #include "Point.hpp"
 #include "SBLoc.hpp"
 
 
 class SBSolver {
 public:
-    virtual void build(const std::vector<SBLoc> &sbData) = 0;
-    virtual SBLoc findNearest(double lng, double lat) const = 0;
+    inline void build(const std::shared_ptr<std::vector<SBLoc>> &sbData);
+    virtual const SBLoc* findNearest(double lng, double lat) const = 0;
+protected:
+    std::shared_ptr<std::vector<SBLoc>> sbData;
+private:
+    virtual void build() = 0;
 };
 
+inline void SBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &sbData) {
+    this->sbData = sbData;
+    build();
+}
 
 #endif /* SBSolver_hpp */

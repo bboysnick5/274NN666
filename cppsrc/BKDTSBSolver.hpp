@@ -14,7 +14,7 @@
 
 class BKDTSBSolver : public KDTSBSolver {
 public:
-    void build(const std::vector<SBLoc> &sbData);
+    void build();
 };
 
 
