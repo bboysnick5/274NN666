@@ -24,7 +24,7 @@ public:
     
 private:
     std::vector<std::vector<KDTree<3, const SBLoc*>>> gridTreeCache;
-    //std::vector<std::vector<std::vector<SBLoc>>> gridVecCache;
+    std::vector<std::vector<const SBLoc*>> gridSingleCache;
     std::vector<const SBLoc*> spiralSearchAllPossibleLocsOneCell(int r0, int c0);
     void fillGridCache();
     inline void checkOneCell(const std::unordered_set<const SBLoc*>&, double,
