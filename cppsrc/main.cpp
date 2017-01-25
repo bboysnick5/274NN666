@@ -68,7 +68,7 @@ void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &sbData,
 void timeNN(SBSolver *solver) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsedSeconds;
-    int numTrials = 10000;
+    int numTrials = 1000;
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -100,9 +100,9 @@ int main(int argc, const char * argv[]) {
     
     std::vector<shared_ptr<SBSolver>> solvers{
         std::make_shared<BFSBSolver>(),
-        //std::make_shared<KDTSBSolver>(),
-        //std::make_shared<BKDTSBSolver>(),
-        //std::make_shared<GridSBSolver>(),
+        std::make_shared<KDTSBSolver>(),
+        std::make_shared<BKDTSBSolver>(),
+        std::make_shared<GridSBSolver>(),
         std::make_shared<BKDTGridSBSolver>(0.3),
     };
     
