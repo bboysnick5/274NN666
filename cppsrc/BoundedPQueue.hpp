@@ -143,7 +143,9 @@ BoundedPQueue<T>::BoundedPQueue(size_t maxSize) {
 template <typename T>
 void BoundedPQueue<T>::enqueue(const T& value, double priority) {
     // Add the element to the collection.
-    elems.insert(make_pair(priority, value));
+    if (size() == maxSize() && priority > worst())
+        return;
+    elems.emplace(priority, value);
     
     // If there are too many elements in the queue, drop off the last one.
     if (size() > maxSize()) {

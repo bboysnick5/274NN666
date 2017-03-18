@@ -14,6 +14,7 @@
 #include <iterator>
 #include "GridSBSolver.hpp"
 #include "KDTree.hpp"
+#include "KDTreeVec.hpp"
 
 
 class BKDTGridSBSolver : public GridSBSolver {
@@ -24,13 +25,15 @@ public:
     
     
 private:
-    std::vector<std::vector<KDTree<3, const SBLoc*>>> gridTreeCache;
-    std::vector<std::vector<const SBLoc*>> gridSingleCache;
-    std::vector<const SBLoc*>::iterator spiralSearchAllPossibleLocsOneCell(int,
-        int, std::vector<const SBLoc*>&);
+    std::vector<KDTreeVec<3, const SBLoc*, DistType::EUC>> gridTreeCache;
+    std::vector<const SBLoc*> gridSingleCache;
+    std::vector<std::pair<Point<3>, const SBLoc*>>::iterator
+        cacheAllPossibleLocsOneCell(int, int, double,
+        std::vector<std::pair<Point<3>, const SBLoc*>>::iterator);
     void fillGridCache();
-    inline void checkOneCell(const std::unordered_set<const SBLoc*>&, double,
-        double, double&, std::vector<const SBLoc*>&, int&) const;
+    double xyzDistFromSideLen();
+    
+    KDTreeVec<3, const SBLoc*, DistType::EUC> sbKdt;
 };
 
 

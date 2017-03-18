@@ -28,7 +28,7 @@ struct SBLoc {
     }
     
     inline bool operator!=(const SBLoc &other) const {
-        return other.lng != lng || other.lat != lat;
+        return !(*this == other);
     }
     
     inline static double

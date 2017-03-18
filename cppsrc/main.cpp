@@ -22,11 +22,14 @@
 #include "BKDTSBSolver.hpp"
 #include "GridSBSolver.hpp"
 #include "BKDTGridSBSolver.hpp"
+#include "BKDT3DCartGridSBSolver.hpp"
+
+#include "KDTreeVec.hpp"
 
 
 bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
     double testTotal = 0.0, refTotal = 0.0;
-    int numTrials = 10000;
+    int numTrials = 1000;
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -84,10 +87,12 @@ void timeNN(SBSolver *solver) {
         numTrials *= 10;
     } while (elapsedSeconds.count()*1000.0 < 5000 && numTrials < 1000000);
     std::cout << "Time: " << (elapsedSeconds.count()*1000.0)/numTrials
-        << " ms per search, " << numTrials << " trials" << std::endl;
+              << " ms per search, " << numTrials << " trials" << std::endl;
 }
 
 int main(int argc, const char * argv[]) {
+    
+    
     
     std::ifstream sbFile(argv[1]);
     sbFile.ignore(256, '\r');
@@ -96,14 +101,19 @@ int main(int argc, const char * argv[]) {
     auto sbData = std::make_shared<std::vector<SBLoc>>();
     std::copy(std::istream_iterator<SBLoc>(sbFile),
               std::istream_iterator<SBLoc>(), std::back_inserter(*sbData));
+    std::stable_sort(sbData->begin(), sbData->end(), [](const auto &l1,
+        const auto& l2){return l1.lng*10000000+l1.lat<l2.lng*10000000+l2.lat;});
+    sbData->erase(sbData->begin(),
+                  std::unique(sbData->rbegin(), sbData->rend()).base());
     std::random_shuffle(sbData->begin(), sbData->end());
     
     std::vector<shared_ptr<SBSolver>> solvers{
         std::make_shared<BFSBSolver>(),
-        std::make_shared<KDTSBSolver>(),
-        std::make_shared<BKDTSBSolver>(),
-        std::make_shared<GridSBSolver>(),
+        //std::make_shared<KDTSBSolver>(),
+        //std::make_shared<BKDTSBSolver>(),
+        //std::make_shared<GridSBSolver>(),
         std::make_shared<BKDTGridSBSolver>(0.3),
+        //std::make_shared<BKDT3DCartGridSBSolver>(0.1)
     };
     
     for (int i = 0; i < solvers.size(); ++i) {

@@ -16,10 +16,10 @@
 class KDTSBSolver : public SBSolver {
 public:
     virtual void build();
-    const SBLoc* findNearest(double lng, double lat) const;
+    virtual const SBLoc* findNearest(double lng, double lat) const;
     
 protected:
-    KDTree<3, const SBLoc*> kdt;
+    KDTree<3, const SBLoc*, DistType::EUC> kdt;
 };
 
 

@@ -13,9 +13,13 @@
 #include <stdlib.h>
 
 
+
 template <size_t N>
 class Point {
 public:
+    
+    constexpr static double EARTH_RADIUS = 6371;
+    
     // Type: iterator
     // Type: const_iterator
     // ------------------------------------------------------------------------
@@ -39,6 +43,18 @@ public:
     double& operator[](size_t index);
     double operator[](size_t index) const;
     
+    
+    // static double eulDist(const Point<N>& one, const Point<N>& two);
+    // Usage: double d = Distance(one, two);
+    // ----------------------------------------------------------------------------
+    // Returns the Euclidean distance between two points.
+    static double euclDist(const Point<N>& pt1, const Point<N>& pt2);
+
+    static double havDist(const Point<N>& one, const Point<N>& two);
+    
+    static double manhDist(const Point<N>& one, const Point<N>& two);
+
+    
     // iterator begin();
     // iterator end();
     // const_iterator begin() const;
@@ -57,12 +73,6 @@ private:
     double coords[N];
 };
 
-// double Distance(const Point<N>& one, const Point<N>& two);
-// Usage: double d = Distance(one, two);
-// ----------------------------------------------------------------------------
-// Returns the Euclidean distance between two points.
-template <size_t N>
-double Distance(const Point<N>& one, const Point<N>& two);
 
 // bool operator==(const Point<N>& one, const Point<N>& two);
 // bool operator!=(const Point<N>& one, const Point<N>& two);
@@ -114,15 +124,32 @@ typename Point<N>::const_iterator Point<N>::end() const {
     return begin() + size();
 }
 
-// Computing the distance uses the standard distance formula: the square root of
-// the sum of the squares of the differences between matching components.
 template <size_t N>
-double Distance(const Point<N>& one, const Point<N>& two) {
+double Point<N>::euclDist(const Point<N>& one, const Point<N>& two) {
     double result = 0.0;
     for (size_t i = 0; i < N; ++i)
         result += (one[i] - two[i]) * (one[i] - two[i]);
-    
     return sqrt(result);
+}
+
+template <size_t N>
+double Point<N>::havDist(const Point<N>& one, const Point<N>& two) {
+    double dLat = (one[1]-two[1])*M_PI/180;
+    double dLon = (one[0]-two[0])*M_PI/180;
+    double lat1 = one[1]*M_PI/180;
+    double lat2 = two[1]*M_PI/180;
+    double a = sin(dLat/2) * sin(dLat/2)
+    + sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2);
+    double c = 2 * atan2(sqrt(a), sqrt(1-a));
+    return EARTH_RADIUS * c;
+}
+
+template <size_t N>
+double Point<N>::manhDist(const Point<N>& one, const Point<N>& two) {
+    double result = 0.0;
+    for (size_t i = 0; i < N; ++i)
+        result += std::fabs(one[i] - two[i]);
+    return result;
 }
 
 // Equality is implemented using the equal algorithm, which takes in two ranges
@@ -136,5 +163,6 @@ template <size_t N>
 bool operator!=(const Point<N>& one, const Point<N>& two) {
     return !(one == two);
 }
+
 
 #endif // POINT_INCLUDED

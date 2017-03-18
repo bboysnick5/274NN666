@@ -15,6 +15,8 @@
 #include "Point.hpp"
 #include "SBLoc.hpp"
 
+const double DOUBLE_MAX = std::numeric_limits<double>::max();
+const double DOUBLE_MIN = std::numeric_limits<double>::lowest();
 
 class SBSolver {
 public:
