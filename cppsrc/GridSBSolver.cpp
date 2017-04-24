@@ -13,8 +13,8 @@
 
 GridSBSolver::GridSBSolver(double alpc) :
     AVE_LOC_PER_CELL(alpc),
-    maxLng(DOUBLE_MIN), maxLat(DOUBLE_MIN),
-    minLng(DOUBLE_MAX), minLat(DOUBLE_MAX) {}
+    minLng(DOUBLE_MAX), maxLng(DOUBLE_MIN),
+    minLat(DOUBLE_MAX), maxLat(DOUBLE_MIN) {}
 
 void GridSBSolver::findKeyLngLat() {
     for (const auto &loc : *sbData) {
@@ -79,7 +79,7 @@ const SBLoc* GridSBSolver::findNearest(double lng, double lat) const {
     auto idxPr = getIdx(lng, lat);
     int r0 = idxPr.first, c0 = idxPr.second;
     double minDist = DOUBLE_MAX;
-    const SBLoc* best;
+    const SBLoc* best = nullptr;
     // exact cell check
     NNOneCell(grid[r0][c0], lng, lat, minDist, best);
     

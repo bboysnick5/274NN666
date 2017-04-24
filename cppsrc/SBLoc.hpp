@@ -84,11 +84,7 @@ namespace std {
         }
     };
     
-    template <>
-    struct equal_to<const SBLoc*> {
-        constexpr bool operator()(const SBLoc* l1, const SBLoc* l2) const {          return *l1==*l2;
-        }
-    };
+
 }
 
 inline std::ostream& operator<<(std::ostream &os, const SBLoc &l) {

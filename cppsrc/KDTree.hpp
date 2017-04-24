@@ -490,16 +490,13 @@ std::pair<Point<N>, ElemType>>> &distKVPairs, double& bestDist) const {
     if (!cur)
         return;
     auto dist = distFuncs[static_cast<int>(dType)](cur->key, pt);
-    if (dist < bestDist + diff) {
-        if (dist < bestDist) {
-            bestDist = dist;
-            distKVPairs.push_back(std::move(distKVPairs[0]));
-            distKVPairs[0] = std::make_pair(dist,
-                             std::make_pair(cur->key, cur->object));
-        } else {
-            distKVPairs.emplace_back(dist, std::make_pair(cur->key,
-                                                          cur->object));
-        }
+    if (dist < bestDist) {
+        bestDist = dist;
+        distKVPairs.push_back(std::move(distKVPairs[0]));
+        distKVPairs[0] = std::make_pair(dist,
+                                        std::make_pair(cur->key, cur->object));
+    } else if (dist < bestDist + diff) {
+        distKVPairs.emplace_back(dist, std::make_pair(cur->key, cur->object));
     }
     TreeNode *next = pt[level%N] < cur->key[level%N] ? cur->left : cur->right;
     rangeDiffKNNPairsHelper(next, level+1, pt, diff, distKVPairs, bestDist);

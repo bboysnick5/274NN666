@@ -24,23 +24,23 @@ BKDTGridSBSolver::cacheAllPossibleLocsOneCell(int r0, int c0, double diff,
 }
 
 void BKDTGridSBSolver::fillGridCache() {
-    gridTreeCache = std::vector<KDTreeVec<3, const SBLoc*, DistType::EUC>>
+    gridTreeCache = std::vector<KDTree<3, const SBLoc*, DistType::EUC>>
                     (rowSize*colSize);
     gridSingleCache = std::vector<const SBLoc*>(rowSize*colSize);
-    std::vector<std::pair<Point<3>, const SBLoc*>> locTreePairs(numLocs);
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
     int totalTreeSize = 0, singleLocs = 0, multiLocs = 0;
     double diff = xyzDistFromSideLen();
     for (int r = 0; r < rowSize; ++r) {
         for (int c = 0; c < colSize; ++c) {
             int idx = r*colSize+c;
             auto locsEnd = cacheAllPossibleLocsOneCell(r, c, diff,
-                                                       locTreePairs.begin());
-            size_t locsSize = locsEnd - locTreePairs.begin();
+                                                       ptLocPairs.begin());
+            size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
-                gridTreeCache[idx] = KDTreeVec<3, const SBLoc*, DistType::EUC>
-                    (locTreePairs.begin(), locsEnd);
+                gridTreeCache[idx] = KDTree<3, const SBLoc*, DistType::EUC>
+                    (ptLocPairs.begin(), locsEnd);
             } else {
-                gridSingleCache[idx] = locTreePairs[0].second;
+                gridSingleCache[idx] = ptLocPairs[0].second;
                 singleLocs++;
             }
             totalTreeSize += locsSize;
@@ -65,7 +65,7 @@ void BKDTGridSBSolver::build() {
     std::transform(sbData->begin(), sbData->end(), std::back_inserter(kdtData),
                    [&](const SBLoc& loc){ return
                        std::make_pair(SBLoc::latLngToCart3DXYZ(loc.lng, loc.lat), &loc);});
-    sbKdt = KDTreeVec<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
+    sbKdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
     numLocs = static_cast<int>(sbKdt.size());
     findKeyLngLat();
     rowSize = sqrt(sbData->size()) / AVE_LOC_PER_CELL;

@@ -22,9 +22,6 @@
 #include "BKDTSBSolver.hpp"
 #include "GridSBSolver.hpp"
 #include "BKDTGridSBSolver.hpp"
-#include "BKDT3DCartGridSBSolver.hpp"
-
-#include "KDTreeVec.hpp"
 
 
 bool accuracyTest(SBSolver *testSolver, SBSolver *refSolver) {
@@ -92,8 +89,6 @@ void timeNN(SBSolver *solver) {
 
 int main(int argc, const char * argv[]) {
     
-    
-    
     std::ifstream sbFile(argv[1]);
     sbFile.ignore(256, '\r');
     sbFile.ignore(256, '\r');
@@ -107,16 +102,17 @@ int main(int argc, const char * argv[]) {
                   std::unique(sbData->rbegin(), sbData->rend()).base());
     std::random_shuffle(sbData->begin(), sbData->end());
     
+    double aveLocPerCell = argc == 2 ? 0.3 : std::stod(argv[2]);
+    
     std::vector<shared_ptr<SBSolver>> solvers{
         std::make_shared<BFSBSolver>(),
-        //std::make_shared<KDTSBSolver>(),
-        //std::make_shared<BKDTSBSolver>(),
-        //std::make_shared<GridSBSolver>(),
-        std::make_shared<BKDTGridSBSolver>(0.3),
-        //std::make_shared<BKDT3DCartGridSBSolver>(0.1)
+        std::make_shared<KDTSBSolver>(),
+        std::make_shared<BKDTSBSolver>(),
+        std::make_shared<GridSBSolver>(),
+        std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
     };
     
-    for (int i = 0; i < solvers.size(); ++i) {
+    for (size_t i = 0; i < solvers.size(); ++i) {
         timeBuild(sbData, solvers[i].get());
         if (i != 0 && !accuracyTest(solvers[i].get(), solvers[0].get()))
             continue;
