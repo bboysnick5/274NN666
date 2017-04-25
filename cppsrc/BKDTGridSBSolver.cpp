@@ -6,6 +6,8 @@
 //  Copyright © 2016 Yunlong Liu. All rights reserved.
 //
 
+#include <thread>
+#include <omp.h>
 #include "BKDTGridSBSolver.hpp"
 
 
@@ -28,8 +30,11 @@ void BKDTGridSBSolver::fillGridCache() {
                     (rowSize*colSize);
     gridSingleCache = std::vector<const SBLoc*>(rowSize*colSize);
     std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
-    int totalTreeSize = 0, singleLocs = 0, multiLocs = 0;
+    int totalTreeSize = 0, singleLocs = 0;
     double diff = xyzDistFromSideLen();
+#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
+default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
+reduction(+:totalTreeSize, singleLocs) collapse(2)
     for (int r = 0; r < rowSize; ++r) {
         for (int c = 0; c < colSize; ++c) {
             int idx = r*colSize+c;
@@ -46,7 +51,7 @@ void BKDTGridSBSolver::fillGridCache() {
             totalTreeSize += locsSize;
         }
     }
-    multiLocs = rowSize*colSize - singleLocs;
+    int multiLocs = rowSize*colSize - singleLocs;
     std::cout << "ave tree size: " << totalTreeSize/(rowSize*colSize)
               << "\nSingle loc cells: " << singleLocs
               << "\nMulti-loc cells:" << multiLocs << std::endl;
