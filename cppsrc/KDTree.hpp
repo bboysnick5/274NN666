@@ -398,10 +398,10 @@ KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) {
 template <size_t N, typename ElemType, DistType dType>
 typename KDTree<N, ElemType, dType>::TreeNode*const*
 KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) const {
-    int level = N-1;
+    int dim = N-1;
     TreeNode *const*n = &root;
-    while (*n && (*n)->key != pt && ++level) {
-        n = pt[level%N] < (*n)->key[level%N] ? &(*n)->left : &(*n)->right;
+    while (*n && (*n)->key != pt && ++dim) {
+        n = pt[dim%N] < (*n)->key[dim%N] ? &(*n)->left : &(*n)->right;
     }
     return n;
 }

@@ -7,7 +7,7 @@
 //
 
 #include <thread>
-#include <omp.h>
+//#include <omp.h>
 #include "BKDTGridSBSolver.hpp"
 
 
@@ -32,9 +32,9 @@ void BKDTGridSBSolver::fillGridCache() {
     std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
     int totalTreeSize = 0, singleLocs = 0;
     double diff = xyzDistFromSideLen();
-#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
-default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
-reduction(+:totalTreeSize, singleLocs) collapse(2)
+//#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
+//default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
+//reduction(+:totalTreeSize, singleLocs) collapse(2)
     for (int r = 0; r < rowSize; ++r) {
         for (int c = 0; c < colSize; ++c) {
             int idx = r*colSize+c;
