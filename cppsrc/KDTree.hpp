@@ -178,14 +178,14 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, int, RAI, RAI);
+    void rangeCtorHelper(TreeNode*&, size_t, RAI, RAI);
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
-    void kNNValueHelper(TreeNode *cur, int level, const Point<N> &pt,
+    void kNNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
                         BoundedPQueue<ElemType> &bpq) const;
     
-    void rangeDiffKNNPairsHelper(TreeNode*, int, const Point<N> &, double,
+    void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N> &, double,
                                  std::vector<std::pair<double,
                                  std::pair<Point<N>, ElemType>>>&, double&) const;
     
@@ -194,7 +194,7 @@ private:
     // and its helper method are used to speed up the search
     // when finding the nearest neighbor only.
     ElemType NNValue(const Point<N>& key) const;
-    void NNValueHelper(TreeNode *cur, int level, const Point<N> &pt,
+    void NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
                        double &bestDist, ElemType *&bestValue) const;
     
     // ----------------------------------------------------
@@ -211,7 +211,7 @@ private:
     TreeNode** findNodePtr(const Point<N>& pt);
     TreeNode*const* findNodePtr(const Point<N>& pt) const;
     
-    inline double branchMin(const Point<N>&, const Point<N>&, int) const;
+    inline double branchMin(const Point<N>&, const Point<N>&, size_t) const;
 
 };
 
@@ -275,19 +275,20 @@ KDTree<N, ElemType, dType>& KDTree<N, ElemType, dType>::operator=(KDTree&& rhs){
 
 template <size_t N, typename ElemType, DistType dType>
 template <class RAI>
-void KDTree<N, ElemType, dType>::rangeCtorHelper(TreeNode*& curNdPtr, int level,
+void KDTree<N, ElemType, dType>::rangeCtorHelper(TreeNode*& curNdPtr, size_t dim,
                                                  RAI begin, RAI end) {
     RAI median;
     if (begin != end) {
         median = begin + (end-begin)/2;
         std::nth_element(begin, median, end, [=](const std::pair<Point<N>,
             ElemType>& p1, const std::pair<Point<N>, ElemType>& p2) {
-            return p1.first[level%N] < p2.first[level%N];});
+            return p1.first[dim] < p2.first[dim];});
         curNdPtr = new TreeNode(std::move(median->first),
                                 std::move(median->second));
         treeSize++;
-        rangeCtorHelper(curNdPtr->left, level+1, begin, median);
-        rangeCtorHelper(curNdPtr->right, level+1, median+1, end);
+        size_t nextDim = dim == N - 1 ? 0 : dim + 1;
+        rangeCtorHelper(curNdPtr->left, nextDim, begin, median);
+        rangeCtorHelper(curNdPtr->right, nextDim, median+1, end);
     }
 }
 
@@ -405,11 +406,9 @@ KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) {
 template <size_t N, typename ElemType, DistType dType>
 typename KDTree<N, ElemType, dType>::TreeNode*const*
 KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) const {
-    int dim = N-1;
     TreeNode *const*n = &root;
-    while (*n && (*n)->key != pt && ++dim) {
-        n = pt[dim%N] < (*n)->key[dim%N] ? &(*n)->left : &(*n)->right;
-    }
+    for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim + 1)
+        n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
     return n;
 }
 
@@ -422,10 +421,10 @@ ElemType KDTree<N, ElemType, dType>::kNNValue(const Point<N>& pt, size_t k) cons
     BoundedPQueue<ElemType> bpq(k);
     kNNValueHelper(root, 0, pt, bpq);
     
-    std::multimap<int, ElemType, std::greater<int>> freqMap;
+    std::multimap<size_t, ElemType, std::greater<size_t>> freqMap;
     while (!bpq.empty()) {
         ElemType elem = bpq.dequeueMin();
-        for (typename std::multimap<int, ElemType>::iterator
+        for (typename std::multimap<size_t, ElemType>::iterator
              it = freqMap.begin();it != freqMap.end(); ++it) {
             if (it->second == elem) {
                 freqMap.emplace(it->first+1, it->second);
@@ -461,17 +460,18 @@ ElemType KDTree<N, ElemType, dType>::kNNValue(const Point<N>& pt, size_t k) cons
 }
 
 template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::kNNValueHelper(TreeNode *cur, int level,
+void KDTree<N, ElemType, dType>::kNNValueHelper(TreeNode *cur, size_t dim,
 const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
-    if (!cur)
-        return;
-    bpq.enqueue(cur->object, distFuncs[(int)dType](cur->key, pt));
-    TreeNode *next = pt[level%N] < cur->key[level%N] ? cur->left : cur->right;
-    kNNValueHelper(next, level + 1, pt, bpq);
+    bpq.enqueue(cur->object, distFuncs[static_cast<size_t>(dType)](cur->key, pt));
+    size_t nextDim = dim + 1 < N ? dim + 1 : 0;
+    TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
+    if (next)
+        kNNValueHelper(next, nextDim, pt, bpq);
     if (bpq.size() < bpq.maxSize()
-        || branchMin(cur->key, pt, level%N) < bpq.worst()) {
+        || branchMin(cur->key, pt, dim) < bpq.worst()) {
         TreeNode *other = next == cur->left ? cur->right : cur->left;
-        kNNValueHelper(other, level + 1, pt, bpq);
+        if (other)
+            kNNValueHelper(other, nextDim, pt, bpq);
     }
 }
 
@@ -491,12 +491,10 @@ Iter KDTree<N, ElemType, dType>::rangeDiffKNNPairs(const Point<N>& key,
 }
 
 template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::rangeDiffKNNPairsHelper(TreeNode *cur, int level,
+void KDTree<N, ElemType, dType>::rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim,
 const Point<N>& pt, double diff, std::vector<std::pair<double,
 std::pair<Point<N>, ElemType>>> &distKVPairs, double& bestDist) const {
-    if (!cur)
-        return;
-    auto dist = distFuncs[static_cast<int>(dType)](cur->key, pt);
+    auto dist = distFuncs[static_cast<size_t>(dType)](cur->key, pt);
     if (dist < bestDist) {
         bestDist = dist;
         distKVPairs.push_back(std::move(distKVPairs[0]));
@@ -505,11 +503,14 @@ std::pair<Point<N>, ElemType>>> &distKVPairs, double& bestDist) const {
     } else if (dist < bestDist + diff) {
         distKVPairs.emplace_back(dist, std::make_pair(cur->key, cur->object));
     }
-    TreeNode *next = pt[level%N] < cur->key[level%N] ? cur->left : cur->right;
-    rangeDiffKNNPairsHelper(next, level+1, pt, diff, distKVPairs, bestDist);
-    if (branchMin(cur->key, pt, level%N) < bestDist+diff) {
+    size_t nextDim = dim + 1 < N ? dim + 1 : 0;
+    TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
+    if (next)
+        rangeDiffKNNPairsHelper(next, nextDim, pt, diff, distKVPairs, bestDist);
+    if (branchMin(cur->key, pt, dim) < bestDist+diff) {
         TreeNode *other = next == cur->left ? cur->right : cur->left;
-        rangeDiffKNNPairsHelper(other, level+1, pt, diff, distKVPairs, bestDist);
+        if (other)
+            rangeDiffKNNPairsHelper(other, nextDim, pt, diff, distKVPairs, bestDist);
     }
 }
 
@@ -522,26 +523,27 @@ ElemType KDTree<N, ElemType, dType>::NNValue(const Point<N> &pt) const {
 }
 
 template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::NNValueHelper(TreeNode *cur, int level,
+void KDTree<N, ElemType, dType>::NNValueHelper(TreeNode *cur, size_t dim,
             const Point<N> &pt, double &bestDist, ElemType *&bestValue) const {
-    if (!cur)
-        return;
-    double curDist = distFuncs[(int)dType](cur->key, pt);
+    double curDist = distFuncs[static_cast<size_t>(dType)](cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
     }
-    TreeNode *next = pt[level%N] < cur->key[level%N] ? cur->left : cur->right;
-    NNValueHelper(next, level+1, pt, bestDist, bestValue);
-    if (branchMin(cur->key, pt, level%N) < bestDist) {
+    size_t nextDim = dim == N - 1 ? 0 : dim + 1;
+    TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
+    if (next)
+        NNValueHelper(next, nextDim, pt, bestDist, bestValue);
+    if (branchMin(cur->key, pt, dim) < bestDist) {
         TreeNode *other = next == cur->left ? cur->right : cur->left;
-        NNValueHelper(other, level+1, pt, bestDist, bestValue);
+        if (other)
+            NNValueHelper(other, nextDim, pt, bestDist, bestValue);
     }
 }
 
 template <size_t N, typename ElemType, DistType dType>
 double KDTree<N, ElemType, dType>::branchMin(const Point<N> &trPt,
-const Point<N> &searchPt, int idx) const {
+const Point<N> &searchPt, size_t idx) const {
     switch (dType) {
         case DistType::EUC:
         case DistType::MAN:

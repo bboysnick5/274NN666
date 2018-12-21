@@ -43,6 +43,7 @@ bool accuracyTest(const std::vector<SBLoc> &testLocs,
         const auto &testLoc = testLocs[i], &refResult = refResults[i],
                    &testResult = testResults[i];
         double refDist = SBLoc::havDist(refResult.lng, refResult.lat, testLoc.lng, testLoc.lat);
+        refTotal += refDist;
         if (testResult != refResult) {
             errorCount++;
             std::cout << "Test Point: " << testLoc << std::endl
@@ -52,7 +53,6 @@ bool accuracyTest(const std::vector<SBLoc> &testLocs,
         } else {
             testTotal += refDist;
         }
-        refTotal += refDist;
     }
     
     double error = testTotal/refTotal;
@@ -92,7 +92,7 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
             std::for_each(testLocs.begin() + maxResults,
                           testLocs.begin() + maxResults + numTrials,
                           [&](const SBLoc &l){
-                              auto temp = solver->findNearest(l.lng, l.lat);});
+                              solver->findNearest(l.lng, l.lat);});
         }
         end = std::chrono::system_clock::now();
         elapsedSeconds = end - start;
@@ -102,7 +102,6 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
 }
 
 int main(int argc, const char * argv[]) {
-    
     
     std::ifstream sbFile(argv[1]);
     sbFile.ignore(256, '\r');
@@ -132,15 +131,15 @@ int main(int argc, const char * argv[]) {
     
     for (size_t i = 0; i < solvers.size(); ++i) {
         timeBuild(sbData, solvers[i].get());
-        testResults.clear();
         timeNN(solvers[i].get(), testLocs, testResults,
                refResults.size() == 0 ? MAX_TRIALS : refResults.size());
         if (i == 0) {
             refResults = std::move(testResults);
-            continue;
+        } else {
+            accuracyTest(testLocs, testResults, refResults);
         }
-        accuracyTest(testLocs, testResults, refResults);
         std::cout << std::endl;
+        testResults.clear();
     }
     
     return 0;
