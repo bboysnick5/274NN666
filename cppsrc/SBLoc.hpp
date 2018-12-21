@@ -16,13 +16,16 @@
 
 struct SBLoc {
     
-    double lng;
     double lat;
+    double lng;
     std::string city;
     std::string addr;
     
     static constexpr double EARTH_RADIUS = 6371;
-        
+    
+    SBLoc() : lat(0), lng(0) {}
+    SBLoc(double lat, double lng) : lat(lat), lng(lng) {}
+    
     inline bool operator==(const SBLoc &other) const {
         return other.lng == lng && other.lat == lat;
     }
@@ -70,8 +73,8 @@ namespace std {
     template <>
     struct hash<SBLoc> {
         size_t operator()(const SBLoc& l) const {
-            return static_cast<long long>(l.lat * 1000000 +
-                   std::numeric_limits<double>::epsilon())* 100000000 +
+            return (static_cast<long long>(l.lat * 1000000 +
+                   std::numeric_limits<double>::epsilon()) << 20) +
                    static_cast<long long>(l.lng * 1000000 +
                    std::numeric_limits<double>::epsilon());
         }

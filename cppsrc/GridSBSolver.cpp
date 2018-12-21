@@ -23,9 +23,9 @@ void GridSBSolver::findKeyLngLat() {
         maxLng = std::max(maxLng, loc.lng);
         maxLat = std::max(maxLat, loc.lat);
     }
-    minLng = std::floor(minLng), minLat = std::floor(minLat);
-    maxLng = std::ceil(maxLng), maxLat = std::ceil(maxLat);
-    midLng = (minLng + maxLng)/2, midLat = (minLat + maxLat)/2;
+    minLng = std::floor(minLng); minLat = std::floor(minLat);
+    maxLng = std::ceil(maxLng); maxLat = std::ceil(maxLat);
+    midLng = (minLng + maxLng)/2; midLat = (minLat + maxLat)/2;
 }
 
 void GridSBSolver::constructGrid() {

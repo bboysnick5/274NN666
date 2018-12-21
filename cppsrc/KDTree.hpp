@@ -46,7 +46,7 @@ public:
     // ----------------------------------------------------
     // Constructs a KDTree from a collection. The tree will
     // be balanced using median constructing method
-    // NOTE: The tree will no eliminate duplicates and the
+    // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
     template <class RAI>
@@ -134,6 +134,13 @@ public:
     // chosen.
     ElemType kNNValue(const Point<N>& key, size_t k) const;
     
+    // Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const
+    // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
+    // ----------------------------------------------------
+    // Given a point p and a double offset, return a set of points in the KDTree
+    // nearest to p such that the farthest one in the set is at least offset
+    // distance close to p than the rest of the points in the tree.
+    // The forward iterator is passed in and filled and the end will be returned.
     template <class Iter>
     Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const;
     

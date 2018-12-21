@@ -58,8 +58,8 @@ void BKDTGridSBSolver::fillGridCache() {
 }
 
 double BKDTGridSBSolver::xyzDistFromSideLen() {
-    double lat2 = SBLoc::latFromHavDist(sideLen*sqrt(2), 45);
-    return Point<3>::euclDist(SBLoc::latLngToCart3DXYZ(0, 45),
+    double lat2 = SBLoc::latFromHavDist(sideLen*sqrt(2), 0);
+    return Point<3>::euclDist(SBLoc::latLngToCart3DXYZ(0, 0),
                               SBLoc::latLngToCart3DXYZ(0, lat2)); 
 }
 
