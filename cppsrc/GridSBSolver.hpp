@@ -25,7 +25,7 @@ public:
     
 protected:
     void findKeyLngLat();
-    std::pair<int, int> getIdx(double lng, double lat) const;
+    std::pair<size_t, size_t> getIdx(double lng, double lat) const;
 
     void constructGrid();
     void fillGrid();
@@ -35,7 +35,7 @@ protected:
     const double AVE_LOC_PER_CELL;
     std::vector<std::vector<std::unordered_set<const SBLoc*>>> grid;
     double sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
-    int rowSize, colSize, numLocs = 0;
+    size_t rowSize, colSize, numLocs = 0;
     
 private:
     static constexpr double DISTORT_FACTOR = 0.95;

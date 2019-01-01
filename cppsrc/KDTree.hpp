@@ -14,11 +14,12 @@
 #include "BoundedPQueue.hpp"
 #include <stdexcept>
 #include <cmath>
-#include <iostream>
 #include <unordered_map>
 #include <map>
 #include <utility>
 #include <set>
+#include <stack>
+#include <tuple>
 #include <stdio.h>
 #include <stdlib.h>
 #include <algorithm>
@@ -26,20 +27,14 @@
 #include <functional>
 
 
-enum class DistType {
-    EUC = 0,
-    MAN,
-    HAV
-};
-
-template <size_t N, typename ElemType, DistType dType>
+template <size_t N, typename ElemType, DistType DT>
 class KDTree {
 public:
     // Constructor: KDTree();
     // Usage: KDTree<3, int> myTree;
     // ----------------------------------------------------
     // Constructs an empty KDTree.
-    KDTree();
+    KDTree() = default;
     
     // Constructor: KDTree(FwdItType begin, FwdItType end);
     // Usage: KDTree<3, int> myTree(vec.begin(), bec.end());
@@ -50,7 +45,7 @@ public:
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
     template <class RAI>
-    KDTree(RAI begin, RAI end);
+    KDTree(RAI, RAI);
     
     // Destructor: ~KDTree()
     // Usage: (implicit)
@@ -64,8 +59,8 @@ public:
     // Usage: one = two;
     // -----------------------------------------------------
     // Copy constructor and copy assignment operator.
-    KDTree(const KDTree& rhs);
-    KDTree& operator=(const KDTree& rhs);
+    KDTree(const KDTree&);
+    KDTree& operator=(const KDTree&);
     
     // KDTree(const KDTree& rhs);
     // KDTree& operator=(const KDTree& rhs);
@@ -73,8 +68,8 @@ public:
     // Usage: one = two;
     // -----------------------------------------------------
     // Move constructor and move assignment operator.
-    KDTree(KDTree&& rhs);
-    KDTree& operator=(KDTree&& rhs);
+    KDTree(KDTree&&);
+    KDTree& operator=(KDTree&&);
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
@@ -94,47 +89,47 @@ public:
     size_t height() const;
     bool empty() const;
     
-    // bool contains(const Point<N>& pt) const;
+    // bool contains(const Point<N, DT>& pt) const;
     // Usage: if (kd.contains(pt))
     // ----------------------------------------------------
     // Returns whether the specified point is contained in the KDTree.
-    bool contains(const Point<N>& pt) const;
+    bool contains(const Point<N, DT>&) const;
     
-    // void insert(const Point<N>& pt, const ElemType& value);
+    // void insert(const Point<N, DT>& pt, const ElemType& value);
     // Usage: kd.insert(v, "This value is associated with v.");
     // ----------------------------------------------------
     // Inserts the point pt into the KDTree, associating it with the specified
     // value. If the element already existed in the tree, the new value will
     // overwrite the existing one.
-    void insert(const Point<N>& pt, const ElemType& value);
+    void insert(const Point<N, DT>&, const ElemType&);
     
-    // ElemType& operator[](const Point<N>& pt);
+    // ElemType& operator[](const Point<N, DT>& pt);
     // Usage: kd[v] = "Some Value";
     // ----------------------------------------------------
     // Returns a reference to the value associated with point pt in the KDTree.
     // If the point does not exist, then it is added to the KDTree using the
     // default value of ElemType as its key.
-    ElemType& operator[](const Point<N>& pt);
+    ElemType& operator[](const Point<N, DT>& pt);
     
-    // ElemType& at(const Point<N>& pt);
-    // const ElemType& at(const Point<N>& pt) const;
+    // ElemType& at(const Point<N, DT>& pt);
+    // const ElemType& at(const Point<N, DT>& pt) const;
     // Usage: cout << kd.at(v) << endl;
     // ----------------------------------------------------
     // Returns a reference to the key associated with the point pt. If the point
     // is not in the tree, this function throws an out_of_range exception.
-    ElemType& at(const Point<N>& pt);
-    const ElemType& at(const Point<N>& pt) const;
+    ElemType& at(const Point<N, DT>& pt);
+    const ElemType& at(const Point<N, DT>& pt) const;
     
-    // ElemType kNNValue(const Point<N>& key, size_t k) const
+    // ElemType kNNValue(const Point<N, DT>& key, size_t k) const
     // Usage: cout << kd.kNNValue(v, 3) << endl;
     // ----------------------------------------------------
     // Given a point v and an integer k, finds the k points in the KDTree
     // nearest to v and returns the most common value associated with those
     // points. In the event of a tie, one of the most frequent value will be
     // chosen.
-    ElemType kNNValue(const Point<N>& key, size_t k) const;
+    ElemType kNNValue(const Point<N, DT>& key, size_t k) const;
     
-    // Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const
+    // Iter rangeDiffKNNPairs(const Point<N, DT>&, double, Iter) const
     // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
     // ----------------------------------------------------
     // Given a point p and a double offset, return a set of points in the KDTree
@@ -142,21 +137,27 @@ public:
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
     template <class Iter>
-    Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const;
+    Iter rangeDiffKNNPairs(const Point<N, DT>&, double, Iter) const;
     
 private:
     
     struct TreeNode {
         TreeNode *left;
         TreeNode *right;
-        Point<N> key;
+        Point<N, DT> key;
         ElemType object;
         
-        TreeNode(const Point<N>& k, const ElemType& obj)
+        TreeNode() = default;
+        TreeNode(const TreeNode&) = default;
+        TreeNode& operator = (const TreeNode&) = default;
+        //TreeNode(TreeNode&&) = default;
+        //TreeNode& operator = (TreeNode&&) = default;
+
+        TreeNode(const Point<N, DT>& k, const ElemType& obj)
         : left(nullptr), right(nullptr), key(k), object(obj) {}
         
-        TreeNode(const Point<N>&& k = Point<N>(), const ElemType&& obj = ElemType())
-        : left(nullptr), right(nullptr), key(std::move(k)), object(std::move(obj)) {}
+        TreeNode(const Point<N, DT>&& k, const ElemType&& obj)
+        : left(nullptr), right(nullptr), key(k), object(obj) {}
         
         ~TreeNode() {
             delete left;
@@ -167,10 +168,6 @@ private:
     TreeNode *root;
     size_t treeSize;
     
-    
-    const static std::function<double (const Point<N>& p1, const Point<N> &p2)>
-        distFuncs[];
-    
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
     size_t heightHelper(TreeNode *n) const;
@@ -178,75 +175,113 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, size_t, RAI, RAI);
+    void rangeCtorHelper(TreeNode*&, size_t, RAI, RAI, RAI);
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
-    void kNNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
+    void kNNValueHelper(TreeNode *cur, size_t dim, const Point<N, DT> &pt,
                         BoundedPQueue<ElemType> &bpq) const;
     
-    void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N> &, double,
+    void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N, DT>&, double,
                                  std::vector<std::pair<double,
-                                 std::pair<Point<N>, ElemType>>>&, double&) const;
+                                 std::pair<Point<N, DT>, ElemType>>>&, double&) const;
     
     // ----------------------------------------------------
     // Identical to kNNValue method with k equals 1. NNValue
     // and its helper method are used to speed up the search
     // when finding the nearest neighbor only.
-    ElemType NNValue(const Point<N>& key) const;
-    void NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
+    ElemType NNValue(const Point<N, DT>& key) const;
+    void NNValueHelper(TreeNode *cur, size_t dim, const Point<N, DT> &pt,
                        double &bestDist, ElemType *&bestValue) const;
     
     // ----------------------------------------------------
     // Helper meothod for deep copy
     void treeCopy(TreeNode*& thisNode, TreeNode *otherNode);
     
-    // TreeNode** findNodePtr(const Point<N>& pt);
-    // TreeNode*const* findNodePtr(const Point<N>& pt) const;
+    // TreeNode** findNodePtr(const Point<N, DT>& pt);
+    // TreeNode*const* findNodePtr(const Point<N, DT>& pt) const;
     // Usage: TreeNode **nodePtr = findNodePtr(pt);
     // ----------------------------------------------------
     // Returns the pointer pointing to the node address
     // corresponding to the given Point. In this double pointing
     // fashion, we can construct a node at that location.
-    TreeNode** findNodePtr(const Point<N>& pt);
-    TreeNode*const* findNodePtr(const Point<N>& pt) const;
+    TreeNode** findNodePtr(const Point<N, DT>& pt);
+    TreeNode*const* findNodePtr(const Point<N, DT>& pt) const;
     
-    inline double branchMin(const Point<N>&, const Point<N>&, size_t) const;
+    double branchMin(const Point<N, DT>&, const Point<N, DT>&, size_t) const;
 
 };
 
 /** KDTree class implementation details */
 
 
-template <size_t N, typename ElemType, DistType dType>
-const std::function<double (const Point<N> &p1, const Point<N> &p2)>
-KDTree<N, ElemType, dType>::distFuncs[] = {Point<N>::euclDist,
-    Point<N>::manhDist, Point<N>::havDist};
-
-
 // ----------------------------------------------------------
 // ----------------------- BIG FIVE -------------------------
 // ----------------------------------------------------------
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>::KDTree() : root(nullptr), treeSize(0) {}
-
-template <size_t N, typename ElemType, DistType dType>
+template <size_t N, typename ElemType, DistType DT>
 template <class RAI>
-KDTree<N, ElemType, dType>::KDTree(RAI begin, RAI end) : treeSize(0) {
-    rangeCtorHelper(root, 0, begin, end);
+KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(0) {
+    rangeCtorHelper(root, 0, begin, end, begin + (end - begin)/2);
+    /*
+    
+    size_t maxStackDepth = std::ceil(log2(end-begin+1));
+    std::vector<std::tuple<TreeNode**, size_t, RAI, RAI, RAI>> st(maxStackDepth);
+    auto it = st.begin();
+    bool hasChild = true;
+    TreeNode** curNdPtr = &root;
+    size_t dim = 0, nextDim = dim == N - 1 ? 0 : dim + 1;
+    RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
+    while (it != st.begin() || hasChild) {
+        if (!hasChild) {
+            hasChild = true;
+            std::tie(curNdPtr, dim, thisBeginIt, thisEndIt, median) = *--it;
+        }
+        
+        treeSize++;
+        std::nth_element(thisBeginIt, median, thisEndIt,
+                         [=](const std::pair<Point<N, DT>, ElemType>& p1,
+                                   const std::pair<Point<N, DT>, ElemType>& p2) {
+                                        return p1.first[dim] < p2.first[dim];});
+        *curNdPtr = new TreeNode(std::move(median->first),
+                                 std::move(median->second));
+        nextDim = dim == N - 1 ? 0 : dim + 1;
+        
+       if (median != thisBeginIt) {
+            if (median + 1 != thisEndIt) {
+                *it++ = {&(*curNdPtr)->left, nextDim, thisBeginIt, median, thisBeginIt + (median-thisBeginIt)/2};
+                curNdPtr = &(*curNdPtr)->right;
+                thisBeginIt = median+1;
+                median = median + (thisEndIt-median+1)/2;
+                dim = nextDim;
+            } else {
+                curNdPtr = &(*curNdPtr)->left;
+                thisEndIt = median;
+                median = thisBeginIt + (median-thisBeginIt)/2;
+                dim = nextDim;
+            }
+       } else if (median + 1 != thisEndIt) {
+           curNdPtr = &(*curNdPtr)->right;
+           thisBeginIt = median+1;
+           median = median + (thisEndIt-median+1)/2;
+           dim = nextDim;
+       } else {
+            hasChild = false;
+       }
+    } */
 }
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>::KDTree(const KDTree& rhs)
+template <size_t N, typename ElemType, DistType DT>
+KDTree<N, ElemType, DT>::KDTree(const KDTree& rhs)
 : root(new TreeNode()), treeSize(rhs.treeSize) {
     treeCopy(root, rhs.root);
 }
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>&
-KDTree<N, ElemType, dType>::operator=(const KDTree& rhs) {
+template <size_t N, typename ElemType, DistType DT>
+KDTree<N, ElemType, DT>&
+KDTree<N, ElemType, DT>::operator=(const KDTree& rhs) {
     if (this != &rhs) {
+        delete root;
         treeSize = rhs.treeSize;
         root = new TreeNode();
         treeCopy(root, rhs.root);
@@ -254,15 +289,16 @@ KDTree<N, ElemType, dType>::operator=(const KDTree& rhs) {
     return *this;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>::KDTree(KDTree&& rhs)
+template <size_t N, typename ElemType, DistType DT>
+KDTree<N, ElemType, DT>::KDTree(KDTree&& rhs)
 : root(rhs.root), treeSize(rhs.treeSize) {
     rhs.root = nullptr;
     rhs.treeSize = 0;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>& KDTree<N, ElemType, dType>::operator=(KDTree&& rhs){
+template <size_t N, typename ElemType, DistType DT>
+KDTree<N, ElemType, DT>& KDTree<N, ElemType, DT>::
+operator=(KDTree&& rhs){
     if (this != &rhs) {
         delete root;
         root = rhs.root;
@@ -273,27 +309,29 @@ KDTree<N, ElemType, dType>& KDTree<N, ElemType, dType>::operator=(KDTree&& rhs){
     return *this;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-template <class RAI>
-void KDTree<N, ElemType, dType>::rangeCtorHelper(TreeNode*& curNdPtr, size_t dim,
-                                                 RAI begin, RAI end) {
-    RAI median;
-    if (begin != end) {
-        median = begin + (end-begin)/2;
-        std::nth_element(begin, median, end, [=](const std::pair<Point<N>,
-            ElemType>& p1, const std::pair<Point<N>, ElemType>& p2) {
-            return p1.first[dim] < p2.first[dim];});
-        curNdPtr = new TreeNode(std::move(median->first),
-                                std::move(median->second));
-        treeSize++;
-        size_t nextDim = dim == N - 1 ? 0 : dim + 1;
-        rangeCtorHelper(curNdPtr->left, nextDim, begin, median);
-        rangeCtorHelper(curNdPtr->right, nextDim, median+1, end);
-    }
-}
 
-template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::treeCopy(TreeNode*& thisNode,
+template <size_t N, typename ElemType, DistType DT>
+template <class RAI>
+void KDTree<N, ElemType, DT>::
+rangeCtorHelper(TreeNode*& curNdPtr, size_t dim, RAI begin,
+                RAI end, RAI median) {
+    treeSize++;
+    std::nth_element(begin, median, end, [=](const std::pair<Point<N, DT>,
+        ElemType>& p1, const std::pair<Point<N, DT>, ElemType>& p2) {
+        return p1.first[dim] < p2.first[dim];});
+    curNdPtr = new TreeNode(std::move(median->first),
+                            std::move(median->second));
+    size_t nextDim = dim == N - 1 ? 0 : dim + 1;
+    if (begin != median)
+        rangeCtorHelper(curNdPtr->left, nextDim, begin,
+                        median, begin + (median-begin)/2);
+    if (median + 1 != end)
+        rangeCtorHelper(curNdPtr->right, nextDim, median+1,
+                        end, median + (end-median+1)/2);
+} 
+
+template <size_t N, typename ElemType, DistType DT>
+void KDTree<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
                                           TreeNode* otherNode) {
     if (otherNode) {
         if (thisNode) {
@@ -310,10 +348,9 @@ void KDTree<N, ElemType, dType>::treeCopy(TreeNode*& thisNode,
     }
 }
 
-template <size_t N, typename ElemType, DistType dType>
-KDTree<N, ElemType, dType>::~KDTree() {
+template <size_t N, typename ElemType, DistType DT>
+KDTree<N, ElemType, DT>::~KDTree() {
     delete root;
-    root = nullptr;
 }
 
 
@@ -321,34 +358,35 @@ KDTree<N, ElemType, dType>::~KDTree() {
 // ----------------- TREE INFORMATION  ----------------------
 // ----------------------------------------------------------
 
-template <size_t N, typename ElemType, DistType dType>
-size_t KDTree<N, ElemType, dType>::dimension() const {
+template <size_t N, typename ElemType, DistType DT>
+size_t KDTree<N, ElemType, DT>::dimension() const {
     return N;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-DistType KDTree<N, ElemType, dType>::distType() const {
-    return dType;
+template <size_t N, typename ElemType, DistType DT>
+DistType KDTree<N, ElemType, DT>::distType() const {
+    return DT;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-size_t KDTree<N, ElemType, dType>::size() const {
+template <size_t N, typename ElemType, DistType DT>
+size_t KDTree<N, ElemType, DT>::size() const {
     return treeSize;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-size_t KDTree<N, ElemType, dType>::height() const {
+template <size_t N, typename ElemType, DistType DT>
+size_t KDTree<N, ElemType, DT>::height() const {
     return heightHelper(root);
 }
 
-template <size_t N, typename ElemType, DistType dType>
-size_t KDTree<N, ElemType, dType>::heightHelper(TreeNode *n) const {
-    return n? 1 + std::max(heightHelper(n->left), heightHelper(n->right)) : -1;
+template <size_t N, typename ElemType, DistType DT>
+size_t KDTree<N, ElemType, DT>::heightHelper(TreeNode *n) const {
+    return n ? 1 + std::max(heightHelper(n->left),
+                            heightHelper(n->right)) : -1;
 }
 
 
-template <size_t N, typename ElemType, DistType dType>
-bool KDTree<N, ElemType, dType>::empty() const {
+template <size_t N, typename ElemType, DistType DT>
+bool KDTree<N, ElemType, DT>::empty() const {
     return treeSize == 0;
 }
 
@@ -357,8 +395,9 @@ bool KDTree<N, ElemType, dType>::empty() const {
 // ----------------- MODIFIERS AND ACCESS -------------------
 // ----------------------------------------------------------
 
-template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::insert(const Point<N>& pt, const ElemType& value) {
+template <size_t N, typename ElemType, DistType DT>
+void KDTree<N, ElemType, DT>::
+insert(const Point<N, DT>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
         (*ndPtr)->object = value;
@@ -368,13 +407,13 @@ void KDTree<N, ElemType, dType>::insert(const Point<N>& pt, const ElemType& valu
     }
 }
 
-template <size_t N, typename ElemType, DistType dType>
-bool KDTree<N, ElemType, dType>::contains(const Point<N>& pt) const {
+template <size_t N, typename ElemType, DistType DT>
+bool KDTree<N, ElemType, DT>::contains(const Point<N, DT>& pt) const {
     return *findNodePtr(pt) != nullptr;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-ElemType& KDTree<N, ElemType, dType>::operator[] (const Point<N>& pt) {
+template <size_t N, typename ElemType, DistType DT>
+ElemType& KDTree<N, ElemType, DT>::operator[] (const Point<N, DT>& pt) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
         *ndPtr = new TreeNode(pt, ElemType());
@@ -383,13 +422,13 @@ ElemType& KDTree<N, ElemType, dType>::operator[] (const Point<N>& pt) {
     return (*ndPtr)->object;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-ElemType& KDTree<N, ElemType, dType>::at(const Point<N>& pt) {
+template <size_t N, typename ElemType, DistType DT>
+ElemType& KDTree<N, ElemType, DT>::at(const Point<N, DT>& pt) {
     return const_cast<ElemType&>(static_cast<const KDTree&>(*this).at(pt));
 }
 
-template <size_t N, typename ElemType, DistType dType>
-const ElemType& KDTree<N, ElemType, dType>::at(const Point<N>& pt) const {
+template <size_t N, typename ElemType, DistType DT>
+const ElemType& KDTree<N, ElemType, DT>::at(const Point<N, DT>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
         throw out_of_range("The point is out of range");
@@ -397,24 +436,25 @@ const ElemType& KDTree<N, ElemType, dType>::at(const Point<N>& pt) const {
     return (*n)->object;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-typename KDTree<N, ElemType, dType>::TreeNode**
-KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) {
+template <size_t N, typename ElemType, DistType DT>
+typename KDTree<N, ElemType, DT>::TreeNode**
+KDTree<N, ElemType, DT>::findNodePtr(const Point<N, DT>& pt) {
     return const_cast<TreeNode**>(static_cast<const KDTree*>(this)->findNodePtr(pt));
 }
 
-template <size_t N, typename ElemType, DistType dType>
-typename KDTree<N, ElemType, dType>::TreeNode*const*
-KDTree<N, ElemType, dType>::findNodePtr(const Point<N>& pt) const {
+template <size_t N, typename ElemType, DistType DT>
+typename KDTree<N, ElemType, DT>::TreeNode*const*
+KDTree<N, ElemType, DT>::findNodePtr(const Point<N, DT>& pt) const {
     TreeNode *const*n = &root;
-    for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim + 1)
+    for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1)
         n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
     return n;
 }
 
 
-template <size_t N, typename ElemType, DistType dType>
-ElemType KDTree<N, ElemType, dType>::kNNValue(const Point<N>& pt, size_t k) const {
+template <size_t N, typename ElemType, DistType DT>
+ElemType KDTree<N, ElemType, DT>::
+kNNValue(const Point<N, DT>& pt, size_t k) const {
     if (k == 1)
         return NNValue(pt);
     
@@ -459,10 +499,10 @@ ElemType KDTree<N, ElemType, dType>::kNNValue(const Point<N>& pt, size_t k) cons
      return frequent; */
 }
 
-template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::kNNValueHelper(TreeNode *cur, size_t dim,
-const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
-    bpq.enqueue(cur->object, distFuncs[static_cast<size_t>(dType)](cur->key, pt));
+template <size_t N, typename ElemType, DistType DT>
+void KDTree<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
+const Point<N, DT>& pt, BoundedPQueue<ElemType> &bpq) const {
+    bpq.enqueue(cur->object, Point<N, DT>::dist(cur->key, pt));
     size_t nextDim = dim + 1 < N ? dim + 1 : 0;
     TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
     if (next)
@@ -475,11 +515,11 @@ const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
     }
 }
 
-template <size_t N, typename ElemType, DistType dType>
+template <size_t N, typename ElemType, DistType DT>
 template <class Iter>
-Iter KDTree<N, ElemType, dType>::rangeDiffKNNPairs(const Point<N>& key,
-                                            double diff, Iter it) const {
-    std::vector<std::pair<double, std::pair<Point<N>, ElemType>>> distKVPairs;
+Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N, DT>& key,
+                                                   double diff, Iter it) const {
+    std::vector<std::pair<double, std::pair<Point<N, DT>, ElemType>>> distKVPairs;
     distKVPairs.reserve(sqrt(treeSize));
     double best = std::numeric_limits<double>::max();
     rangeDiffKNNPairsHelper(root, 0, key, diff, distKVPairs, best);
@@ -490,19 +530,18 @@ Iter KDTree<N, ElemType, dType>::rangeDiffKNNPairs(const Point<N>& key,
     return it;
 }
 
-template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim,
-const Point<N>& pt, double diff, std::vector<std::pair<double,
-std::pair<Point<N>, ElemType>>> &distKVPairs, double& bestDist) const {
-    auto dist = distFuncs[static_cast<size_t>(dType)](cur->key, pt);
-    if (dist < bestDist) {
-        bestDist = dist;
-        distKVPairs.push_back(std::move(distKVPairs[0]));
-        distKVPairs[0] = std::make_pair(dist,
-                                        std::make_pair(cur->key, cur->object));
-    } else if (dist < bestDist + diff) {
+template <size_t N, typename ElemType, DistType DT>
+void KDTree<N, ElemType, DT>::
+rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim, const Point<N, DT>& pt,
+                        double diff, std::vector<std::pair<double,
+                        std::pair<Point<N, DT>, ElemType>>> &distKVPairs,
+                        double& bestDist) const {
+    auto dist = Point<N, DT>::dist(cur->key, pt);
+    if (dist < bestDist + diff) {
+        if (dist < bestDist)
+            bestDist = dist;
         distKVPairs.emplace_back(dist, std::make_pair(cur->key, cur->object));
-    }
+    } 
     size_t nextDim = dim + 1 < N ? dim + 1 : 0;
     TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
     if (next)
@@ -514,18 +553,19 @@ std::pair<Point<N>, ElemType>>> &distKVPairs, double& bestDist) const {
     }
 }
 
-template <size_t N, typename ElemType, DistType dType>
-ElemType KDTree<N, ElemType, dType>::NNValue(const Point<N> &pt) const {
+template <size_t N, typename ElemType, DistType DT>
+ElemType KDTree<N, ElemType, DT>::NNValue(const Point<N, DT> &pt) const {
     double bestDist = std::numeric_limits<double>::max();
     ElemType *valuePtr = nullptr;
     NNValueHelper(root, 0, pt, bestDist, valuePtr);
-    return valuePtr == nullptr ? ElemType() : *valuePtr;
+    return valuePtr ? *valuePtr : ElemType();
 }
 
-template <size_t N, typename ElemType, DistType dType>
-void KDTree<N, ElemType, dType>::NNValueHelper(TreeNode *cur, size_t dim,
-            const Point<N> &pt, double &bestDist, ElemType *&bestValue) const {
-    double curDist = distFuncs[static_cast<size_t>(dType)](cur->key, pt);
+template <size_t N, typename ElemType, DistType DT>
+void KDTree<N, ElemType, DT>::
+NNValueHelper(TreeNode *cur, size_t dim, const Point<N, DT> &pt, double &bestDist,
+              ElemType *&bestValue) const {
+    double curDist = Point<N, DT>::dist(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -541,19 +581,19 @@ void KDTree<N, ElemType, dType>::NNValueHelper(TreeNode *cur, size_t dim,
     }
 }
 
-template <size_t N, typename ElemType, DistType dType>
-double KDTree<N, ElemType, dType>::branchMin(const Point<N> &trPt,
-const Point<N> &searchPt, size_t idx) const {
-    switch (dType) {
+template <size_t N, typename ElemType, DistType DT>
+double KDTree<N, ElemType, DT>::branchMin(const Point<N, DT> &trPt,
+const Point<N, DT> &searchPt, size_t idx) const {
+    switch (DT) {
         case DistType::EUC:
         case DistType::MAN:
             return std::fabs(trPt[idx] - searchPt[idx]);
             /*
         case DistType::HAV:
-            Point<N> pt;
+            Point<N, DT> pt;
             pt[idx] = searchPt[idx];
             pt[1-idx] = trPt[1-idx];
-            return Point<N>::havDist(trPt, pt);
+            return Point<N, DT>::havDist(trPt, pt);
              */
     }
 }

@@ -23,60 +23,94 @@ struct SBLoc {
     
     static constexpr double EARTH_RADIUS = 6371;
     
-    SBLoc() : lat(0), lng(0) {}
-    SBLoc(double lat, double lng) : lat(lat), lng(lng) {}
+    SBLoc() = default;
+    SBLoc(double lat, double lng);
     
-    inline bool operator==(const SBLoc &other) const {
-        return other.lng == lng && other.lat == lat;
-    }
+    Point<3, DistType::EUC> locToCart3DPt() const;
     
-    inline bool operator!=(const SBLoc &other) const {
-        return !(*this == other);
-    }
+    bool operator==(const SBLoc &other) const;
     
-    inline static double
-    havDist(double lng1, double lat1, double lng2, double lat2) {
-        double dLat = (lat2-lat1)*M_PI/180;
-        double dLon = (lng2-lng1)*M_PI/180;
-        lat1 = lat1*M_PI/180;
-        lat2 = lat2*M_PI/180;
-        double a = sin(dLat/2) * sin(dLat/2)
-                   + sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2);
-        double c = 2 * atan2(sqrt(a), sqrt(1-a));
-        return EARTH_RADIUS * c;
-    }
+    bool operator!=(const SBLoc &other) const;
     
-    inline static double latFromHavDist(double dist, double lat1) {
-        double c = dist/EARTH_RADIUS;
-        double sum = sin(c/2);
-        double dLat = asin(sum)*2;
-        return dLat*180/M_PI + lat1;
-    }
+    static double toRadians(double degree);
     
-    inline static double lngFromHavDist(double dist, double lng1, double lat) {
-        double c = dist/EARTH_RADIUS;
-        double sum = sin(c/2);
-        double dLng = asin(sum/cos(lat/180*M_PI))*2;
-        return dLng*180/M_PI + lng1;
-    }
+    static double havDist(double lng1, double lat1, double lng2, double lat2);
     
-    inline static Point<3> latLngToCart3DXYZ(double lng, double lat) {
-        Point<3> p;
-        p[0] = cos(lat*M_PI/180)*cos(lng*M_PI/180);
-        p[1] = cos(lat*M_PI/180)*sin(lng*M_PI/180);
-        p[2] = sin(lat*M_PI/180);
-        return p;
-    }
+    static double latFromHavDist(double dist, double lat1);
+    
+    static double lngFromHavDist(double dist, double lng1, double lat);
+    
+    static Point<3, DistType::EUC> latLngToCart3DPt(double lng, double lat);
+    
+    static double xyzDistFromLngLat(double lat1, double lat2, double lngDiff);
 };
+
+inline SBLoc::SBLoc(double lat, double lng) : lat(lat), lng(lng) {}
+
+inline bool SBLoc::operator==(const SBLoc &other) const {
+    if (other.lng == lng && other.lat == lat)
+        return true;
+    return std::fabs(other.lng - lng) < 0.00001 &&
+           std::fabs(other.lat - lat) < 0.00001;
+}
+
+inline bool SBLoc::operator!=(const SBLoc &other) const {
+    return !(*this == other);
+}
+
+inline double SBLoc::toRadians(double degree) {
+    return degree*M_PI/180.0;
+}
+
+inline double SBLoc::havDist(double lng1, double lat1, double lng2, double lat2) {
+    double dLat = (lat2-lat1)*M_PI/180;
+    double dLon = (lng2-lng1)*M_PI/180;
+    lat1 = lat1*M_PI/180;
+    lat2 = lat2*M_PI/180;
+    double a = sin(dLat/2) * sin(dLat/2)
+    + sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2);
+    double c = 2 * atan2(sqrt(a), sqrt(1-a));
+    return EARTH_RADIUS * c;
+}
+
+inline double SBLoc::latFromHavDist(double dist, double lat1) {
+    double c = dist/EARTH_RADIUS;
+    double sum = sin(c/2);
+    double dLat = asin(sum)*2;
+    return dLat*180/M_PI + lat1;
+}
+
+inline double SBLoc::lngFromHavDist(double dist, double lng1, double lat) {
+    double c = dist/EARTH_RADIUS;
+    double sum = sin(c/2);
+    double dLng = asin(sum/cos(lat/180*M_PI))*2;
+    return dLng*180/M_PI + lng1;
+}
+
+inline Point<3, DistType::EUC> SBLoc::locToCart3DPt() const {
+    return latLngToCart3DPt(lng, lat);
+}
+
+inline Point<3, DistType::EUC> SBLoc::latLngToCart3DPt(double lng, double lat) {
+    lng = toRadians(lng);
+    lat = toRadians(lat);
+    return Point<3, DistType::EUC>{cos(lat)*cos(lng), cos(lat)*sin(lng),
+                                   sin(lat)};
+}
+
+inline double SBLoc::xyzDistFromLngLat(double lat1, double lat2, double lngDiff) {
+    lat1 *= M_PI/180.0;
+    lat2 *= M_PI/180.0;
+    return sqrt(-2 * (cos(lat1)*cos(lat2)*cos(lngDiff*M_PI/180.0) +
+                      sin(lat1)*sin(lat2) - 1.0));
+}
 
 namespace std {
     template <>
     struct hash<SBLoc> {
         size_t operator()(const SBLoc& l) const {
-            return (static_cast<long long>(l.lat * 1000000 +
-                   std::numeric_limits<double>::epsilon()) << 20) +
-                   static_cast<long long>(l.lng * 1000000 +
-                   std::numeric_limits<double>::epsilon());
+            return (static_cast<size_t>((l.lat + 90.0) * 1000000) << 20) +
+                   static_cast<size_t>((l.lng + 180.0) * 1000000);
         }
     };
     
@@ -86,8 +120,6 @@ namespace std {
             return std::hash<SBLoc>()(*l);
         }
     };
-    
-
 }
 
 inline std::ostream& operator<<(std::ostream &os, const SBLoc &l) {

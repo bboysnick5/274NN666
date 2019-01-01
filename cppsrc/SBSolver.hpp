@@ -20,7 +20,7 @@ const double DOUBLE_MIN = std::numeric_limits<double>::lowest();
 
 class SBSolver {
 public:
-    inline void build(const std::shared_ptr<std::vector<SBLoc>> &sbData);
+    virtual void build(const std::shared_ptr<std::vector<SBLoc>> &sbData);
     virtual const SBLoc* findNearest(double lng, double lat) const = 0;
 protected:
     std::shared_ptr<std::vector<SBLoc>> sbData;

@@ -39,7 +39,7 @@ void GridSBSolver::constructGrid() {
            std::vector<std::unordered_set<const SBLoc*>>(colSize));
 }
 
-std::pair<int, int> GridSBSolver::getIdx(double lng, double lat) const {
+std::pair<size_t, size_t> GridSBSolver::getIdx(double lng, double lat) const {
     double unsignedRowDistFromCenter = SBLoc::havDist(lng, lat, lng, midLat),
            unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter :
@@ -77,21 +77,21 @@ double lng, double lat, double &minDist, const SBLoc* &best) const {
 
 const SBLoc* GridSBSolver::findNearest(double lng, double lat) const {
     auto idxPr = getIdx(lng, lat);
-    int r0 = idxPr.first, c0 = idxPr.second;
+    size_t r0 = idxPr.first, c0 = idxPr.second;
     double minDist = DOUBLE_MAX;
     const SBLoc* best = nullptr;
     // exact cell check
     NNOneCell(grid[r0][c0], lng, lat, minDist, best);
     
     // Spiral Search
-    for (int d = 1; ; ++d) {
-        for (int r = std::max(0, r0-d); r <= std::min(r0+d, rowSize-1); ++r) {
+    for (size_t d = 1; ; ++d) {
+        for (int r = std::max(0,static_cast<int>(r0-d)); r <= std::min(static_cast<int>(r0+d), static_cast<int>(rowSize)-1); ++r) {
             if (c0-d >= 0)
                 NNOneCell(grid[r][c0-d], lng, lat, minDist, best);
             if (c0+d < colSize)
                 NNOneCell(grid[r][c0+d], lng, lat, minDist, best);
         }
-        for (int c = std::max(0, c0-d+1); c < std::min(c0+d, colSize); c++) {
+        for (int c = std::max(0, static_cast<int>(c0-d+1)); c < std::min(static_cast<int>(c0+d), static_cast<int>(colSize)); c++) {
             if (r0 - d >= 0)
                 NNOneCell(grid[r0-d][c], lng, lat, minDist, best);
             if (r0 + d < rowSize)

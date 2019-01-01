@@ -11,10 +11,11 @@
 
 
 void BKDTSBSolver::build() {
-    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
-    std::transform(sbData->begin(), sbData->end(), std::back_inserter(kdtData),
-        [&](const SBLoc& loc){ return
-        std::make_pair(SBLoc::latLngToCart3DXYZ(loc.lng, loc.lat), &loc);});
+    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData(sbData->size());
+    std::transform(sbData->begin(), sbData->end(), kdtData.begin(),
+                   [&](const SBLoc& l)->std::pair<Point<3, DistType::EUC>, const SBLoc*>{
+                       return {l.locToCart3DPt(), &l};});
     kdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
-    std::cout << "Tree height is " << kdt.height() << std::endl;
+    std::cout << "Tree height is " << kdt.height() << std::endl
+              << "Tree size is " << kdt.size() << std::endl;
 }
