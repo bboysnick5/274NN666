@@ -15,11 +15,13 @@
 
 class KDTSBSolver : public SBSolver {
 public:
-    virtual void build();
-    virtual const SBLoc* findNearest(double lng, double lat) const;
+    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    const SBLoc* findNearest(double lng, double lat) const override;
     
 protected:
-    KDTree<3, const SBLoc*, DistType::EUC> kdt;
+    KDTree<3, const SBLoc*, DistType::EUC> locKdt;
+    
+    virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&);
 };
 
 

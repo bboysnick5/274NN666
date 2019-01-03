@@ -11,25 +11,28 @@
 
 #include <stdio.h>
 #include <vector>
+#include <memory>
 #include <iterator>
-#include "GridSBSolver.hpp"
+#include "BKDTSBSolver.hpp"
 #include "KDTree.hpp"
 
 
-class UniCellBKDTGridSBSolver : public GridSBSolver {
+class UniCellBKDTGridSBSolver : public BKDTSBSolver {
 public:
     UniCellBKDTGridSBSolver(double aveLocPerCell = 1);
-    void build();
-    const SBLoc* findNearest(double lng, double lat) const;
+    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    const SBLoc* findNearest(double lng, double lat) const override;
     
     
 private:
-    std::vector<KDTree<3, const SBLoc*, DistType::EUC>> gridTreeCache;
-    std::vector<const SBLoc*> gridSingleCache;
+    const double AVE_LOC_PER_CELL = 1;
+    
+    std::vector<std::pair<std::unique_ptr<KDTree<3,const SBLoc*,DistType::EUC>>,
+                          const SBLoc*>> gridCache;
     std::vector<std::pair<size_t, double>> thisRowStartIdx;
     double latInc;
     
-    void fillGridCache(const KDTree<3, const SBLoc*, DistType::EUC>&);
+    void fillGridCache(size_t, double);
     double calcSideLenFromAlpc();
 };
 

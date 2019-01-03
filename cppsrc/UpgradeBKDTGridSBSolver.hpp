@@ -19,8 +19,8 @@
 class UpgradeBKDTGridSBSolver : public GridSBSolver {
 public:
     UpgradeBKDTGridSBSolver(double aveLocPerCell = 1);
-    void build();
-    const SBLoc* findNearest(double lng, double lat) const;
+    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    const SBLoc* findNearest(double lng, double lat) const override;
     
     
 private:

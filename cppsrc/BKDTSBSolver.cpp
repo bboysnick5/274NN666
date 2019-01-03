@@ -10,12 +10,17 @@
 #include "BKDTSBSolver.hpp"
 
 
-void BKDTSBSolver::build() {
-    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData(sbData->size());
-    std::transform(sbData->begin(), sbData->end(), kdtData.begin(),
-                   [&](const SBLoc& l)->std::pair<Point<3, DistType::EUC>, const SBLoc*>{
-                       return {l.locToCart3DPt(), &l};});
-    kdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
-    std::cout << "Tree height is " << kdt.height() << std::endl
-              << "Tree size is " << kdt.size() << std::endl;
+void BKDTSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    generateKDT(locData);
+    locKdt.printTreeInfo();
+}
+
+void BKDTSBSolver::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData;
+    kdtData.reserve(locData->size());
+    std::transform(locData->begin(), locData->end(),std::back_inserter(kdtData),
+                   [&](const SBLoc& l)->std::pair<Point<3, DistType::EUC>,
+                   const SBLoc*>{return {l.locToCart3DPt(), &l};});
+    locKdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(),
+                                                    kdtData.end());
 }

@@ -32,7 +32,8 @@ std::vector<SBLoc> generateTestLocs(size_t numTrials) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     std::vector<SBLoc> testLocs;
     std::generate_n(std::back_inserter(testLocs), numTrials,
-                    [&]()->SBLoc{return SBLoc(-90.0 + 180.0*dist(mt), -180.0 + 360.0*dist(mt));});
+                    [&]()->SBLoc{return SBLoc(SBLoc::toRadians(-90.0 + 180.0*dist(mt)),
+                                              SBLoc::toRadians(-180.0 + 360.0*dist(mt)));});
     return testLocs;
 }
 
@@ -66,11 +67,11 @@ bool accuracyTest(const std::vector<SBLoc> &testLocs,
     return error <= 1 + epsilon && error >= 1 - epsilon;
 }
 
-void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &sbData,
+void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &locData,
                SBSolver *solver) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     start = std::chrono::system_clock::now();
-    solver->build(sbData);
+    solver->build(locData);
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsedSeconds = end - start;
     std::cout << typeid(*solver).name() << " Build time: "
@@ -82,6 +83,7 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsedSeconds;
     size_t numTrials = 3;
+    resultLocs.reserve(maxResults);
     do {
         numTrials *= 5;
         start = std::chrono::system_clock::now();
@@ -98,7 +100,8 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
         }
         end = std::chrono::system_clock::now();
         elapsedSeconds = end - start;
-    } while (elapsedSeconds.count()*1000.0 < 8000 && numTrials * 5 < testLocs.size());
+    } while (elapsedSeconds.count()*1000.0 < 8000 &&
+             numTrials * 5 < testLocs.size());
     std::cout << "Time: " << (elapsedSeconds.count()*1000.0)/numTrials
               << " ms per search, " << numTrials << " trials" << std::endl;
 }
@@ -141,8 +144,11 @@ int main(int argc, const char * argv[]) {
         return 0;
     }
     
+    
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<SBLoc> testResults, refResults, testLocs;
+    
+    /*
     std::string line;
     while (std::getline(inRefResults, line)) {
         std::stringstream ss(line);
@@ -153,12 +159,12 @@ int main(int argc, const char * argv[]) {
         std::getline(inRefResults, ref.addr);
         testLocs.push_back(test);
         refResults.push_back(ref);
-    }
+    } */
     auto restTestLocs = generateTestLocs(MAX_TRIALS-testLocs.size());
     testLocs.insert(testLocs.end(), std::make_move_iterator(restTestLocs.begin()),
                     std::make_move_iterator(restTestLocs.end()));
     
-    
+    /*
     SBLoc l;
     l.lat = 90.0;
     l.lng = 180.0;
@@ -168,7 +174,7 @@ int main(int argc, const char * argv[]) {
     l.lat = -90.0; l.lng = 180.0;
     testLocs.insert(testLocs.begin(), l);
     l.lat = 90.0; l.lng = -180.0;
-    testLocs.insert(testLocs.begin(), l);
+    testLocs.insert(testLocs.begin(), l); */
     
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),

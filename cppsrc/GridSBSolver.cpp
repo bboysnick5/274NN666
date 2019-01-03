@@ -11,13 +11,17 @@
 #include <algorithm>
 #include <cmath>
 
+
+const double DOUBLE_MAX = std::numeric_limits<double>::max();
+const double DOUBLE_MIN = std::numeric_limits<double>::lowest();
+
 GridSBSolver::GridSBSolver(double alpc) :
     AVE_LOC_PER_CELL(alpc),
     minLng(DOUBLE_MAX), maxLng(DOUBLE_MIN),
     minLat(DOUBLE_MAX), maxLat(DOUBLE_MIN) {}
 
-void GridSBSolver::findKeyLngLat() {
-    for (const auto &loc : *sbData) {
+void GridSBSolver::findKeyLngLat(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    for (const auto &loc : *locData) {
         minLng = std::min(minLng, loc.lng);
         minLat = std::min(minLat, loc.lat);
         maxLng = std::max(maxLng, loc.lng);
@@ -28,12 +32,12 @@ void GridSBSolver::findKeyLngLat() {
     midLng = (minLng + maxLng)/2; midLat = (minLat + maxLat)/2;
 }
 
-void GridSBSolver::constructGrid() {
-    rowSize = sqrt(sbData->size()) / AVE_LOC_PER_CELL;
+void GridSBSolver::constructGrid(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    rowSize = sqrt(locData->size()) / AVE_LOC_PER_CELL;
     sideLen = SBLoc::havDist(0, minLat, 0, maxLat) / rowSize;
-    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos(minLat/180*M_PI);
-    double longestColDistSpan = 2 * M_PI * lowestLatCircleRadius *
-                                (std::fabs(maxLng - minLng)/360);
+    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos(minLat);
+    double longestColDistSpan = lowestLatCircleRadius *
+                                std::fabs(maxLng - minLng);
     colSize = longestColDistSpan/sideLen + 1;
     grid = std::vector<std::vector<std::unordered_set<const SBLoc*>>>(rowSize,
            std::vector<std::unordered_set<const SBLoc*>>(colSize));
@@ -48,8 +52,8 @@ std::pair<size_t, size_t> GridSBSolver::getIdx(double lng, double lat) const {
                            unsignedColDistFromCenter)/sideLen + colSize/2);
 }
 
-void GridSBSolver::fillGrid() {
-    for (const auto &l : *sbData) {
+void GridSBSolver::fillGrid(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    for (const auto &l : *locData) {
         auto idxPr = getIdx(l.lng, l.lat);
         auto &cell = grid[idxPr.first][idxPr.second];
         numLocs = numLocs - static_cast<int>(cell.erase(&l)) + 1;
@@ -57,10 +61,10 @@ void GridSBSolver::fillGrid() {
     }
 }
 
-void GridSBSolver::build() {
-    findKeyLngLat();
-    constructGrid();
-    fillGrid();
+void GridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    findKeyLngLat(locData);
+    constructGrid(locData);
+    fillGrid(locData);
 }
 
 void GridSBSolver::NNOneCell(const std::unordered_set<const SBLoc*> &cell,

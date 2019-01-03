@@ -29,7 +29,8 @@ BKDTGridSBSolver::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, double diff,
            cellCtrLng = SBLoc::lngFromHavDist(colDistCellCtrGridCtr,
                                               midLng, cellCtrLat);
     return sbKdt.rangeDiffKNNPairs(SBLoc::latLngToCart3DPt(cellCtrLng,
-                                                            cellCtrLat), diff, begin);
+                                                           cellCtrLat),
+                                   diff, begin);
 }
 
 void BKDTGridSBSolver::fillGridCache() {
@@ -71,20 +72,20 @@ double BKDTGridSBSolver::xyzDistFromSideLen() {
 }
  
 
-void BKDTGridSBSolver::build() {
+void BKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData;
-    kdtData.reserve(sbData->size());
-    std::transform(sbData->begin(), sbData->end(), std::back_inserter(kdtData),
+    kdtData.reserve(locData->size());
+    std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
                    [&](const SBLoc& loc){ return
                        std::make_pair(SBLoc::latLngToCart3DPt(loc.lng, loc.lat), &loc);});
     sbKdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
     numLocs = sbKdt.size();
-    findKeyLngLat();
-    rowSize = sqrt(sbData->size()) / AVE_LOC_PER_CELL;
+    findKeyLngLat(locData);
+    rowSize = sqrt(locData->size()) / AVE_LOC_PER_CELL;
     sideLen = SBLoc::havDist(0, minLat, 0, maxLat) / rowSize;
-    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos((minLat < 0 ? 0 : minLat)/180*M_PI);
+    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos(minLat < 0 ? 0 : minLat);
     double longestColDistSpan = 2 * M_PI * lowestLatCircleRadius *
-                                (std::fabs(maxLng - minLng)/360);
+                                (std::fabs(maxLng - minLng)/(2*M_PI));
     colSize = longestColDistSpan/sideLen + 1;
     
     fillGridCache();

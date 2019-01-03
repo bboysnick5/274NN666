@@ -19,16 +19,16 @@
 class GridSBSolver : public SBSolver {
     
 public:
-    virtual void build();
-    virtual const SBLoc* findNearest(double lng, double lat) const;
+    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    const SBLoc* findNearest(double lng, double lat) const override;
     GridSBSolver(double aveLocPerCell = 1);
     
 protected:
-    void findKeyLngLat();
+    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc>>&);
     std::pair<size_t, size_t> getIdx(double lng, double lat) const;
 
-    void constructGrid();
-    void fillGrid();
+    void constructGrid(const std::shared_ptr<std::vector<SBLoc>>&);
+    void fillGrid(const std::shared_ptr<std::vector<SBLoc>>&);
     void NNOneCell(const std::unordered_set<const SBLoc*>&,
                   double, double, double&, const SBLoc*&) const;
     
