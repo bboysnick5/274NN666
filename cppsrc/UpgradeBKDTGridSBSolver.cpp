@@ -15,10 +15,10 @@ UpgradeBKDTGridSBSolver(double alpc) : GridSBSolver(alpc) {}
 
 
 void UpgradeBKDTGridSBSolver::fillGridCache() {
-    gridTreeCache = std::vector<KDTree<3, const SBLoc*, DistType::EUC>>
+    gridTreeCache = std::vector<KDTree<3, const SBLoc*, Point<3>::DistType::EUC>>
     (rowSize*colSize);
     gridSingleCache = std::vector<const SBLoc*>(rowSize*colSize);
-    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> ptLocPairs(numLocs);
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
     size_t totalTreeSize = 0, singleLocs = 0;
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -34,7 +34,7 @@ void UpgradeBKDTGridSBSolver::fillGridCache() {
                            ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
-                gridTreeCache[idx] = KDTree<3, const SBLoc*, DistType::EUC>
+                gridTreeCache[idx] = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>
                 (ptLocPairs.begin(), locsEnd);
             } else {
                 gridSingleCache[idx] = ptLocPairs[0].second;
@@ -57,12 +57,12 @@ double UpgradeBKDTGridSBSolver::calcLatIncFromAlpc() {
 }
 
 void UpgradeBKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData;
+    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
                    [&](const SBLoc& loc){ return
                        std::make_pair(SBLoc::latLngToCart3DPt(loc.lng, loc.lat), &loc);});
-    sbKdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(), kdtData.end());
+    sbKdt = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>(kdtData.begin(), kdtData.end());
     numLocs = sbKdt.size();
     latInc = calcLatIncFromAlpc();
     rowSize = std::ceil(180.0/(latInc -

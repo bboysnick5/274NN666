@@ -24,9 +24,10 @@ struct SBLoc {
     static constexpr double EARTH_RADIUS = 6371;
     
     SBLoc() = default;
+    SBLoc(const Point<3>&);
     SBLoc(double lat, double lng);
     
-    Point<3, DistType::EUC> locToCart3DPt() const;
+    Point<3> locToCart3DPt() const;
     
     bool operator==(const SBLoc &other) const;
     
@@ -42,12 +43,15 @@ struct SBLoc {
     
     static double lngFromHavDist(double dist, double lng1, double lat);
     
-    static Point<3, DistType::EUC> latLngToCart3DPt(double lng, double lat);
+    static Point<3> latLngToCart3DPt(double lng, double lat);
     
     static double xyzDistFromLngLat(double lat1, double lat2, double lngDiff);
 };
 
-inline SBLoc::SBLoc(double lat, double lng) : lat(lat), lng(lng) {}
+inline SBLoc::SBLoc(double lat, double lng) : lat(lat), lng(lng), city(""), addr("") {}
+
+inline SBLoc::SBLoc(const Point<3> &pt) : lat(asin(pt[2])), lng(asin(pt[1]/cos(asin(pt[2])))), city(""), addr("") {}
+
 
 inline bool SBLoc::operator==(const SBLoc &other) const {
     if (other.lng == lng && other.lat == lat)
@@ -89,13 +93,12 @@ inline double SBLoc::lngFromHavDist(double dist, double lng1, double lat) {
     return dLng + lng1;
 }
 
-inline Point<3, DistType::EUC> SBLoc::locToCart3DPt() const {
+inline Point<3> SBLoc::locToCart3DPt() const {
     return latLngToCart3DPt(lng, lat);
 }
 
-inline Point<3, DistType::EUC> SBLoc::latLngToCart3DPt(double lng, double lat) {
-    return Point<3, DistType::EUC>{cos(lat)*cos(lng), cos(lat)*sin(lng),
-                                   sin(lat)};
+inline Point<3> SBLoc::latLngToCart3DPt(double lng, double lat) {
+    return Point<3>{cos(lat)*cos(lng), cos(lat)*sin(lng), sin(lat)};
 }
 
 inline double SBLoc::xyzDistFromLngLat(double lat1, double lat2, double lngDiff) {
@@ -108,7 +111,7 @@ namespace std {
     struct hash<SBLoc> {
         size_t operator()(const SBLoc& l) const {
             return (static_cast<size_t>((l.lat + 0.5*M_PI) * 1000000) << 20) +
-                   static_cast<size_t>((l.lng + M_PI) * 1000000);
+                    static_cast<size_t>((l.lng + M_PI) * 1000000);
         }
     };
     

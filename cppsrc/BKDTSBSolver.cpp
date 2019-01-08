@@ -16,11 +16,11 @@ void BKDTSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
 }
 
 void BKDTSBSolver::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> kdtData;
+    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->begin(), locData->end(),std::back_inserter(kdtData),
-                   [&](const SBLoc& l)->std::pair<Point<3, DistType::EUC>,
+                   [&](const SBLoc& l)->std::pair<Point<3>,
                    const SBLoc*>{return {l.locToCart3DPt(), &l};});
-    locKdt = KDTree<3, const SBLoc*, DistType::EUC>(kdtData.begin(),
-                                                    kdtData.end());
+    locKdt = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>(kdtData.begin(),
+                                                              kdtData.end());
 }

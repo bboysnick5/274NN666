@@ -19,7 +19,7 @@ public:
     const SBLoc* findNearest(double lng, double lat) const override;
     
 protected:
-    KDTree<3, const SBLoc*, DistType::EUC> locKdt;
+    KDTree<3, const SBLoc*, Point<3>::DistType::EUC> locKdt;
     
     virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&);
 };

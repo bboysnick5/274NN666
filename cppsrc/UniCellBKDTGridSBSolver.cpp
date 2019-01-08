@@ -17,7 +17,7 @@ UniCellBKDTGridSBSolver(double alpc) : BKDTSBSolver(), AVE_LOC_PER_CELL(alpc) {}
 void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
     gridCache.reserve(locKdt.size()*1.2/AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(rowSize);
-    std::vector<std::pair<Point<3, DistType::EUC>, const SBLoc*>> ptLocPairs(locKdt.size());
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(locKdt.size());
     size_t totalTreeSize = 0, singleLocs = 0;
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -35,21 +35,26 @@ void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
                thisCtrLng = 0.5 * thisLngInc - M_PI;
         thisRowStartIdx.emplace_back(idx, thisLngInc);
         for (; idx < thisEndIdx; ++idx, thisCtrLng += thisLngInc) {
-            auto locsEnd = locKdt.rangeDiffKNNPairs(SBLoc::latLngToCart3DPt(thisCtrLng, thisCtrLat),
-                                                    thisDiff, ptLocPairs.begin());
+            auto locsEnd = locKdt.rangeDiffKNNPairs
+                           (SBLoc::latLngToCart3DPt(thisCtrLng, thisCtrLat),
+                           thisDiff, ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
-                gridCache.emplace_back(new KDTree<3, const SBLoc*,
-                    DistType::EUC>(ptLocPairs.begin(), locsEnd), nullptr);
+                gridCache.emplace_back(KDTree<3, const SBLoc*,
+                Point<3>::DistType::EUC>(ptLocPairs.begin(), locsEnd), nullptr);
             } else {
-                gridCache.emplace_back(nullptr, ptLocPairs[0].second);
+                gridCache.emplace_back(KDTree<3, const SBLoc*,
+                                       Point<3>::DistType::EUC>(),
+                                       ptLocPairs[0].second);
                 singleLocs++;
             }
             totalTreeSize += locsSize;
         }
     }
-    std::cout << "Total tree size: " << totalTreeSize
+    std::cout << "Total tree nodes: " << totalTreeSize
               << "\nAve tree size: " << totalTreeSize/gridCache.size()
+              << "\nAve tree height: "
+              << static_cast<size_t>(log2(totalTreeSize/gridCache.size()+1)) + 1
               << "\nRatio of tree nodes over num locs: "
               << totalTreeSize/locKdt.size()
               << "\nSingle loc cells: " << singleLocs << "\nMulti-loc cells:"
@@ -76,7 +81,7 @@ findNearest(double lng, double lat) const {
     auto[startIdx, thisLngInc] = thisRowStartIdx[(lat+0.5*M_PI)/latInc];
     size_t idx = startIdx + static_cast<size_t>((lng+M_PI)/thisLngInc);
     return gridCache[idx].second ? gridCache[idx].second :
-           gridCache[idx].first->kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
+           gridCache[idx].first.kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
 }
 
 

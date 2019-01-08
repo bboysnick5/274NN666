@@ -24,10 +24,10 @@ public:
     
     
 private:
-    std::vector<KDTree<3, const SBLoc*, DistType::EUC>> gridTreeCache;
+    std::vector<KDTree<3, const SBLoc*,Point<3>::DistType::EUC>> gridTreeCache;
     std::vector<const SBLoc*> gridSingleCache;
     double latInc, lngInc;
-    KDTree<3, const SBLoc*, DistType::EUC> sbKdt;
+    KDTree<3, const SBLoc*, Point<3>::DistType::EUC> sbKdt;
     
     void fillGridCache();
     double calcLatIncFromAlpc();

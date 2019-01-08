@@ -41,8 +41,8 @@ bool accuracyTest(const std::vector<SBLoc> &testLocs,
                   const std::vector<SBLoc> &testResults,
                   const std::vector<SBLoc> &refResults) {
     double testTotal = 0.0, refTotal = 0.0;
-    size_t errorCount = 0;
-    for (size_t i=0; i < refResults.size(); i++){
+    size_t errorCount = 0, maxTests = std::min(testResults.size(), refResults.size());
+    for (size_t i=0; i < maxTests; i++){
         const auto &testLoc = testLocs[i], &refResult = refResults[i],
                    &testResult = testResults[i];
         double refDist = SBLoc::havDist(refResult.lng, refResult.lat, testLoc.lng, testLoc.lat);
@@ -59,9 +59,9 @@ bool accuracyTest(const std::vector<SBLoc> &testLocs,
     }
     
     double error = testTotal/refTotal;
-    std::cout << "A total test of " << refResults.size() << " locations\n"
+    std::cout << "A total test of " << maxTests << " locations\n"
               << "Error percentage in num diff is: "
-              << (double)errorCount*100/refResults.size() << "%\n"
+              << (double)errorCount*100/maxTests << "%\n"
               << "Error percentage in hav dist is: " << 100.0*(error-1.0) << "%\n";
     double epsilon = 0.2;
     return error <= 1 + epsilon && error >= 1 - epsilon;
@@ -100,7 +100,7 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
         }
         end = std::chrono::system_clock::now();
         elapsedSeconds = end - start;
-    } while (elapsedSeconds.count()*1000.0 < 8000 &&
+    } while (elapsedSeconds.count()*1000.0 < 4000 &&
              numTrials * 5 < testLocs.size());
     std::cout << "Time: " << (elapsedSeconds.count()*1000.0)/numTrials
               << " ms per search, " << numTrials << " trials" << std::endl;
@@ -136,6 +136,26 @@ int main(int argc, const char * argv[]) {
                   std::unique(locData->rbegin(), locData->rend()).base());
     std::random_shuffle(locData->begin(), locData->end());
     
+    
+    /*
+    
+    auto bfSolver = std::make_shared<BFSBSolver>();
+    timeBuild(locData, bfSolver.get());
+    auto refResult = bfSolver->findNearest(SBLoc::toRadians(-100.603), SBLoc::toRadians(56.6682));
+    auto bkdtSolver = std::make_shared<BKDTSBSolver>();
+    timeBuild(locData, bkdtSolver.get());
+    for (int i = 0; i < 1; ++i) {
+    auto result = bkdtSolver->findNearest(SBLoc::toRadians(-100.603), SBLoc::toRadians(56.6682));
+    std::cout << "Result: " << *result << std::endl
+              << "Ref result: " << *refResult << std::endl;
+    }
+    return 0;
+    
+    */
+    
+    
+    
+    
     if (numOfLocsToWriteToFile) {
         //auto bfSolver = std::make_shared<BFSBSolver>();
         auto bfSolver = std::make_shared<BKDTSBSolver>();
@@ -161,20 +181,10 @@ int main(int argc, const char * argv[]) {
         refResults.push_back(ref);
     } */
     auto restTestLocs = generateTestLocs(MAX_TRIALS-testLocs.size());
+    testLocs.insert(testLocs.begin(),{SBLoc(M_PI/2, M_PI),SBLoc(-M_PI/2, -M_PI),
+        SBLoc(-M_PI/2, M_PI), SBLoc(M_PI/2, -M_PI)});
     testLocs.insert(testLocs.end(), std::make_move_iterator(restTestLocs.begin()),
                     std::make_move_iterator(restTestLocs.end()));
-    
-    /*
-    SBLoc l;
-    l.lat = 90.0;
-    l.lng = 180.0;
-    testLocs.insert(testLocs.begin(), l);
-    l.lat = -90.0; l.lng = -180.0;
-    testLocs.insert(testLocs.begin(), l);
-    l.lat = -90.0; l.lng = 180.0;
-    testLocs.insert(testLocs.begin(), l);
-    l.lat = 90.0; l.lng = -180.0;
-    testLocs.insert(testLocs.begin(), l); */
     
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),
@@ -191,9 +201,10 @@ int main(int argc, const char * argv[]) {
     refResults.clear();
     
     
-    
+    std::for_each(solvers.begin(), solvers.end(),
+                  [&](const auto &solver){timeBuild(locData, solver.get());});
     for (size_t i = 0; i < solvers.size(); ++i) {
-        timeBuild(locData, solvers[i].get());
+        //timeBuild(locData, solvers[i].get());
         timeNN(solvers[i].get(), testLocs, testResults,
                refResults.size() == 0 ? MAX_TRIALS : refResults.size());
         if (i == 0) {

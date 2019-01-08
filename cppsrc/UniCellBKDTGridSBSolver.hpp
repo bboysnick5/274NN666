@@ -27,7 +27,7 @@ public:
 private:
     const double AVE_LOC_PER_CELL = 1;
     
-    std::vector<std::pair<std::unique_ptr<KDTree<3,const SBLoc*,DistType::EUC>>,
+    std::vector<std::pair<KDTree<3,const SBLoc*, Point<3>::DistType::EUC>,
                           const SBLoc*>> gridCache;
     std::vector<std::pair<size_t, double>> thisRowStartIdx;
     double latInc;

@@ -13,15 +13,16 @@
 #include <stdlib.h>
 //#include <initializer_list>
 
-enum class DistType {
-    EUC = 0,
-    MAN,
-    HAV
-};
-
-template <size_t N, DistType DT>
+template <size_t N>
 class Point {
 public:
+    
+    enum class DistType {
+        EUC = 0,
+        EUCSQ,
+        MAN,
+        HAV
+    };
     
     template <typename... T>
     Point(T... ts) : coords{ts...} {}
@@ -52,11 +53,12 @@ public:
     double operator[](size_t index) const;
     
     
-    // static double eulDist(const Point<N, DT>& one, const Point<N, DT>& two);
+    // static double eulDist(const Point<N>& one, const Point<N>& two);
     // Usage: double d = Distance(one, two);
     // ----------------------------------------------------------------------------
     // Returns the Euclidean distance between two points.
-    static double dist(const Point<N, DT>& pt1, const Point<N, DT>& pt2);
+    template <DistType>
+    static double dist(const Point<N>& pt1, const Point<N>& pt2);
     
     // iterator begin();
     // iterator end();
@@ -75,68 +77,72 @@ private:
     // The point's actual coordinates are stored in an array.
     double coords[N];
     
-    static double eucDist(const Point<N, DT>& pt1, const Point<N, DT>& pt2);
-    static double havDist(const Point<N, DT>& pt1, const Point<N, DT>& pt2);
-    static double manDist(const Point<N, DT>& pt1, const Point<N, DT>& pt2);
+    static double eucDist(const Point<N>& pt1, const Point<N>& pt2);
+    static double eucSqDist(const Point<N>& pt1, const Point<N>& pt2);
+    static double havDist(const Point<N>& pt1, const Point<N>& pt2);
+    static double manDist(const Point<N>& pt1, const Point<N>& pt2);
 
 };
 
 
-// bool operator==(const Point<N, DT>& one, const Point<N, DT>& two);
-// bool operator!=(const Point<N, DT>& one, const Point<N, DT>& two);
+// bool operator==(const Point<N>& one, const Point<N>& two);
+// bool operator!=(const Point<N>& one, const Point<N>& two);
 // Usage: if (one == two)
 // ----------------------------------------------------------------------------
 // Returns whether two points are equal or not equal.
-template <size_t N, DistType DT>
-bool operator==(const Point<N, DT>& one, const Point<N, DT>& two);
+template <size_t N>
+bool operator==(const Point<N>& one, const Point<N>& two);
 
-template <size_t N, DistType DT>
-bool operator!=(const Point<N, DT>& one, const Point<N, DT>& two);
+template <size_t N>
+bool operator!=(const Point<N>& one, const Point<N>& two);
 
 /** Point class implementation details */
 
 #include <algorithm>
 
-template <size_t N, DistType DT>
-size_t Point<N, DT>::size() const {
+template <size_t N>
+size_t Point<N>::size() const {
     return N;
 }
 
-template <size_t N, DistType DT>
-double& Point<N, DT>::operator[] (size_t index) {
-    return coords[index];
+template <size_t N>
+double& Point<N>::operator[] (size_t index) {
+    return *(coords + index);
 }
 
-template <size_t N, DistType DT>
-double Point<N, DT>::operator[] (size_t index) const {
-    return coords[index];
+template <size_t N>
+double Point<N>::operator[] (size_t index) const {
+    return *(coords + index);
 }
 
-template <size_t N, DistType DT>
-typename Point<N, DT>::iterator Point<N, DT>::begin() {
+template <size_t N>
+typename Point<N>::iterator Point<N>::begin() {
     return coords;
 }
 
-template <size_t N, DistType DT>
-typename Point<N, DT>::const_iterator Point<N, DT>::begin() const {
+template <size_t N>
+typename Point<N>::const_iterator Point<N>::begin() const {
     return coords;
 }
 
-template <size_t N, DistType DT>
-typename Point<N, DT>::iterator Point<N, DT>::end() {
+template <size_t N>
+typename Point<N>::iterator Point<N>::end() {
     return begin() + size();
 }
 
-template <size_t N, DistType DT>
-typename Point<N, DT>::const_iterator Point<N, DT>::end() const {
+template <size_t N>
+typename Point<N>::const_iterator Point<N>::end() const {
     return begin() + size();
 }
 
-template <size_t N, DistType DT>
-double Point<N, DT>::dist(const Point<N, DT>& one, const Point<N, DT>& two) {
+template <size_t N>
+template <typename Point<N>::DistType DT>
+double Point<N>::dist(const Point<N>& one, const Point<N>& two) {
     switch (DT) {
         case DistType::EUC:
             return eucDist(one, two);
+        case DistType::EUCSQ:
+            return eucSqDist(one, two);
         case DistType::MAN:
             return manDist(one, two);
         case DistType::HAV:
@@ -144,18 +150,24 @@ double Point<N, DT>::dist(const Point<N, DT>& one, const Point<N, DT>& two) {
     }
 }
 
-template <size_t N, DistType DT>
-double Point<N, DT>::eucDist(const Point<N, DT>& one, const Point<N, DT>& two) {
-    double diff = one[0] - two[0], result = diff*diff;
-    for (size_t i = 1; i < N; ++i) {
-        diff = one[i] - two[i];
-        result += diff*diff;
-    }
-    return sqrt(result);
+template <size_t N>
+double Point<N>::eucDist(const Point<N>& one, const Point<N>& two) {
+    return sqrt(eucSqDist(one, two));
 }
 
-template <size_t N, DistType DT>
-double Point<N, DT>::havDist(const Point<N, DT>& one, const Point<N, DT>& two) {
+template <size_t N>
+double Point<N>::eucSqDist(const Point<N>& one, const Point<N>& two) {
+    double diff = *one.coords - *two.coords, result = diff*diff;
+    for (size_t i = 1; i < N; ++i) {
+        diff = *(one.coords+i) - *(two.coords+i);
+        result += diff*diff;
+    }
+    return result;
+}
+
+
+template <size_t N>
+double Point<N>::havDist(const Point<N>& one, const Point<N>& two) {
     constexpr static double EARTH_RADIUS = 6371;
     double dLat = (one[1]-two[1])*M_PI/180;
     double dLon = (one[0]-two[0])*M_PI/180;
@@ -167,8 +179,8 @@ double Point<N, DT>::havDist(const Point<N, DT>& one, const Point<N, DT>& two) {
     return EARTH_RADIUS * c;
 }
 
-template <size_t N, DistType DT>
-double Point<N, DT>::manDist(const Point<N, DT>& one, const Point<N, DT>& two) {
+template <size_t N>
+double Point<N>::manDist(const Point<N>& one, const Point<N>& two) {
     double result = std::fabs(one[0] - two[0]);
     for (size_t i = 1; i < N; ++i)
         result += std::fabs(one[i] - two[i]);
@@ -177,13 +189,13 @@ double Point<N, DT>::manDist(const Point<N, DT>& one, const Point<N, DT>& two) {
 
 // Equality is implemented using the equal algorithm, which takes in two ranges
 // and reports whether they contain equal values.
-template <size_t N, DistType DT>
-bool operator==(const Point<N, DT>& one, const Point<N, DT>& two) {
+template <size_t N>
+bool operator==(const Point<N>& one, const Point<N>& two) {
     return std::equal(one.begin(), one.end(), two.begin());
 }
 
-template <size_t N, DistType DT>
-bool operator!=(const Point<N, DT>& one, const Point<N, DT>& two) {
+template <size_t N>
+bool operator!=(const Point<N>& one, const Point<N>& two) {
     return !(one == two);
 }
 
