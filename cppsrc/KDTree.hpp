@@ -171,8 +171,121 @@ private:
         }
     };
     
+    
+    class PooledAllocator {
+        /* We maintain memory alignment to word boundaries by requiring that all
+         allocations be in multiples of the machine wordsize.  */
+        /* Size of machine word in bytes.  Must be power of 2. */
+        /* Minimum number of bytes requested at a time from the system.  Must be
+         * multiple of WORDSIZE. */
+        
+        constexpr static size_t WORDSIZE = 16;
+        constexpr static size_t BLOCKSIZE = 8192;
+        
+        size_t remaining; /* Number of bytes left in current block of storage. */
+        void *base;       /* Pointer to base of current block of storage. */
+        void *loc;        /* Current location in block to next allocate memory. */
+        
+        void internal_init() {
+            remaining = 0;
+            base = nullptr;
+            usedMemory = 0;
+            wastedMemory = 0;
+        }
+        
+    public:
+        size_t usedMemory;
+        size_t wastedMemory;
+        
+        /**
+         Default constructor. Initializes a new pool.
+         */
+        PooledAllocator() { internal_init(); }
+        
+        /**
+         * Destructor. Frees all the memory allocated in this pool.
+         */
+        ~PooledAllocator() { free_all(); }
+        
+        /** Frees all allocated memory chunks */
+        void free_all() {
+            while (base) {
+                void *prev =
+                *(static_cast<void **>(base)); /* Get pointer to prev block. */
+                ::free(base);
+                base = prev;
+            }
+            internal_init();
+        }
+        
+        /**
+         * Returns a pointer to a piece of new memory of the given size in bytes
+         * allocated from the pool.
+         */
+        void *malloc(const size_t req_size) {
+            /* Round size up to a multiple of wordsize.  The following expression
+             only works for WORDSIZE that is a power of 2, by masking last bits of
+             incremented size to zero.
+             */
+            const size_t size = (req_size + (WORDSIZE - 1)) & ~(WORDSIZE - 1);
+            
+            /* Check whether a new block must be allocated.  Note that the first word
+             of a block is reserved for a pointer to the previous block.
+             */
+            if (size > remaining) {
+                
+                wastedMemory += remaining;
+                
+                /* Allocate new storage. */
+                const size_t blocksize =
+                (size + sizeof(void *) + (WORDSIZE - 1) > BLOCKSIZE)
+                ? size + sizeof(void *) + (WORDSIZE - 1)
+                : BLOCKSIZE;
+                
+                // use the standard C malloc to allocate memory
+                void *m = ::malloc(blocksize);
+                if (!m) {
+                    fprintf(stderr, "Failed to allocate memory.\n");
+                    return nullptr;
+                }
+                
+                /* Fill first word of new block with pointer to previous block. */
+                static_cast<void **>(m)[0] = base;
+                base = m;
+                
+                size_t shift = 0;
+                // int size_t = (WORDSIZE - ( (((size_t)m) + sizeof(void*)) &
+                // (WORDSIZE-1))) & (WORDSIZE-1);
+                
+                remaining = blocksize - sizeof(void *) - shift;
+                loc = (static_cast<char *>(m) + sizeof(void *) + shift);
+            }
+            void *rloc = loc;
+            loc = static_cast<char *>(loc) + size;
+            remaining -= size;
+            
+            usedMemory += size;
+            
+            return rloc;
+        }
+        
+        /**
+         * Allocates (using this pool) a generic type T.
+         *
+         * Params:
+         *     count = number of instances to allocate.
+         * Returns: pointer (of type T*) to memory buffer
+         */
+        template <typename T> T *allocate(const size_t count = 1) {
+            return static_cast<T *>(this->malloc(sizeof(T) * count));
+        }
+    };
+
+    
+    
     TreeNode *root;
     size_t treeSize;
+    PooledAllocator al;
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
@@ -188,9 +301,9 @@ private:
     void kNNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
                         BoundedPQueue<ElemType> &bpq) const;
     
-    void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N>&, double,
-                                 std::vector<std::pair<double,
-                                 std::pair<Point<N>, ElemType>>>&, double&, double&) const;
+    //void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N>&, double,
+     //                            std::vector<std::pair<double,
+        //                         std::pair<Point<N>, ElemType>>>&, double&, double&) const;
     
     // ----------------------------------------------------
     // Identical to kNNValue method with k equals 1. NNValue
@@ -590,12 +703,14 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
     bool hasNext = true;
     
     
-    struct actRecord {
+    
+    struct ActRecord {
+        double curDist;
         TreeNode *cur;
         size_t dim;
-        double curDist;
     };
-    actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
+    ActRecord st[static_cast<size_t>(log2(treeSize+1))],
+    *it = st;
     while (it != st || hasNext) {
         if (!hasNext) {
             const auto &ar = *--it;
@@ -605,7 +720,7 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
             hasNext = true;
         }
         curDistSq = Point<N>::template
-        dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+                    dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
@@ -618,15 +733,13 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
         curDistSq *= curDistSq;
         dim = dim == N - 1 ? 0 : dim + 1;
         if (next) {
-            *it++ = {next == cur->left ? cur->right : cur->left, dim, curDistSq};
+            *it++ = {curDistSq, next == cur->left ? cur->right : cur->left, dim};
             cur = next;
-            //dim = nextDim;
         } else {
             if (curDistSq < bestDistDiffSq) {
                 next = next == cur->left ? cur->right : cur->left;
                 if (next) {
                     cur = next;
-                    //dim = nextDim;
                     continue;
                 }
             }
@@ -634,18 +747,15 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
         }
     }
     
-    
-    
-    for (const auto &p : distKVPairs) {
-        if (p.first < bestDistDiffSq) {
-            const auto &pSec = p.second;
-            *returnIt++ = {*pSec.first, *pSec.second};
-        }
+    for (const auto& [dist, kvPairs] : distKVPairs) {
+        if (dist < bestDistDiffSq)
+            *returnIt++ = {*kvPairs.first, *kvPairs.second};
     }
     return returnIt;
     
 }
 
+/*
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 void KDTree<N, ElemType, DT>::
 rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim, const Point<N>& pt,
@@ -670,7 +780,7 @@ rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim, const Point<N>& pt,
         if (next)
             rangeDiffKNNPairsHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
     }
-}
+}*/
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 ElemType KDTree<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
@@ -683,9 +793,9 @@ ElemType KDTree<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     bool hasNext = true;
     
     struct actRecord {
+        double curDist;
         TreeNode *cur;
         size_t dim;
-        double curDist;
     };
     actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
     while (it != st || hasNext) {
@@ -707,7 +817,7 @@ ElemType KDTree<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
         next = diff < 0.0 ? cur->left : cur->right;
         curDist = diff*diff;
         if (next) {
-            *it++ = {next == cur->left ? cur->right : cur->left, nextDim, curDist};
+            *it++ = {curDist, next == cur->left ? cur->right : cur->left, nextDim};
             cur = next;
             dim = nextDim;
         } else {

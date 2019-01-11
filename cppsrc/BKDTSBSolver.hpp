@@ -15,6 +15,7 @@
 class BKDTSBSolver : public KDTSBSolver {
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    virtual ~BKDTSBSolver() {}
     
 protected:
     void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&) override;

@@ -22,16 +22,16 @@ void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
     //reduction(+:totalTreeSize, singleLocs) collapse(2)
-    double thisLat = -0.5*M_PI, thisCtrLat = thisLat + 0.5*latInc;
+    double thisLat = -0.5 * M_PI, thisCtrLat = thisLat + 0.5 * latInc;
     for (size_t r = 0, idx = 0; r < rowSize;
          ++r, thisCtrLat += latInc, thisLat += latInc) {
         size_t thisColSize = static_cast<size_t>(2*M_PI * SBLoc::EARTH_RADIUS *
-                             cos(thisLat>0?thisLat-latInc:thisLat)/sideLen) + 1,
+                             cos(thisLat>0?thisLat-latInc:thisLat)/sideLen) + 2,
                thisEndIdx = idx + thisColSize;
         double thisLngInc = 2*M_PI/thisColSize +
-                            2*M_PI/(thisColSize*thisColSize*0xFF),
+                            2*M_PI/(thisColSize*thisColSize*0xFFFF),
                thisDiff = SBLoc::xyzDistFromLngLat(r*latInc - 0.5*M_PI,
-                          (r+1) * latInc - 0.5*M_PI, thisLngInc),
+                          (r+1)*latInc - 0.5*M_PI, thisLngInc),
                thisCtrLng = 0.5 * thisLngInc - M_PI;
         thisRowStartIdx.emplace_back(idx, thisLngInc);
         for (; idx < thisEndIdx; ++idx, thisCtrLng += thisLngInc) {
@@ -72,16 +72,17 @@ build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     BKDTSBSolver::generateKDT(locData);
     double sideLen = calcSideLenFromAlpc();
     latInc = std::fabs(SBLoc::latFromHavDist(sideLen, 0));
-    size_t rowSize = std::ceil(M_PI/(latInc - latInc*latInc/(M_PI*0xFF)));
+    size_t rowSize = std::ceil(M_PI/(latInc - latInc*latInc/(M_PI*0xFFFF)));
     fillGridCache(rowSize, sideLen);
 }
 
 const SBLoc* UniCellBKDTGridSBSolver::
 findNearest(double lng, double lat) const {
     auto[startIdx, thisLngInc] = thisRowStartIdx[(lat+0.5*M_PI)/latInc];
-    size_t idx = startIdx + static_cast<size_t>((lng+M_PI)/thisLngInc);
-    return gridCache[idx].second ? gridCache[idx].second :
-           gridCache[idx].first.kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
+    const auto& [cacheTree, singleLoc] =
+        gridCache[startIdx + static_cast<size_t>((lng+M_PI)/thisLngInc)];
+    return singleLoc ? singleLoc :
+           cacheTree.kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
 }
 
 

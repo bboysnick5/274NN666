@@ -26,33 +26,40 @@
 #include "UniCellBKDTGridSBSolver.hpp"
 
 
-std::vector<SBLoc> generateTestLocs(size_t numTrials) {
+std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials) {
     std::random_device rd;
     std::mt19937 mt(rd());
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    std::vector<SBLoc> testLocs;
+    std::vector<std::pair<double, double>> testLocs;
+    testLocs.reserve(numTrials+4);
+    testLocs.insert(testLocs.begin(),{{M_PI/2, M_PI},{-M_PI/2, -M_PI},
+        {-M_PI/2, M_PI}, {M_PI/2, -M_PI}});
+    
     std::generate_n(std::back_inserter(testLocs), numTrials,
-                    [&]()->SBLoc{return SBLoc(SBLoc::toRadians(-90.0 + 180.0*dist(mt)),
-                                              SBLoc::toRadians(-180.0 + 360.0*dist(mt)));});
+                    [&]()->std::pair<double, double>{
+                        return {SBLoc::toRadians(-90.0 + 180.0*dist(mt)),
+                                SBLoc::toRadians(-180.0 + 360.0*dist(mt))};});
     return testLocs;
 }
 
-bool accuracyTest(const std::vector<SBLoc> &testLocs,
-                  const std::vector<SBLoc> &testResults,
-                  const std::vector<SBLoc> &refResults) {
+bool accuracyTest(const std::vector<std::pair<double, double>> &testLocs,
+                  const std::vector<const SBLoc*> &testResults,
+                  const std::vector<const SBLoc*> &refResults) {
     double testTotal = 0.0, refTotal = 0.0;
     size_t errorCount = 0, maxTests = std::min(testResults.size(), refResults.size());
-    for (size_t i=0; i < maxTests; i++){
-        const auto &testLoc = testLocs[i], &refResult = refResults[i],
+    for (size_t i = 0; i < maxTests; ++i) {
+        const auto &refResult = refResults[i],
                    &testResult = testResults[i];
-        double refDist = SBLoc::havDist(refResult.lng, refResult.lat, testLoc.lng, testLoc.lat);
+        const auto[testLat, testLng] = testLocs[i];
+        double refDist = SBLoc::havDist(refResult->lng, refResult->lat, testLng, testLat);
         refTotal += refDist;
         if (testResult != refResult) {
             errorCount++;
-            std::cout << "Test Point: " << testLoc << std::endl
-                      << "Return point: " << testResult << "Ref point: " << refResult
-                      << std::endl;
-            testTotal += SBLoc::havDist(testResult.lng, testResult.lat, testLoc.lng, testLoc.lat);
+            std::cout << "Test Point lat: " << SBLoc::toDegree(testLat)
+                      << ", lng: " << SBLoc::toDegree(testLng)
+                      << "\nReturn point: " << *testResult
+                      << "Ref point: " << *refResult << "\n";
+            testTotal += SBLoc::havDist(testResult->lng, testResult->lat, testLng, testLat);
         } else {
             testTotal += refDist;
         }
@@ -75,11 +82,11 @@ void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &locData,
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsedSeconds = end - start;
     std::cout << typeid(*solver).name() << " Build time: "
-        << elapsedSeconds.count() << std::endl;
+              << elapsedSeconds.count() << "\n";
 }
 
-void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
-           std::vector<SBLoc> &resultLocs, size_t maxResults) {
+void timeNN(SBSolver *solver, const std::vector<std::pair<double, double>> &testLocs,
+            std::vector<const SBLoc*> &resultLocs, size_t maxResults) {
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<double> elapsedSeconds;
     size_t numTrials = 3;
@@ -90,42 +97,64 @@ void timeNN(SBSolver *solver, const std::vector<SBLoc> &testLocs,
         if (resultLocs.size() < maxResults) {
             std::transform(testLocs.begin() + resultLocs.size(),
                            testLocs.begin() + resultLocs.size() + numTrials,
-                           std::back_inserter(resultLocs), [&](const SBLoc &l){
-                               return *solver->findNearest(l.lng, l.lat);});
+                           std::back_inserter(resultLocs), [&](const auto &p){
+                               return solver->findNearest(p.second, p.first);});
         } else {
             std::for_each(testLocs.begin() + maxResults,
                           testLocs.begin() + maxResults + numTrials,
-                          [&](const SBLoc &l){                       
-                              solver->findNearest(l.lng, l.lat);});
+                          [&](const auto &p){
+                              solver->findNearest(p.second, p.first);});
         }
         end = std::chrono::system_clock::now();
         elapsedSeconds = end - start;
     } while (elapsedSeconds.count()*1000.0 < 4000 &&
              numTrials * 5 < testLocs.size());
+    resultLocs.shrink_to_fit();
     std::cout << "Time: " << (elapsedSeconds.count()*1000.0)/numTrials
-              << " ms per search, " << numTrials << " trials" << std::endl;
+              << " ms per search, " << numTrials << " trials\n";
 }
 
-void writeResults(const char* argv[], const std::vector<SBLoc> &testLocs,
+void writeResults(const char* argv[],
+                  const std::vector<std::pair<double, double>> &testLocs,
                   SBSolver *solver) {
     std::ofstream outRefResults(argv[2], std::ios::app);
     std::transform(testLocs.begin(), testLocs.end(),
                    std::ostream_iterator<std::string>(outRefResults),
-                   [&](const SBLoc &l){
-                       auto resultLoc = solver->findNearest(l.lng, l.lat);
-                       return to_string(l.lat) + " " + to_string(l.lng) + " " +
+                   [&](const auto &p){
+                       auto resultLoc = solver->findNearest(p.second, p.first);
+                       return to_string(p.first) + " " + to_string(p.second) + " " +
                               to_string(resultLoc->lat) + " " + to_string(resultLoc->lng) +
                               resultLoc->city + "," + resultLoc->addr + "\n";});
 }
 
 
 int main(int argc, const char * argv[]) {
+    
+    size_t MAX_TRIALS = 0xFFFFFF;
+    std::vector<const SBLoc*> testResults, refResults;
+    std::vector<std::pair<double, double>> testLocs = generateTestLocs(MAX_TRIALS) ;
+    
+    /*
+     std::string line;
+     while (std::getline(inRefResults, line)) {
+     std::stringstream ss(line);
+     SBLoc test, ref;
+     std::string cityAddr;
+     ss >> test.lat >> test.lng >> ref.lat >> ref.lng;
+     std::getline(inRefResults, ref.city, ',');
+     std::getline(inRefResults, ref.addr);
+     testLocs.push_back(test);
+     refResults.push_back(ref);
+     } */
+    
+    
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
-    double aveLocPerCell = argc == 3 ? 1 : std::stod(argv[3]);
+    double aveLocPerCell = argc == 3 ? 0.8 : std::stod(argv[3]);
     size_t numOfLocsToWriteToFile = argc < 5 ? false : std::stoi(argv[4]);
     
     infileLocs.ignore(256, '\r');
     infileLocs.ignore(256, '\r');
+    
     
     auto locData = std::make_shared<std::vector<SBLoc>>();
     std::copy(std::istream_iterator<SBLoc>(infileLocs),
@@ -133,72 +162,36 @@ int main(int argc, const char * argv[]) {
     std::stable_sort(locData->begin(), locData->end(), [](const auto &l1,
         const auto& l2){return l1.lng*10000000+l1.lat<l2.lng*10000000+l2.lat;});
     locData->erase(locData->begin(),
-                  std::unique(locData->rbegin(), locData->rend()).base());
-    std::random_shuffle(locData->begin(), locData->end());
+                   std::unique(locData->rbegin(), locData->rend()).base());
+    locData->shrink_to_fit();
     
-    
-    /*
-    
-    auto bfSolver = std::make_shared<BFSBSolver>();
-    timeBuild(locData, bfSolver.get());
-    auto refResult = bfSolver->findNearest(SBLoc::toRadians(-100.603), SBLoc::toRadians(56.6682));
-    auto bkdtSolver = std::make_shared<BKDTSBSolver>();
-    timeBuild(locData, bkdtSolver.get());
-    for (int i = 0; i < 1; ++i) {
-    auto result = bkdtSolver->findNearest(SBLoc::toRadians(-100.603), SBLoc::toRadians(56.6682));
-    std::cout << "Result: " << *result << std::endl
-              << "Ref result: " << *refResult << std::endl;
-    }
-    return 0;
-    
-    */
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(locData->begin(), locData->end(), g);
     
     
     
     
     if (numOfLocsToWriteToFile) {
-        //auto bfSolver = std::make_shared<BFSBSolver>();
-        auto bfSolver = std::make_shared<BKDTSBSolver>();
-        timeBuild(locData, bfSolver.get());
-        writeResults(argv, generateTestLocs(numOfLocsToWriteToFile), bfSolver.get());
+        //auto solver = std::make_shared<BFSBSolver>();
+        auto solver = std::make_shared<BKDTSBSolver>();
+        timeBuild(locData, solver.get());
+        writeResults(argv, generateTestLocs(numOfLocsToWriteToFile), solver.get());
         return 0;
     }
     
-    
-    size_t MAX_TRIALS = 0xFFFFFF;
-    std::vector<SBLoc> testResults, refResults, testLocs;
-    
-    /*
-    std::string line;
-    while (std::getline(inRefResults, line)) {
-        std::stringstream ss(line);
-        SBLoc test, ref;
-        std::string cityAddr;
-        ss >> test.lat >> test.lng >> ref.lat >> ref.lng;
-        std::getline(inRefResults, ref.city, ',');
-        std::getline(inRefResults, ref.addr);
-        testLocs.push_back(test);
-        refResults.push_back(ref);
-    } */
-    auto restTestLocs = generateTestLocs(MAX_TRIALS-testLocs.size());
-    testLocs.insert(testLocs.begin(),{SBLoc(M_PI/2, M_PI),SBLoc(-M_PI/2, -M_PI),
-        SBLoc(-M_PI/2, M_PI), SBLoc(M_PI/2, -M_PI)});
-    testLocs.insert(testLocs.end(), std::make_move_iterator(restTestLocs.begin()),
-                    std::make_move_iterator(restTestLocs.end()));
+
+
     
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),
-        //std::make_shared<KDTSBSolver>(),
-        std::make_shared<BKDTSBSolver>(),
+        std::make_shared<KDTSBSolver>(),
+        //std::make_shared<BKDTSBSolver>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
-        std::make_shared<UniCellBKDTGridSBSolver>(aveLocPerCell),
+        //std::make_shared<UniCellBKDTGridSBSolver>(aveLocPerCell),
         //std::make_shared<UpgradeBKDTGridSBSolver>(0.7*aveLocPerCell),
     };
-    
-    
-    
-    refResults.clear();
     
     
     std::for_each(solvers.begin(), solvers.end(),
@@ -212,7 +205,7 @@ int main(int argc, const char * argv[]) {
         } else {
             accuracyTest(testLocs, testResults, refResults);
         }
-        std::cout << std::endl;
+        std::cout << "\n";
         testResults.clear();
     }
     

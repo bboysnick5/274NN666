@@ -20,8 +20,8 @@
 class UniCellBKDTGridSBSolver : public BKDTSBSolver {
 public:
     UniCellBKDTGridSBSolver(double aveLocPerCell = 1);
-    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lng, double lat) const override;
+    void build(const std::shared_ptr<std::vector<SBLoc>>&) override final;
+    const SBLoc* findNearest(double lng, double lat) const override final;
     
     
 private:
