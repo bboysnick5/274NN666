@@ -7,7 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		011CF6BA21D711EE0052024D /* UpgradeBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6B821D711EE0052024D /* UpgradeBKDTGridSBSolver.cpp */; };
+		011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */; };
 		011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */; };
 		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
 		82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */; };
@@ -41,11 +41,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		011CF6B821D711EE0052024D /* UpgradeBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UpgradeBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
-		011CF6B921D711EE0052024D /* UpgradeBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UpgradeBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
+		011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
+		011CF6B921D711EE0052024D /* UniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0122F1A821D4A16E004422B6 /* refCities.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = refCities.txt; sourceTree = "<group>"; };
+		0142A72721EB55C9002FDD43 /* KDTreeMetaData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeMetaData.hpp; sourceTree = "<group>"; };
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
@@ -106,6 +107,7 @@
 				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
 				01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */,
+				0142A72721EB55C9002FDD43 /* KDTreeMetaData.hpp */,
 				016197E921E8F94C009F8E48 /* PoolAllocator.hpp */,
 				82A66E311E003B0800D5FAFD /* main.cpp */,
 				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
@@ -120,8 +122,8 @@
 				823641431E00C98B007AE0FD /* GridSBSolver.hpp */,
 				82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */,
 				82405F2C1E0C7FDD00028713 /* BKDTGridSBSolver.hpp */,
-				011CF6B821D711EE0052024D /* UpgradeBKDTGridSBSolver.cpp */,
-				011CF6B921D711EE0052024D /* UpgradeBKDTGridSBSolver.hpp */,
+				011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */,
+				011CF6B921D711EE0052024D /* UniLatLngBKDTGridSBSolver.hpp */,
 				011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */,
 				011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */,
 			);
@@ -188,7 +190,7 @@
 			files = (
 				82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */,
 				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
-				011CF6BA21D711EE0052024D /* UpgradeBKDTGridSBSolver.cpp in Sources */,
+				011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */,
 				011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */,
 				82A66E371E003B0800D5FAFD /* main.cpp in Sources */,

@@ -9,78 +9,72 @@
 #include "UpgradeBKDTGridSBSolver.hpp"
 //#include <omp.h>
 
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+UpgradeBKDTGridSBSolver<Tree>::
+UpgradeBKDTGridSBSolver(double alpc) : UniCellBKDTGridSBSolver<Tree>(alpc) {}
 
-UpgradeBKDTGridSBSolver::
-UpgradeBKDTGridSBSolver(double alpc) : GridSBSolver(alpc) {}
-
-
-void UpgradeBKDTGridSBSolver::fillGridCache() {
-    gridTreeCache = std::vector<KDTree<3, const SBLoc*, Point<3>::DistType::EUC>>
-    (rowSize*colSize);
-    gridSingleCache = std::vector<const SBLoc*>(rowSize*colSize);
-    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
-    size_t totalTreeSize = 0, singleLocs = 0;
-    //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
-    //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
-    //reduction(+:totalTreeSize, singleLocs) collapse(2)
-    for (size_t r = 0; r < rowSize; ++r) {
-        for (size_t c = 0; c < colSize; ++c) {
-            size_t idx = r*colSize+c;
-            auto locsEnd = sbKdt.rangeDiffKNNPairs(
-                           SBLoc::latLngToCart3DPt((c+0.5) * lngInc - 180.0,
-                                                    (r+0.5) * latInc - 90.0),
-                           SBLoc::xyzDistFromLngLat(r*latInc-90.0,
-                                                    (r+1)*latInc-90.0, lngInc),
-                           ptLocPairs.begin());
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+void UpgradeBKDTGridSBSolver<Tree>::fillGridCache() {
+    colSize = rowSize;
+    lngInc = 2*M_PI/colSize + 2*M_PI/(colSize*colSize*0xFFFF);
+    this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(this->locKdt.size());
+    
+    double thisCtrLat = 0.5 * (this->latInc - M_PI);
+    for (size_t r = 0; r < rowSize; ++r, thisCtrLat += this->latInc) {
+        double thisCtrLng = 0.5 * lngInc - M_PI;
+        double thisDiff = SBLoc::xyzDistFromLngLat(r*this->latInc- 0.5*M_PI,
+                          (r+1)*this->latInc-0.5*M_PI, lngInc);
+        for (size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
+            auto locsEnd = this->locKdt.rangeDiffKNNPairs
+                           (SBLoc::latLngToCart3DPt(thisCtrLng, thisCtrLat),
+                            thisDiff, ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
-            if (locsSize > 1) {
-                gridTreeCache[idx] = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>
-                (ptLocPairs.begin(), locsEnd);
-            } else {
-                gridSingleCache[idx] = ptLocPairs[0].second;
-                singleLocs++;
+            switch (locsSize) {
+                case 1:
+                    this->gridCache.emplace_back(std::piecewise_construct,
+                                                 std::forward_as_tuple(),
+                                                 std::forward_as_tuple
+                                                 (ptLocPairs[0].second));
+                    this->singleLocs++;
+                    break;
+                default:
+                    this->gridCache.emplace_back(std::piecewise_construct,
+                                                 std::forward_as_tuple
+                                                 (ptLocPairs.begin(), locsEnd),
+                                                 std::forward_as_tuple(nullptr));
             }
-            totalTreeSize += locsSize;
+            this->totalNodeSize += locsSize;
         }
     }
-    size_t multiLocs = rowSize*colSize - singleLocs;
-    std::cout << "ave tree size: " << totalTreeSize/(rowSize*colSize)
-    << "\nSingle loc cells: " << singleLocs
-    << "\nMulti-loc cells:" << multiLocs << std::endl;
 }
 
-double UpgradeBKDTGridSBSolver::calcLatIncFromAlpc() {
-    double surfaceArea = 4*M_PI*SBLoc::EARTH_RADIUS*SBLoc::EARTH_RADIUS;
-    double numCells = numLocs/AVE_LOC_PER_CELL;
-    double sideLen = sqrt(surfaceArea/numCells);
-    return std::fabs(SBLoc::latFromHavDist(sideLen, 0));
-}
 
-void UpgradeBKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
-    kdtData.reserve(locData->size());
-    std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
-                   [&](const SBLoc& loc){ return
-                       std::make_pair(SBLoc::latLngToCart3DPt(loc.lng, loc.lat), &loc);});
-    sbKdt = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>(kdtData.begin(), kdtData.end());
-    numLocs = sbKdt.size();
-    latInc = calcLatIncFromAlpc();
-    rowSize = std::ceil(180.0/(latInc -
-                               std::numeric_limits<double>::epsilon()*256));
-    colSize = rowSize;
-    lngInc = 360.0/colSize + std::numeric_limits<double>::epsilon()*256;
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+void UpgradeBKDTGridSBSolver<Tree>::
+build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+    BKDTSBSolver<Tree>::generateKDT(locData);
+    sideLen = UniCellBKDTGridSBSolver<Tree>::calcSideLenFromAlpc();
+    this->latInc = std::fabs(SBLoc::latFromHavDist(sideLen, 0));
+    rowSize = std::ceil(M_PI/(this->latInc - this->latInc*this->latInc/(M_PI*0xFFFF)));
     fillGridCache();
 }
 
-const SBLoc* UpgradeBKDTGridSBSolver::findNearest(double lng, double lat) const {
-    size_t idx = std::floor((lat+90.0)/latInc)*colSize + (lng+180.0)/lngInc;
-    auto singleLoc = gridSingleCache[idx];
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+const SBLoc* UpgradeBKDTGridSBSolver<Tree>::
+findNearest(double lng, double lat) const {
+    const auto&[cacheTree, singleLoc] =
+        this->gridCache[static_cast<size_t>((lat+0.5*M_PI)/this->latInc)*colSize
+                        + static_cast<size_t>((lng+M_PI)/lngInc)];
     return singleLoc ? singleLoc :
-           gridTreeCache[idx].kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
+           cacheTree.kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
 }
 
 
 
 
+
+template class UpgradeBKDTGridSBSolver<KDTree>;
+template class UpgradeBKDTGridSBSolver<KDTreeCusMem>;
 
 

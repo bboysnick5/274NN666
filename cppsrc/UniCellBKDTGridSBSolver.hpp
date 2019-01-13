@@ -9,7 +9,7 @@
 #ifndef UniCellBKDTGridSBSolver_hpp
 #define UniCellBKDTGridSBSolver_hpp
 
-#include "BKDTSBSolver.hpp"
+#include "UniLatLngBKDTGridSBSolver.hpp"
 #include "KDTree.hpp"
 #include <stdio.h>
 #include <vector>
@@ -18,24 +18,17 @@
 
 
 template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
-class UniCellBKDTGridSBSolver : public BKDTSBSolver<Tree> {
+class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<Tree> {
 public:
     UniCellBKDTGridSBSolver(double aveLocPerCell = 1);
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override final;
     const SBLoc* findNearest(double lng, double lat) const override final;
-    virtual void printSolverInfo() const override final;
+    //virtual void printSolverInfo() const override;
     
-    
+
 private:
-    const double AVE_LOC_PER_CELL = 1;
-    
-    std::vector<std::pair<Tree<3,const SBLoc*, Point<3>::DistType::EUC>,
-                          const SBLoc*>> gridCache;
     std::vector<std::pair<size_t, double>> thisRowStartIdx;
-    double latInc;
-    
-    void fillGridCache(size_t, double);
-    double calcSideLenFromAlpc();
+    void fillGridCache();
 };
 
 

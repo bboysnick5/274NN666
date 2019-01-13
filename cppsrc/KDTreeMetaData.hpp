@@ -1,13 +1,13 @@
 //
-//  KDTreeCusMemCusMem.hpp
+//  KDTreeMetaData.hpp
 //  274F16NearestSB
 //
-//  Created by nick on 1/12/19.
+//  Created by nick on 1/13/19.
 //  Copyright © 2019 Yunlong Liu. All rights reserved.
 //
 
-#ifndef KDTreeCusMem_hpp
-#define KDTreeCusMem_hpp
+#ifndef KDTreeMetaData_hpp
+#define KDTreeMetaData_hpp
 
 
 #include "Point.hpp"
@@ -31,53 +31,53 @@
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT
 = Point<N>::DistType::EUC>
-class KDTreeCusMem {
+class KDTreeMetaData {
 public:
-    // Constructor: KDTreeCusMem();
-    // Usage: KDTreeCusMem<3, int> myTree;
+    // Constructor: KDTreeMetaData();
+    // Usage: KDTreeMetaData<3, int> myTree;
     // ----------------------------------------------------
-    // Constructs an empty KDTreeCusMem.
-    KDTreeCusMem() = default;
+    // Constructs an empty KDTreeMetaData.
+    KDTreeMetaData() = default;
     
-    // Constructor: KDTreeCusMem(FwdItType begin, FwdItType end);
-    // Usage: KDTreeCusMem<3, int> myTree(vec.begin(), bec.end());
+    // Constructor: KDTreeMetaData(FwdItType begin, FwdItType end);
+    // Usage: KDTreeMetaData<3, int> myTree(vec.begin(), bec.end());
     // ----------------------------------------------------
-    // Constructs a KDTreeCusMem from a collection. The tree will
+    // Constructs a KDTreeMetaData from a collection. The tree will
     // be balanced using median constructing method
     // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
     template <class RAI>
-    KDTreeCusMem(RAI, RAI);
+    KDTreeMetaData(RAI, RAI);
     
-    // Destructor: ~KDTreeCusMem()
+    // Destructor: ~KDTreeMetaData()
     // Usage: (implicit)
     // ----------------------------------------------------
-    // Cleans up all resources used by the KDTreeCusMem.
-    ~KDTreeCusMem();
+    // Cleans up all resources used by the KDTreeMetaData.
+    ~KDTreeMetaData();
     
-    // KDTreeCusMem(const KDTreeCusMem& rhs);
-    // KDTreeCusMem& operator=(const KDTreeCusMem& rhs);
-    // Usage: KDTreeCusMem<3, int> one = two;
+    // KDTreeMetaData(const KDTreeMetaData& rhs);
+    // KDTreeMetaData& operator=(const KDTreeMetaData& rhs);
+    // Usage: KDTreeMetaData<3, int> one = two;
     // Usage: one = two;
     // -----------------------------------------------------
     // Copy constructor and copy assignment operator.
-    KDTreeCusMem(const KDTreeCusMem&);
-    KDTreeCusMem& operator=(const KDTreeCusMem&)&;
+    KDTreeMetaData(const KDTreeMetaData&);
+    KDTreeMetaData& operator=(const KDTreeMetaData&)&;
     
-    // KDTreeCusMem(const KDTreeCusMem& rhs);
-    // KDTreeCusMem& operator=(const KDTreeCusMem& rhs);
-    // Usage: KDTreeCusMem<3, int> one = two;
+    // KDTreeMetaData(const KDTreeMetaData& rhs);
+    // KDTreeMetaData& operator=(const KDTreeMetaData& rhs);
+    // Usage: KDTreeMetaData<3, int> one = two;
     // Usage: one = two;
     // -----------------------------------------------------
     // Move constructor and move assignment operator.
-    KDTreeCusMem(KDTreeCusMem&&) noexcept;
-    KDTreeCusMem& operator=(KDTreeCusMem&&)& noexcept;
+    KDTreeMetaData(KDTreeMetaData&&) noexcept;
+    KDTreeMetaData& operator=(KDTreeMetaData&&)& noexcept;
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
     // ----------------------------------------------------
-    // Returns the dimension of the points stored in this KDTreeCusMem.
+    // Returns the dimension of the points stored in this KDTreeMetaData.
     size_t dimension() const;
     typename Point<N>::DistType distType() const;
     
@@ -99,13 +99,13 @@ public:
     // bool contains(const Point<N>& pt) const;
     // Usage: if (kd.contains(pt))
     // ----------------------------------------------------
-    // Returns whether the specified point is contained in the KDTreeCusMem.
+    // Returns whether the specified point is contained in the KDTreeMetaData.
     bool contains(const Point<N>&) const;
     
     // void insert(const Point<N>& pt, const ElemType& value);
     // Usage: kd.insert(v, "This value is associated with v.");
     // ----------------------------------------------------
-    // Inserts the point pt into the KDTreeCusMem, associating it with the specified
+    // Inserts the point pt into the KDTreeMetaData, associating it with the specified
     // value. If the element already existed in the tree, the new value will
     // overwrite the existing one.
     void insert(const Point<N>&, const ElemType&);
@@ -113,8 +113,8 @@ public:
     // ElemType& operator[](const Point<N>& pt);
     // Usage: kd[v] = "Some Value";
     // ----------------------------------------------------
-    // Returns a reference to the value associated with point pt in the KDTreeCusMem.
-    // If the point does not exist, then it is added to the KDTreeCusMem using the
+    // Returns a reference to the value associated with point pt in the KDTreeMetaData.
+    // If the point does not exist, then it is added to the KDTreeMetaData using the
     // default value of ElemType as its key.
     ElemType& operator[](const Point<N>& pt);
     
@@ -130,7 +130,7 @@ public:
     // ElemType kNNValue(const Point<N>& key, size_t k) const
     // Usage: cout << kd.kNNValue(v, 3) << endl;
     // ----------------------------------------------------
-    // Given a point v and an integer k, finds the k points in the KDTreeCusMem
+    // Given a point v and an integer k, finds the k points in the KDTreeMetaData
     // nearest to v and returns the most common value associated with those
     // points. In the event of a tie, one of the most frequent value will be
     // chosen.
@@ -139,7 +139,7 @@ public:
     // Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const
     // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
     // ----------------------------------------------------
-    // Given a point p and a double offset, return a set of points in the KDTreeCusMem
+    // Given a point p and a double offset, return a set of points in the KDTreeMetaData
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
@@ -228,7 +228,7 @@ private:
     
 };
 
-/** KDTreeCusMem class implementation details */
+/** KDTreeMetaData class implementation details */
 
 
 // ----------------------------------------------------------
@@ -237,64 +237,64 @@ private:
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
-KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
+KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(RAI begin, RAI end)
 : treeSize(end-begin) {
-
+    
     TreeNode* ndPoolPtr = root = pool.allocateExact<TreeNode>(treeSize);
     rangeCtorHelper(ndPoolPtr, 0, begin, end, begin + (end - begin)/2);
     
     
     /*
-    struct actRecord {
-        TreeNode** curNdPtr;
-        size_t dim;
-        RAI thisBeginIt, median, thisEndIt;
-    };
-    
-    actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
-    bool hasChild = true;
-    TreeNode* curNd;
-    size_t dim = 0;
-    RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
-    while (it != st || hasChild) {
-        if (!hasChild) {
-            hasChild = true;
-            *(--it)->curNdPtr = ndPoolPtr;
-            dim = it->dim;
-            thisBeginIt = it->thisBeginIt;
-            thisEndIt = it->thisEndIt;
-            median = it->median;
-        }
-        
-        std::nth_element(thisBeginIt, median, thisEndIt,
-                         [=](const auto& p1, const auto& p2) {
-                             return p1.first[dim] < p2.first[dim];});
-        pool.construct(ndPoolPtr, std::move(median->first),
-                       std::move(median->second));
-        curNd = ndPoolPtr++;
-        dim = dim == N - 1 ? 0 : dim + 1;
-        
-        if (thisBeginIt != median) {
-            if (median + 1 != thisEndIt) {
-                *it++ = {&curNd->right, dim, median + 1,
-                         median + (thisEndIt-median+1)/2, thisEndIt};
-            }
-            thisEndIt = median;
-            median = thisBeginIt + (median-thisBeginIt)/2;
-            curNd->left = ndPoolPtr;
-        } else if (median + 1 != thisEndIt) {
-            thisBeginIt = median+1;
-            median = median + (thisEndIt-median+1)/2;
-            curNd->right = ndPoolPtr;
-        } else {
-            hasChild = false;
-        }
-    }
-   */
+     struct actRecord {
+     TreeNode** curNdPtr;
+     size_t dim;
+     RAI thisBeginIt, median, thisEndIt;
+     };
+     
+     actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
+     bool hasChild = true;
+     TreeNode* curNd;
+     size_t dim = 0;
+     RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
+     while (it != st || hasChild) {
+     if (!hasChild) {
+     hasChild = true;
+     *(--it)->curNdPtr = ndPoolPtr;
+     dim = it->dim;
+     thisBeginIt = it->thisBeginIt;
+     thisEndIt = it->thisEndIt;
+     median = it->median;
+     }
+     
+     std::nth_element(thisBeginIt, median, thisEndIt,
+     [=](const auto& p1, const auto& p2) {
+     return p1.first[dim] < p2.first[dim];});
+     pool.construct(ndPoolPtr, std::move(median->first),
+     std::move(median->second));
+     curNd = ndPoolPtr++;
+     dim = dim == N - 1 ? 0 : dim + 1;
+     
+     if (thisBeginIt != median) {
+     if (median + 1 != thisEndIt) {
+     *it++ = {&curNd->right, dim, median + 1,
+     median + (thisEndIt-median+1)/2, thisEndIt};
+     }
+     thisEndIt = median;
+     median = thisBeginIt + (median-thisBeginIt)/2;
+     curNd->left = ndPoolPtr;
+     } else if (median + 1 != thisEndIt) {
+     thisBeginIt = median+1;
+     median = median + (thisEndIt-median+1)/2;
+     curNd->right = ndPoolPtr;
+     } else {
+     hasChild = false;
+     }
+     }
+     */
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(const KDTreeCusMem& rhs)
+KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(const KDTreeMetaData& rhs)
 : root(new TreeNode()), treeSize(rhs.treeSize) {
     // wrong logic.
     // should be check whether this size is greater than other.
@@ -308,8 +308,8 @@ KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(const KDTreeCusMem& rhs)
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeCusMem<N, ElemType, DT>&
-KDTreeCusMem<N, ElemType, DT>::operator=(const KDTreeCusMem& rhs) & {
+KDTreeMetaData<N, ElemType, DT>&
+KDTreeMetaData<N, ElemType, DT>::operator=(const KDTreeMetaData& rhs) & {
     if (this != &rhs) {
         delete root;
         treeSize = rhs.treeSize;
@@ -320,15 +320,15 @@ KDTreeCusMem<N, ElemType, DT>::operator=(const KDTreeCusMem& rhs) & {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(KDTreeCusMem&& rhs) noexcept
+KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(KDTreeMetaData&& rhs) noexcept
 : root(rhs.root), treeSize(rhs.treeSize), pool(std::move(rhs.pool)) {
     rhs.root = nullptr;
     rhs.treeSize = 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeCusMem<N, ElemType, DT>& KDTreeCusMem<N, ElemType, DT>::
-operator=(KDTreeCusMem&& rhs) & noexcept {
+KDTreeMetaData<N, ElemType, DT>& KDTreeMetaData<N, ElemType, DT>::
+operator=(KDTreeMetaData&& rhs) & noexcept {
     if (this != &rhs) {
         root = rhs.root;
         treeSize = rhs.treeSize;
@@ -342,7 +342,7 @@ operator=(KDTreeCusMem&& rhs) & noexcept {
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
-void KDTreeCusMem<N, ElemType, DT>::
+void KDTreeMetaData<N, ElemType, DT>::
 rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
                 RAI end, RAI median) {
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
@@ -374,7 +374,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeCusMem<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
+void KDTreeMetaData<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
                                              TreeNode* otherNode
 //TreeNode* ndPoolIt
 ) {
@@ -396,7 +396,7 @@ void KDTreeCusMem<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeCusMem<N, ElemType, DT>::~KDTreeCusMem<N, ElemType, DT>() {
+KDTreeMetaData<N, ElemType, DT>::~KDTreeMetaData<N, ElemType, DT>() {
     pool.destroy_and_free_all<TreeNode>();
 }
 
@@ -405,41 +405,41 @@ KDTreeCusMem<N, ElemType, DT>::~KDTreeCusMem<N, ElemType, DT>() {
 // ----------------------------------------------------------
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeCusMem<N, ElemType, DT>::dimension() const {
+size_t KDTreeMetaData<N, ElemType, DT>::dimension() const {
     return N;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename Point<N>::DistType KDTreeCusMem<N, ElemType, DT>::distType() const {
+typename Point<N>::DistType KDTreeMetaData<N, ElemType, DT>::distType() const {
     return DT;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeCusMem<N, ElemType, DT>::size() const {
+size_t KDTreeMetaData<N, ElemType, DT>::size() const {
     return treeSize;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeCusMem<N, ElemType, DT>::height() const {
+size_t KDTreeMetaData<N, ElemType, DT>::height() const {
     return heightHelper(root);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeCusMem<N, ElemType, DT>::heightHelper(TreeNode *n) const {
+size_t KDTreeMetaData<N, ElemType, DT>::heightHelper(TreeNode *n) const {
     return n ? 1 + std::max(heightHelper(n->left),
                             heightHelper(n->right)) : -1;
 }
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-bool KDTreeCusMem<N, ElemType, DT>::empty() const {
+bool KDTreeMetaData<N, ElemType, DT>::empty() const {
     return treeSize == 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeCusMem<N, ElemType, DT>::printTreeInfo() const {
+void KDTreeMetaData<N, ElemType, DT>::printTreeInfo() const {
     std::cout << "Tree height is " << height()
-              << "\nTree size is " << size() << "\n";
+    << "\nTree size is " << size() << "\n";
 }
 
 // ----------------------------------------------------------
@@ -447,14 +447,14 @@ void KDTreeCusMem<N, ElemType, DT>::printTreeInfo() const {
 // ----------------------------------------------------------
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeCusMem<N, ElemType, DT>::clear() {
+void KDTreeMetaData<N, ElemType, DT>::clear() {
     pool.free_all();
     root = nullptr;
     treeSize = 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeCusMem<N, ElemType, DT>::
+void KDTreeMetaData<N, ElemType, DT>::
 insert(const Point<N>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
@@ -466,12 +466,12 @@ insert(const Point<N>& pt, const ElemType& value) {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-bool KDTreeCusMem<N, ElemType, DT>::contains(const Point<N>& pt) const {
+bool KDTreeMetaData<N, ElemType, DT>::contains(const Point<N>& pt) const {
     return *findNodePtr(pt) != nullptr;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType& KDTreeCusMem<N, ElemType, DT>::operator[] (const Point<N>& pt) {
+ElemType& KDTreeMetaData<N, ElemType, DT>::operator[] (const Point<N>& pt) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
         *ndPtr = new TreeNode(pt, ElemType());
@@ -481,12 +481,12 @@ ElemType& KDTreeCusMem<N, ElemType, DT>::operator[] (const Point<N>& pt) {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType& KDTreeCusMem<N, ElemType, DT>::at(const Point<N>& pt) {
-    return const_cast<ElemType&>(static_cast<const KDTreeCusMem&>(*this).at(pt));
+ElemType& KDTreeMetaData<N, ElemType, DT>::at(const Point<N>& pt) {
+    return const_cast<ElemType&>(static_cast<const KDTreeMetaData&>(*this).at(pt));
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-const ElemType& KDTreeCusMem<N, ElemType, DT>::at(const Point<N>& pt) const {
+const ElemType& KDTreeMetaData<N, ElemType, DT>::at(const Point<N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
         throw out_of_range("The point is out of range");
@@ -495,14 +495,14 @@ const ElemType& KDTreeCusMem<N, ElemType, DT>::at(const Point<N>& pt) const {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename KDTreeCusMem<N, ElemType, DT>::TreeNode**
-KDTreeCusMem<N, ElemType, DT>::findNodePtr(const Point<N>& pt) {
-    return const_cast<TreeNode**>(static_cast<const KDTreeCusMem*>(this)->findNodePtr(pt));
+typename KDTreeMetaData<N, ElemType, DT>::TreeNode**
+KDTreeMetaData<N, ElemType, DT>::findNodePtr(const Point<N>& pt) {
+    return const_cast<TreeNode**>(static_cast<const KDTreeMetaData*>(this)->findNodePtr(pt));
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename KDTreeCusMem<N, ElemType, DT>::TreeNode*const*
-KDTreeCusMem<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
+typename KDTreeMetaData<N, ElemType, DT>::TreeNode*const*
+KDTreeMetaData<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
     TreeNode *const*n = &root;
     for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1)
         n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
@@ -511,7 +511,7 @@ KDTreeCusMem<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType KDTreeCusMem<N, ElemType, DT>::
+ElemType KDTreeMetaData<N, ElemType, DT>::
 kNNValue(const Point<N>& pt, size_t k) const {
     if (k == 1)
         return NNValue(pt);
@@ -558,8 +558,8 @@ kNNValue(const Point<N>& pt, size_t k) const {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeCusMem<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
-                                             const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
+void KDTreeMetaData<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
+                                                   const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
     bpq.enqueue(cur->object, Point<N>::template dist<DT>(cur->key, pt));
     size_t nextDim = dim + 1 < N ? dim + 1 : 0;
     TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
@@ -575,8 +575,8 @@ void KDTreeCusMem<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class Iter>
-Iter KDTreeCusMem<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
-                                                double fence, Iter returnIt) const {
+Iter KDTreeMetaData<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
+                                                      double fence, Iter returnIt) const {
     /*
      std::vector<std::pair<double, std::pair<Point<N>, ElemType>>> distKVPairs;
      distKVPairs.reserve(sqrt(treeSize));
@@ -656,7 +656,7 @@ Iter KDTreeCusMem<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
 
 /*
  template <size_t N, typename ElemType, typename Point<N>::DistType DT>
- void KDTreeCusMem<N, ElemType, DT>::
+ void KDTreeMetaData<N, ElemType, DT>::
  rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim, const Point<N>& pt,
  double diff, std::vector<std::pair<double,
  std::pair<Point<N>, ElemType>>> &distKVPairs,
@@ -682,7 +682,7 @@ Iter KDTreeCusMem<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
  }*/
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
+ElemType KDTreeMetaData<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
     
     double bestDist = std::numeric_limits<double>::max(), curDist, diff;
@@ -746,7 +746,7 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <typename Point<N>::DistType thisDt,
 typename std::enable_if<thisDt == Point<N>::DistType::EUC, int>::type>
-void KDTreeCusMem<N, ElemType, DT>::
+void KDTreeMetaData<N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
               const ElemType *&bestValue, double &bestDist) const {
     double curDist = Point<N>::template
@@ -770,7 +770,7 @@ NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <typename Point<N>::DistType thisDt,
 typename std::enable_if<thisDt != Point<N>::DistType::EUC, int>::type>
-void KDTreeCusMem<N, ElemType, DT>::
+void KDTreeMetaData<N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
               const ElemType *&bestValue, double &bestDist) const {
     double curDist = Point<N>::template dist<DT>(cur->key, pt);
@@ -790,8 +790,8 @@ NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-double KDTreeCusMem<N, ElemType, DT>::branchMin(const Point<N> &trPt,
-                                          const Point<N> &searchPt, size_t idx) const {
+double KDTreeMetaData<N, ElemType, DT>::branchMin(const Point<N> &trPt,
+                                                const Point<N> &searchPt, size_t idx) const {
     switch (DT) {
         case Point<N>::DistType::EUC:
         case Point<N>::DistType::MAN:
@@ -806,4 +806,6 @@ double KDTreeCusMem<N, ElemType, DT>::branchMin(const Point<N> &trPt,
     }
 }
 
-#endif /* KDTreeCusMem_hpp */
+
+
+#endif /* KDTreeMetaData_hpp */

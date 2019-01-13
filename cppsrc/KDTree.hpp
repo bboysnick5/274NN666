@@ -71,7 +71,7 @@ public:
     // -----------------------------------------------------
     // Move constructor and move assignment operator.
     KDTree(KDTree&&) noexcept;
-    KDTree& operator=(KDTree&&)&;
+    KDTree& operator=(KDTree&&)& noexcept;
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
@@ -340,7 +340,8 @@ KDTree<N, ElemType, DT>::KDTree(KDTree&& rhs) noexcept
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTree<N, ElemType, DT>& KDTree<N, ElemType, DT>::operator=(KDTree&& rhs) & {
+KDTree<N, ElemType, DT>& KDTree<N, ElemType, DT>::
+operator = (KDTree&& rhs) & noexcept {
     if (this != &rhs) {
         delete root;
         root = rhs.root;
@@ -444,8 +445,8 @@ bool KDTree<N, ElemType, DT>::empty() const {
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 void KDTree<N, ElemType, DT>::printTreeInfo() const {
-    std::cout << "Tree height is " << height() << std::endl
-              << "Tree size is " << size() << std::endl;
+    std::cout << "Tree height is " << height()
+              << "\nTree size is " << size() << "\n";
 }
 
 // ----------------------------------------------------------

@@ -11,7 +11,6 @@
 
 #include <cmath>
 #include <stdlib.h>
-//#include <initializer_list>
 
 template <size_t N>
 class Point {

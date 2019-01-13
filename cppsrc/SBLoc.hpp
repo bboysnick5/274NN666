@@ -9,6 +9,7 @@
 #ifndef SBLoc_hpp
 #define SBLoc_hpp
 
+#include "Point.hpp"
 #include <stdio.h>
 #include <string>
 #include <iostream>

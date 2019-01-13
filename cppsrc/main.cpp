@@ -12,7 +12,7 @@
 #include "BKDTSBSolver.hpp"
 #include "GridSBSolver.hpp"
 #include "BKDTGridSBSolver.hpp"
-#include "UpgradeBKDTGridSBSolver.hpp"
+#include "UniLatLngBKDTGridSBSolver.hpp"
 #include "UniCellBKDTGridSBSolver.hpp"
 
 #include <iostream>
@@ -84,6 +84,8 @@ void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &locData,
     std::chrono::duration<double> elapsedSeconds = end - start;
     std::cout << typeid(*solver).name() << " Build time: "
               << elapsedSeconds.count() << "\n";
+    solver->printSolverInfo();
+    std::cout << "\n";
 }
 
 void timeNN(SBSolver *solver, const std::vector<std::pair<double, double>> &testLocs,
@@ -122,9 +124,9 @@ void writeResults(const char* argv[],
     std::transform(testLocs.begin(), testLocs.end(),
                    std::ostream_iterator<std::string>(outRefResults),
                    [&](const auto &p){
-                       auto resultLoc = solver->findNearest(p.second, p.first);
+                       const auto resultLoc = solver->findNearest(p.second, p.first);
                        return to_string(p.first) + " " + to_string(p.second) + " " +
-                              to_string(resultLoc->lat) + " " + to_string(resultLoc->lng) +
+                       to_string(resultLoc->lat) + " " + to_string(resultLoc->lng) +
                               resultLoc->city + "," + resultLoc->addr + "\n";});
 }
 
@@ -192,21 +194,19 @@ int main(int argc, const char * argv[]) {
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),
         //std::make_shared<KDTSBSolver<KDTree>>(),
-        std::make_shared<BKDTSBSolver<KDTree>>(),
-        std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
+        //std::make_shared<BKDTSBSolver<KDTree>>(),
+        //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell),
         //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell),
         std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell),
-        //std::make_shared<UpgradeBKDTGridSBSolver>(0.7*aveLocPerCell),
     };
     
     
     std::for_each(solvers.begin(), solvers.end(),
-                  [&](const auto &solver) {
-                      timeBuild(locData, solver.get());
-                      solver->printSolverInfo();
-                  });
+                  [&](const auto &solver) {timeBuild(locData, solver.get());});
     for (size_t i = 0; i < solvers.size(); ++i) {
         //timeBuild(locData, solvers[i].get());
         timeNN(solvers[i].get(), testLocs, testResults,
@@ -216,8 +216,8 @@ int main(int argc, const char * argv[]) {
         } else {
             accuracyTest(testLocs, testResults, refResults);
         }
-        std::cout << "\n";
         testResults.clear();
+        std::cout << "\n";
     }
     
     return 0;
