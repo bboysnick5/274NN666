@@ -12,9 +12,12 @@
 #include <stdio.h>
 #include "KDTSBSolver.hpp"
 
-class BKDTSBSolver : public KDTSBSolver {
+template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
+class BKDTSBSolver : public KDTSBSolver<Tree> {
+    
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
+    virtual void printSolverInfo() const override;
     virtual ~BKDTSBSolver() {}
     
 protected:

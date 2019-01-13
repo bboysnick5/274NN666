@@ -11,13 +11,23 @@
 //#include <omp.h>
 
 
-UniCellBKDTGridSBSolver::
-UniCellBKDTGridSBSolver(double alpc) : BKDTSBSolver(), AVE_LOC_PER_CELL(alpc) {}
 
-void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
-    gridCache.reserve(locKdt.size()*1.2/AVE_LOC_PER_CELL);
+
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+UniCellBKDTGridSBSolver<Tree>::
+UniCellBKDTGridSBSolver(double alpc) : BKDTSBSolver<Tree>(), AVE_LOC_PER_CELL(alpc) {}
+
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+void UniCellBKDTGridSBSolver<Tree>::printSolverInfo() const {
+    this->locKdt.printTreeInfo();
+}
+
+
+template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
+void UniCellBKDTGridSBSolver<Tree>::fillGridCache(size_t rowSize, double sideLen) {
+    gridCache.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(rowSize);
-    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(locKdt.size());
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(this->locKdt.size());
     size_t totalTreeSize = 0, singleLocs = 0;
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -35,17 +45,19 @@ void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
                thisCtrLng = 0.5 * thisLngInc - M_PI;
         thisRowStartIdx.emplace_back(idx, thisLngInc);
         for (; idx < thisEndIdx; ++idx, thisCtrLng += thisLngInc) {
-            auto locsEnd = locKdt.rangeDiffKNNPairs
+            auto locsEnd = this->locKdt.rangeDiffKNNPairs
                            (SBLoc::latLngToCart3DPt(thisCtrLng, thisCtrLat),
                            thisDiff, ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
-                gridCache.emplace_back(KDTree<3, const SBLoc*,
-                Point<3>::DistType::EUC>(ptLocPairs.begin(), locsEnd), nullptr);
+                gridCache.emplace_back(std::piecewise_construct,
+                                       std::forward_as_tuple
+                                       (ptLocPairs.begin(), locsEnd),
+                                       std::forward_as_tuple(nullptr));
             } else {
-                gridCache.emplace_back(KDTree<3, const SBLoc*,
-                                       Point<3>::DistType::EUC>(),
-                                       ptLocPairs[0].second);
+                gridCache.emplace_back(std::piecewise_construct,
+                                       std::forward_as_tuple(),
+                                       std::forward_as_tuple(ptLocPairs[0].second));
                 singleLocs++;
             }
             totalTreeSize += locsSize;
@@ -56,27 +68,30 @@ void UniCellBKDTGridSBSolver::fillGridCache(size_t rowSize, double sideLen) {
               << "\nAve tree height: "
               << static_cast<size_t>(log2(totalTreeSize/gridCache.size()+1)) + 1
               << "\nRatio of tree nodes over num locs: "
-              << totalTreeSize/locKdt.size()
+              << totalTreeSize/this->locKdt.size()
               << "\nSingle loc cells: " << singleLocs << "\nMulti-loc cells:"
               << gridCache.size() - singleLocs << std::endl;
 }
 
-double UniCellBKDTGridSBSolver::calcSideLenFromAlpc() {
+template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
+double UniCellBKDTGridSBSolver<Tree>::calcSideLenFromAlpc() {
     double surfaceArea = 4*M_PI*SBLoc::EARTH_RADIUS*SBLoc::EARTH_RADIUS;
-    double numCells = locKdt.size()/AVE_LOC_PER_CELL;
+    double numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
     return sqrt(surfaceArea/numCells);
 }
 
-void UniCellBKDTGridSBSolver::
+template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
+void UniCellBKDTGridSBSolver<Tree>::
 build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    BKDTSBSolver::generateKDT(locData);
+    BKDTSBSolver<Tree>::generateKDT(locData);
     double sideLen = calcSideLenFromAlpc();
     latInc = std::fabs(SBLoc::latFromHavDist(sideLen, 0));
     size_t rowSize = std::ceil(M_PI/(latInc - latInc*latInc/(M_PI*0xFFFF)));
     fillGridCache(rowSize, sideLen);
 }
 
-const SBLoc* UniCellBKDTGridSBSolver::
+template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
+const SBLoc* UniCellBKDTGridSBSolver<Tree>::
 findNearest(double lng, double lat) const {
     auto[startIdx, thisLngInc] = thisRowStartIdx[(lat+0.5*M_PI)/latInc];
     const auto& [cacheTree, singleLoc] =
@@ -89,3 +104,5 @@ findNearest(double lng, double lat) const {
 
 
 
+template class UniCellBKDTGridSBSolver<KDTree>;
+template class UniCellBKDTGridSBSolver<KDTreeCusMem>;

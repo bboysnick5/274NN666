@@ -12,15 +12,17 @@
 #include <stdio.h>
 #include "SBSolver.hpp"
 #include "KDTree.hpp"
+#include "KDTreeCusMem.hpp"
 
+template <template <size_t, typename, typename Point<3>::DistType> class Tree>
 class KDTSBSolver : public SBSolver {
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
     const SBLoc* findNearest(double lng, double lat) const override;
+    virtual void printSolverInfo() const override;
     
 protected:
-    KDTree<3, const SBLoc*, Point<3>::DistType::EUC> locKdt;
-    
+    Tree<3, const SBLoc*, Point<3>::DistType::EUC> locKdt;
     virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&);
 };
 

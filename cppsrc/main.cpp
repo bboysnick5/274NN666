@@ -6,6 +6,15 @@
 //  Copyright © 2016 Yunlong Liu. All rights reserved.
 //
 
+
+#include "KDTSBSolver.hpp"
+#include "BFSBSolver.hpp"
+#include "BKDTSBSolver.hpp"
+#include "GridSBSolver.hpp"
+#include "BKDTGridSBSolver.hpp"
+#include "UpgradeBKDTGridSBSolver.hpp"
+#include "UniCellBKDTGridSBSolver.hpp"
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -17,14 +26,6 @@
 #include <memory>
 #include <typeinfo>
 #include <random>
-#include "KDTSBSolver.hpp"
-#include "BFSBSolver.hpp"
-#include "BKDTSBSolver.hpp"
-#include "GridSBSolver.hpp"
-#include "BKDTGridSBSolver.hpp"
-#include "UpgradeBKDTGridSBSolver.hpp"
-#include "UniCellBKDTGridSBSolver.hpp"
-
 
 std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials) {
     std::random_device rd;
@@ -130,6 +131,10 @@ void writeResults(const char* argv[],
 
 int main(int argc, const char * argv[]) {
     
+    
+    //std::cout << "Size of: " << sizeof(KDTree<3, int*>) << std::endl;
+    //return 0;
+    
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<const SBLoc*> testResults, refResults;
     std::vector<std::pair<double, double>> testLocs = generateTestLocs(MAX_TRIALS) ;
@@ -164,6 +169,7 @@ int main(int argc, const char * argv[]) {
     locData->erase(locData->begin(),
                    std::unique(locData->rbegin(), locData->rend()).base());
     locData->shrink_to_fit();
+    infileLocs.close();
     
     std::random_device rd;
     std::mt19937 g(rd());
@@ -174,7 +180,7 @@ int main(int argc, const char * argv[]) {
     
     if (numOfLocsToWriteToFile) {
         //auto solver = std::make_shared<BFSBSolver>();
-        auto solver = std::make_shared<BKDTSBSolver>();
+        auto solver = std::make_shared<BKDTSBSolver<KDTree>>();
         timeBuild(locData, solver.get());
         writeResults(argv, generateTestLocs(numOfLocsToWriteToFile), solver.get());
         return 0;
@@ -185,17 +191,22 @@ int main(int argc, const char * argv[]) {
     
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),
-        std::make_shared<KDTSBSolver>(),
-        //std::make_shared<BKDTSBSolver>(),
+        //std::make_shared<KDTSBSolver<KDTree>>(),
+        std::make_shared<BKDTSBSolver<KDTree>>(),
+        std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
-        //std::make_shared<UniCellBKDTGridSBSolver>(aveLocPerCell),
+        //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell),
         //std::make_shared<UpgradeBKDTGridSBSolver>(0.7*aveLocPerCell),
     };
     
     
     std::for_each(solvers.begin(), solvers.end(),
-                  [&](const auto &solver){timeBuild(locData, solver.get());});
+                  [&](const auto &solver) {
+                      timeBuild(locData, solver.get());
+                      solver->printSolverInfo();
+                  });
     for (size_t i = 0; i < solvers.size(); ++i) {
         //timeBuild(locData, solvers[i].get());
         timeNN(solvers[i].get(), testLocs, testResults,

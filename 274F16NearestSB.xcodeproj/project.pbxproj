@@ -46,6 +46,8 @@
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0122F1A821D4A16E004422B6 /* refCities.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = refCities.txt; sourceTree = "<group>"; };
+		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
+		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
@@ -103,6 +105,8 @@
 				82A66E321E003B0800D5FAFD /* Point.hpp */,
 				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
+				01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */,
+				016197E921E8F94C009F8E48 /* PoolAllocator.hpp */,
 				82A66E311E003B0800D5FAFD /* main.cpp */,
 				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
@@ -247,6 +251,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-v";
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -296,6 +301,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				MACOSX_DEPLOYMENT_TARGET = 10.14;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "-v";
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -303,7 +309,7 @@
 		82A66E261E00382500D5FAFD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -311,7 +317,7 @@
 		82A66E271E00382500D5FAFD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
