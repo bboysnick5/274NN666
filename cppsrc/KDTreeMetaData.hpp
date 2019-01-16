@@ -170,6 +170,13 @@ private:
         ~TreeNode() = default;
     };
     
+    struct MetaData {
+        void* prev;
+        size_t remaining;
+        size_t treesize;
+        TreeNode *root;
+        TreeNode *cur;
+    };
     
     TreeNode *root;
     size_t treeSize;

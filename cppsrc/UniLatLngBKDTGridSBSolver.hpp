@@ -15,27 +15,31 @@
 #include <stdio.h>
 #include <vector>
 #include <iterator>
+#include <variant>
 
 
-template <template <size_t, typename, typename Point<3>::DistType> class Tree>
-class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<Tree> {
+template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
-    UniLatLngBKDTGridSBSolver(double aveLocPerCell = 1);
+    UniLatLngBKDTGridSBSolver(double = 1, size_t = 40);
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
     const SBLoc* findNearest(double lng, double lat) const override;
     virtual void printSolverInfo() const override final;
     
 protected:
-    const double AVE_LOC_PER_CELL = 1;
+    const double AVE_LOC_PER_CELL;
+    const size_t MAX_CACHE_CELL_VEC_SIZE;
     double lngInc, latInc, sideLen;
-    size_t totalNodeSize = 0, singleLocs = 0, rowSize, colSize;
-    std::vector<std::pair<Tree<3,const SBLoc*, Point<3>::DistType::EUC>,
-                const SBLoc*>> gridCache;
+    size_t totalNodeSize = 0, singleLocs = 0, vecLocs = 0, rowSize, colSize;
+    std::vector<std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
+                             const SBLoc*, KDT<KDTType>>> gridCache;
     
-    double calcSideLenFromAlpc();
+    void calcSideLenFromAlpc();
+    void fillCacheCell(double, double, double,
+                       std::vector<std::pair<Point<3>, const SBLoc*>>&);
     
 private:
-    void fillGridCache();
+    virtual void fillGridCache();
 };
 
 

@@ -9,12 +9,16 @@
 #ifndef KDTSBSolver_hpp
 #define KDTSBSolver_hpp
 
-#include <stdio.h>
 #include "SBSolver.hpp"
 #include "KDTree.hpp"
 #include "KDTreeCusMem.hpp"
+#include "KDTreeMetaData.hpp"
+#include <stdio.h>
 
-template <template <size_t, typename, typename Point<3>::DistType> class Tree>
+template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+using KDT = KDTType<3, const SBLoc*, Point<3>::DistType::EUC>;
+
+template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 class KDTSBSolver : public SBSolver {
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
@@ -22,7 +26,7 @@ public:
     virtual void printSolverInfo() const override;
     
 protected:
-    Tree<3, const SBLoc*, Point<3>::DistType::EUC> locKdt;
+    KDT<KDTType> locKdt;
     virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&);
 };
 

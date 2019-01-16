@@ -12,8 +12,8 @@
 #include <stdio.h>
 #include "KDTSBSolver.hpp"
 
-template <template <size_t, typename elem, typename Point<3>::DistType> class Tree>
-class BKDTSBSolver : public KDTSBSolver<Tree> {
+template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+class BKDTSBSolver : public KDTSBSolver<KDTType> {
     
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;

@@ -26,6 +26,7 @@
 #include <memory>
 #include <typeinfo>
 #include <random>
+#include <regex>
 
 std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials) {
     std::random_device rd;
@@ -54,10 +55,10 @@ bool accuracyTest(const std::vector<std::pair<double, double>> &testLocs,
         const auto[testLat, testLng] = testLocs[i];
         double refDist = SBLoc::havDist(refResult->lng, refResult->lat, testLng, testLat);
         refTotal += refDist;
-        if (testResult != refResult) {
+        if (*testResult != *refResult) {
             errorCount++;
-            std::cout << "Test Point lat: " << SBLoc::toDegree(testLat)
-                      << ", lng: " << SBLoc::toDegree(testLng)
+            std::cout << "Test Point lng: " << SBLoc::toDegree(testLng)
+                      << ", lat: " << SBLoc::toDegree(testLat)
                       << "\nReturn point: " << *testResult
                       << "Ref point: " << *refResult << "\n";
             testTotal += SBLoc::havDist(testResult->lng, testResult->lat, testLng, testLat);
@@ -82,8 +83,9 @@ void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &locData,
     solver->build(locData);
     end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsedSeconds = end - start;
-    std::cout << typeid(*solver).name() << " Build time: "
-              << elapsedSeconds.count() << "\n";
+    std::cout << std::regex_replace(typeid(*solver).name(),
+                                    std::regex("[A-Z]?[0-9]+|.$"), "")
+              << " Build time: " << elapsedSeconds.count() << "\n";
     solver->printSolverInfo();
     std::cout << "\n";
 }
@@ -133,31 +135,19 @@ void writeResults(const char* argv[],
 
 int main(int argc, const char * argv[]) {
     
+  
     
-    //std::cout << "Size of: " << sizeof(KDTree<3, int*>) << std::endl;
-    //return 0;
+   // std::cout << "Size of: " << sizeof(std::variant<KDT<KDTreeCusMem>, std::vector<std::pair<Point<3>, const SBLoc*>>, const SBLoc*>) << std::endl;
+   // return 0;
     
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<const SBLoc*> testResults, refResults;
     std::vector<std::pair<double, double>> testLocs = generateTestLocs(MAX_TRIALS) ;
     
-    /*
-     std::string line;
-     while (std::getline(inRefResults, line)) {
-     std::stringstream ss(line);
-     SBLoc test, ref;
-     std::string cityAddr;
-     ss >> test.lat >> test.lng >> ref.lat >> ref.lng;
-     std::getline(inRefResults, ref.city, ',');
-     std::getline(inRefResults, ref.addr);
-     testLocs.push_back(test);
-     refResults.push_back(ref);
-     } */
-    
-    
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
-    double aveLocPerCell = argc == 3 ? 0.8 : std::stod(argv[3]);
-    size_t numOfLocsToWriteToFile = argc < 5 ? false : std::stoi(argv[4]);
+    double aveLocPerCell = argc < 4 ? 0.8 : std::stod(argv[3]);
+    size_t maxCacheCellVecSize = argc < 5 ? 40 : std::stoi(argv[4]);
+    size_t numOfLocsToWriteToFile = argc < 6 ? false : std::stoi(argv[5]);
     
     infileLocs.ignore(256, '\r');
     infileLocs.ignore(256, '\r');
@@ -166,6 +156,12 @@ int main(int argc, const char * argv[]) {
     auto locData = std::make_shared<std::vector<SBLoc>>();
     std::copy(std::istream_iterator<SBLoc>(infileLocs),
               std::istream_iterator<SBLoc>(), std::back_inserter(*locData));
+    infileLocs.close();
+    std::random_device rd;
+    std::mt19937 g(rd());
+    std::shuffle(locData->begin(), locData->end(), g);
+    
+    /*
     std::stable_sort(locData->begin(), locData->end(), [](const auto &l1,
         const auto& l2){return l1.lng*10000000+l1.lat<l2.lng*10000000+l2.lat;});
     locData->erase(locData->begin(),
@@ -177,9 +173,20 @@ int main(int argc, const char * argv[]) {
     std::mt19937 g(rd());
     std::shuffle(locData->begin(), locData->end(), g);
     
+    std::for_each(locData->begin(), locData->end(), []( auto& l){
+        l.city = std::regex_replace(l.city, std::regex("\n|\r"), "");
+        l.addr = std::regex_replace(l.addr, std::regex("\n|\r"), "");
+    });
     
+    std::ofstream outFile(argv[2]);
+    std::transform(locData->begin(), locData->end(),
+                   std::ostream_iterator<std::string>(outFile),
+                   [&](const auto &l){
+                       return l.city + "," +to_string(SBLoc::toDegree( l.lat)) + "," + to_string(SBLoc::toDegree( l.lng)) + "," + l.addr + "\r";});
     
-    
+    return 0;
+    */
+     
     if (numOfLocsToWriteToFile) {
         //auto solver = std::make_shared<BFSBSolver>();
         auto solver = std::make_shared<BKDTSBSolver<KDTree>>();
@@ -195,13 +202,14 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<BFSBSolver>(),
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
-        //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
+        std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
-        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell),
-        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell),
-        //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell),
-        std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell, maxCacheCellVecSize),
+       // std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
+       // std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>
+            (aveLocPerCell, maxCacheCellVecSize),
     };
     
     

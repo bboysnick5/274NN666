@@ -64,12 +64,9 @@ class PooledAllocator {
             static_cast<void **>(m)[0] = base;
             base = m;
             
-            size_t shift = 0;
-            // int size_t = (WORDSIZE - ( (((size_t)m) + sizeof(void*)) &
-            // (WORDSIZE-1))) & (WORDSIZE-1);
-            
-            remaining = blocksize - sizeof(void *) - shift;
-            loc = (static_cast<char *>(m) + sizeof(void *) + shift);
+            constexpr static size_t SIZE_OF_VOID_STAR = sizeof(void*);
+            remaining = blocksize - SIZE_OF_VOID_STAR;
+            loc = static_cast<char *>(m) + SIZE_OF_VOID_STAR;
         }
         void *rloc = loc;
         loc = static_cast<char *>(loc) + size;

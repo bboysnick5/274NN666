@@ -381,16 +381,12 @@ rangeCtorHelper(TreeNode*& curNdPtr, size_t dim, RAI begin,
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 void KDTree<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
-                                       TreeNode* otherNode
-                                       //TreeNode* ndPoolIt
-) {
+                                       TreeNode* otherNode) {
     if (otherNode) {
         if (thisNode) {
             thisNode->object = otherNode->object;
             thisNode->key = otherNode->key;
         } else {
-            //pool.construct(thisNode, {otherNode->key, otherNode->object});
-            //++ndPoolIt;
             thisNode = new TreeNode(otherNode->key, otherNode->object);
         }
         treeCopy(thisNode->left, otherNode->left);
