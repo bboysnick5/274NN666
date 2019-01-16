@@ -47,9 +47,23 @@ public:
     // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
-    template <class RAI>
+    template <typename RAI,
+    typename std::enable_if<std::is_same<
+    typename std::iterator_traits<RAI>::iterator_category,
+    std::random_access_iterator_tag>::value &&
+    !std::is_const<typename std::remove_pointer<
+    typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type = 0>
     KDTreeCusMem(RAI, RAI);
     
+    template <typename Const_RAI,
+        typename std::enable_if<std::is_same<
+        typename std::iterator_traits<typename
+        std::remove_const_t<Const_RAI>>::iterator_category,
+        std::random_access_iterator_tag>::value && std::is_const<typename
+        std::remove_pointer<typename std::iterator_traits<Const_RAI>::pointer>
+           ::type>::value, int>::type = 0>
+    KDTreeCusMem(Const_RAI, Const_RAI);
+
     // Destructor: ~KDTreeCusMem()
     // Usage: (implicit)
     // ----------------------------------------------------
@@ -200,7 +214,7 @@ private:
     ElemType NNValue(const Point<N>& key) const;
     
     template <typename Point<N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt == Point<N>::DistType::EUC, int>::type = 0>
+              typename std::enable_if<thisDt == Point<N>::DistType::EUC, int>::type = 0>
     void NNValueHelper(TreeNode*, size_t, const Point<N>&,
                        const ElemType *&, double&) const;
     
@@ -235,11 +249,31 @@ private:
 // ----------------------- BIG FIVE -------------------------
 // ----------------------------------------------------------
 
+
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-template <class RAI>
+template <typename Const_RAI,
+    typename std::enable_if<std::is_same<typename std::iterator_traits<typename
+    std::remove_const_t<Const_RAI>>::iterator_category,
+    std::random_access_iterator_tag>::value &&
+    std::is_const<typename std::remove_pointer<typename
+    std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
+KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(Const_RAI cbegin, Const_RAI cend)
+: treeSize(cend-cbegin), pool(std::make_unique<PooledAllocator>()) {
+    std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
+    TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
+    rangeCtorHelper(ndPoolPtr, 0, constructData.begin(), constructData.end(),
+                    constructData.begin() +
+                    (constructData.end() - constructData.begin())/2);
+}
+
+template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+template <typename RAI, typename std::enable_if<std::is_same<typename
+    std::iterator_traits<RAI>::iterator_category,
+    std::random_access_iterator_tag>::value && !std::is_const<typename
+    std::remove_pointer< typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
 : treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
-
+    
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
     rangeCtorHelper(ndPoolPtr, 0, begin, end, begin + (end - begin)/2);
     
@@ -448,7 +482,7 @@ void KDTreeCusMem<N, ElemType, DT>::printTreeInfo() const {
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 void KDTreeCusMem<N, ElemType, DT>::clear() {
-    pool->free_all();
+    pool->destroy_and_free_all<TreeNode>();
     root = nullptr;
     treeSize = 0;
 }
@@ -700,16 +734,16 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
     
     // LOGGGGGGGGGGGGGGG
-    /*
     
+    /*
     static size_t totalNumNodesSearches = 0, numNNSearches = 0, totalTreeSize = 0;
     static size_t numOfFullSearch = 0;
     size_t thisNumNodesSearches = 0;
     static bool logCondition;
-    static constexpr size_t TREE_SIZE_LOWER_BOUND = 15, TREE_SIZE_UPPER_BOUND = 20;
+    static constexpr size_t TREE_SIZE_LOWER_BOUND = 1000, TREE_SIZE_UPPER_BOUND = 1200;
     logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
-    
-*/
+    */
+
 
     while (it != st || hasNext) {
         if (!hasNext) {
@@ -720,8 +754,7 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
             hasNext = true;
         }
         nextDim = dim == N - 1 ? 0 : dim + 1;
-        curDist = Point<N>::template
-        dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+        curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
@@ -729,7 +762,7 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
         
         // LOGGGGGGGGGGGGGGG
        // if (logCondition)
-         //   thisNumNodesSearches++;
+          //  thisNumNodesSearches++;
         
         
         diff = pt[dim] - cur->key[dim];

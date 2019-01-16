@@ -88,26 +88,35 @@ build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     latInc = std::fabs(SBLoc::latFromHavDist(sideLen, 0));
     rowSize = std::ceil(M_PI/(latInc - latInc*latInc/(M_PI*0xFFFF)));
     fillGridCache();
+    //this->locKdt.clear();
 }
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 const SBLoc* UniLatLngBKDTGridSBSolver<KDTType>::
-findNearest(double lng, double lat) const {
-    const auto &v = gridCache[static_cast<size_t>((lat+0.5*M_PI)/latInc)*colSize
-                              + static_cast<size_t>((lng+M_PI)/lngInc)];
+returnNNLocFromCacheVariant(double lng, double lat,
+                            const std::variant<std::vector<std::pair<Point<3>,
+                            const SBLoc*>>, const SBLoc*, KDT<KDTType>>& v) {
     switch (v.index()) {
         case 0: {
             const auto p = SBLoc::latLngToCart3DPt(lng, lat);
-            return std::min_element(std::get<0>(v).begin(), std::get<0>(v).end(),
-                                    [&](const auto& p1, const auto& p2){
-                                        return Point<3>::template dist<Point<3>::DistType::EUCSQ>(p1.first, p) < Point<3>::template dist<Point<3>::DistType::EUCSQ>(p2.first, p);
-                                    })->second;
+            return std::min_element(std::get<0>(v).cbegin(), std::get<0>(v).cend(),
+                [&](const auto& p1, const auto& p2){return Point<3>::template
+                dist<Point<3>::DistType::EUCSQ>(p1.first, p)< Point<3>::template
+                dist<Point<3>::DistType::EUCSQ>(p2.first, p);})->second;
         }
         case 1:
             return std::get<1>(v);
         default:
             return std::get<2>(v).kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
     }
+}
+
+
+template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+const SBLoc* UniLatLngBKDTGridSBSolver<KDTType>::
+findNearest(double lng, double lat) const {
+    return returnNNLocFromCacheVariant(lng, lat, gridCache[static_cast<size_t>
+    ((lat+0.5*M_PI)/latInc)*colSize+ static_cast<size_t>((lng+M_PI)/lngInc)]);
 }
 
 

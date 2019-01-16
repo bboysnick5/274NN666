@@ -50,26 +50,8 @@ template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 const SBLoc* UniCellBKDTGridSBSolver<KDTType>::
 findNearest(double lng, double lat) const {
     const auto[startIdx, thisLngInc] = thisRowStartIdx[(lat+0.5*M_PI)/this->latInc];
-    const auto &v = this->gridCache[startIdx +
-                                    static_cast<size_t>((lng+M_PI)/thisLngInc)];
-    switch (v.index()) {
-        case 0: {
-            const auto p = SBLoc::latLngToCart3DPt(lng, lat);
-            const auto &vec = std::get<0>(v);
-            return std::min_element
-                (vec.begin(), vec.end(), [&](const auto& p1, const auto& p2) {
-                    return Point<3>::template dist<Point<3>::DistType::EUCSQ>(p1.first, p)
-                           < Point<3>::template dist<Point<3>::DistType::EUCSQ>(p2.first, p);
-                })->second;
-        }
-        case 1:
-            return std::get<1>(v);
-        default:
-            return std::get<2>(v).kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
-    }
-   // return std::holds_alternative<KDT<KDTType>>(v)
-    //       ? std::get<0>(v).kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1)
-    //       : std::get<const SBLoc*>(v);
+    return UniLatLngBKDTGridSBSolver<KDTType>::returnNNLocFromCacheVariant(lng,
+    lat, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)/thisLngInc)]);
 }
 
 
@@ -77,3 +59,14 @@ findNearest(double lng, double lat) const {
 
 template class UniCellBKDTGridSBSolver<KDTree>;
 template class UniCellBKDTGridSBSolver<KDTreeCusMem>;
+
+
+
+
+/* TO DO
+ 
+ 
+ Instead of using vector of pair of Point loc* cache,
+ use a more compact pointer to pair pool cache, will likely reduce build time
+ but not search time.
+ */

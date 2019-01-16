@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		01183DA421EEE5240002C03A /* BFEUCPtSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */; };
 		011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */; };
 		011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */; };
 		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
@@ -41,6 +42,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BFEUCPtSolver.cpp; sourceTree = "<group>"; };
+		01183DA321EEE5240002C03A /* BFEUCPtSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BFEUCPtSolver.hpp; sourceTree = "<group>"; };
 		011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6B921D711EE0052024D /* UniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
@@ -114,6 +117,8 @@
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
 				82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */,
 				82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */,
+				01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */,
+				01183DA321EEE5240002C03A /* BFEUCPtSolver.hpp */,
 				82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */,
 				82A66E301E003B0800D5FAFD /* KDTSBSolver.hpp */,
 				82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */,
@@ -192,6 +197,7 @@
 				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
 				011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */,
+				01183DA421EEE5240002C03A /* BFEUCPtSolver.cpp in Sources */,
 				011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */,
 				82A66E371E003B0800D5FAFD /* main.cpp in Sources */,
 				823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */,

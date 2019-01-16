@@ -27,7 +27,7 @@ template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 void BKDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
-    std::transform(locData->begin(),locData->end(), std::back_inserter(kdtData),
+    std::transform(locData->cbegin(),locData->cend(), std::back_inserter(kdtData),
                    [&](const SBLoc& l)->std::pair<Point<3>, const SBLoc*>{
                        return {l.locToCart3DPt(), &l};});
     this->locKdt = KDT<KDTType>(kdtData.begin(), kdtData.end());

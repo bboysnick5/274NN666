@@ -6,9 +6,9 @@
 //  Copyright © 2016 Yunlong Liu. All rights reserved.
 //
 
-
-#include "KDTSBSolver.hpp"
+#include "BFEUCPtSolver.hpp"
 #include "BFSBSolver.hpp"
+#include "KDTSBSolver.hpp"
 #include "BKDTSBSolver.hpp"
 #include "GridSBSolver.hpp"
 #include "BKDTGridSBSolver.hpp"
@@ -34,7 +34,7 @@ std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     std::vector<std::pair<double, double>> testLocs;
     testLocs.reserve(numTrials+4);
-    testLocs.insert(testLocs.begin(),{{M_PI/2, M_PI},{-M_PI/2, -M_PI},
+    testLocs.insert(testLocs.cbegin(),{{M_PI/2, M_PI},{-M_PI/2, -M_PI},
         {-M_PI/2, M_PI}, {M_PI/2, -M_PI}});
     
     std::generate_n(std::back_inserter(testLocs), numTrials,
@@ -100,13 +100,13 @@ void timeNN(SBSolver *solver, const std::vector<std::pair<double, double>> &test
         numTrials *= 5;
         start = std::chrono::system_clock::now();
         if (resultLocs.size() < maxResults) {
-            std::transform(testLocs.begin() + resultLocs.size(),
-                           testLocs.begin() + resultLocs.size() + numTrials,
+            std::transform(testLocs.cbegin() + resultLocs.size(),
+                           testLocs.cbegin() + resultLocs.size() + numTrials,
                            std::back_inserter(resultLocs), [&](const auto &p){
                                return solver->findNearest(p.second, p.first);});
         } else {
-            std::for_each(testLocs.begin() + maxResults,
-                          testLocs.begin() + maxResults + numTrials,
+            std::for_each(testLocs.cbegin() + maxResults,
+                          testLocs.cbegin() + maxResults + numTrials,
                           [&](const auto &p){
                               solver->findNearest(p.second, p.first);});
         }
@@ -123,7 +123,7 @@ void writeResults(const char* argv[],
                   const std::vector<std::pair<double, double>> &testLocs,
                   SBSolver *solver) {
     std::ofstream outRefResults(argv[2], std::ios::app);
-    std::transform(testLocs.begin(), testLocs.end(),
+    std::transform(testLocs.cbegin(), testLocs.cend(),
                    std::ostream_iterator<std::string>(outRefResults),
                    [&](const auto &p){
                        const auto resultLoc = solver->findNearest(p.second, p.first);
@@ -135,9 +135,12 @@ void writeResults(const char* argv[],
 
 int main(int argc, const char * argv[]) {
     
-  
+   // std::vector<std::pair<Point<3>, const SBLoc*>> v;
+
+    //std::cout << std::is_const<typename std::remove_pointer<typename std::iterator_traits<std::vector<int>::const_iterator>::pointer>::type>::value << "\n";
+   // return 0;
     
-   // std::cout << "Size of: " << sizeof(std::variant<KDT<KDTreeCusMem>, std::vector<std::pair<Point<3>, const SBLoc*>>, const SBLoc*>) << std::endl;
+   //std::cout << "Size of: " << sizeof(std::variant<KDT<KDTreeCusMem>, std::vector<std::pair<Point<3>, const SBLoc*>>, const SBLoc*>) << std::endl;
    // return 0;
     
     size_t MAX_TRIALS = 0xFFFFFF;
@@ -146,7 +149,7 @@ int main(int argc, const char * argv[]) {
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
     double aveLocPerCell = argc < 4 ? 0.8 : std::stod(argv[3]);
-    size_t maxCacheCellVecSize = argc < 5 ? 40 : std::stoi(argv[4]);
+    size_t maxCacheCellVecSize = argc < 5 ? 1500 : std::stoi(argv[4]);
     size_t numOfLocsToWriteToFile = argc < 6 ? false : std::stoi(argv[5]);
     
     infileLocs.ignore(256, '\r');
@@ -200,20 +203,20 @@ int main(int argc, const char * argv[]) {
     
     std::vector<shared_ptr<SBSolver>> solvers{
         //std::make_shared<BFSBSolver>(),
+        //std::make_shared<BFEUCPtSBSolver>(),
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
         std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell, maxCacheCellVecSize),
-       // std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
-       // std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
-        std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>
-            (aveLocPerCell, maxCacheCellVecSize),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
+        //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
     };
     
     
-    std::for_each(solvers.begin(), solvers.end(),
+    std::for_each(solvers.cbegin(), solvers.cend(),
                   [&](const auto &solver) {timeBuild(locData, solver.get());});
     for (size_t i = 0; i < solvers.size(); ++i) {
         //timeBuild(locData, solvers[i].get());

@@ -28,7 +28,7 @@ const SBLoc* KDTSBSolver<KDTType>::findNearest(double lng, double lat) const {
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 void KDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::for_each(locData->begin(), locData->end(), [&](const SBLoc &loc){
+    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc &loc){
         locKdt.insert(loc.locToCart3DPt(), &loc);});
 }
 

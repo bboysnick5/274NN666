@@ -46,8 +46,20 @@ public:
     // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
-    template <class RAI>
+    template <typename RAI, typename std::enable_if<std::is_same<typename
+    std::iterator_traits<RAI>::iterator_category,
+    std::random_access_iterator_tag>::value &&
+    !std::is_const<typename std::remove_pointer<
+    typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type = 0>
     KDTree(RAI, RAI);
+    
+    template <typename Const_RAI,
+    typename std::enable_if<std::is_same<typename std::iterator_traits<typename
+    std::remove_const_t<Const_RAI>>::iterator_category,
+    std::random_access_iterator_tag>::value &&
+    std::is_const<typename std::remove_pointer<
+    typename std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type = 0>
+    KDTree(Const_RAI cbegin, Const_RAI cend);
     
     // Destructor: ~KDTree()
     // Usage: (implicit)
@@ -236,8 +248,29 @@ private:
 // ----------------------- BIG FIVE -------------------------
 // ----------------------------------------------------------
 
+
+
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-template <class RAI>
+template <typename Const_RAI,
+typename std::enable_if<std::is_same<typename std::iterator_traits<typename
+std::remove_const_t<Const_RAI>>::iterator_category,
+std::random_access_iterator_tag>::value && std::is_const<typename
+std::remove_pointer< typename std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
+KDTree<N, ElemType, DT>::KDTree(Const_RAI cbegin, Const_RAI cend)
+: treeSize(cend-cbegin) {
+    std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
+//std::copy(cbegin, cend, std::back_inserter(constructData));
+    rangeCtorHelper(root, 0, constructData.begin(), constructData.end(),
+                    constructData.begin() +
+                    (constructData.end() - constructData.begin())/2);
+}
+
+template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+template <typename RAI, typename std::enable_if<std::is_same<typename
+std::iterator_traits<RAI>::iterator_category,
+std::random_access_iterator_tag>::value &&
+!std::is_const<typename std::remove_pointer<
+typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
     
     if (treeSize == 1) {

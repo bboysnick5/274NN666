@@ -19,9 +19,9 @@ class BFSBSolver : public SBSolver {
 public:
     const SBLoc* findNearest(double lng, double lat) const override;
     void build(const std::shared_ptr<std::vector<SBLoc>> &sbData) override;
-    void printSolverInfo() const override final {}
+    void printSolverInfo() const override;
     
-private:
+protected:
     std::shared_ptr<std::vector<SBLoc>> locData;
 };
 

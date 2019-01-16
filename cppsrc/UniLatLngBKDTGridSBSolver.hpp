@@ -21,7 +21,7 @@
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
-    UniLatLngBKDTGridSBSolver(double = 1, size_t = 40);
+    UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
     const SBLoc* findNearest(double lng, double lat) const override;
     virtual void printSolverInfo() const override final;
@@ -33,10 +33,13 @@ protected:
     size_t totalNodeSize = 0, singleLocs = 0, vecLocs = 0, rowSize, colSize;
     std::vector<std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
                              const SBLoc*, KDT<KDTType>>> gridCache;
-    
+    std::vector<std::pair<Point<3>, const SBLoc*>> vecData;
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
                        std::vector<std::pair<Point<3>, const SBLoc*>>&);
+    static const SBLoc* returnNNLocFromCacheVariant(double, double,
+          const std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
+          const SBLoc*, KDT<KDTType>>&);
     
 private:
     virtual void fillGridCache();
