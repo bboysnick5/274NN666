@@ -61,7 +61,6 @@
 #include <stdlib.h>
 
 
-using namespace std;
 
 template <typename T>
 class BoundedPQueue {
@@ -127,7 +126,7 @@ public:
 private:
     // This class is layered on top of a multimap mapping from priorities
     // to elements with those priorities.
-    multimap<double, T> elems;
+    std::multimap<double, T> elems;
     size_t maximumSize;
 };
 
@@ -149,7 +148,7 @@ void BoundedPQueue<T>::enqueue(const T& value, double priority) {
     
     // If there are too many elements in the queue, drop off the last one.
     if (size() > maxSize()) {
-        typename multimap<double, T>::iterator last = elems.end();
+        typename std::multimap<double, T>::iterator last = elems.end();
         --last; // Now points to highest-priority element
         elems.erase(last);
     }
@@ -189,12 +188,12 @@ size_t BoundedPQueue<T>::maxSize() const {
 // and if so return infinity.
 template <typename T>
 double BoundedPQueue<T>::best() const {
-    return empty()? numeric_limits<double>::infinity() : elems.begin()->first;
+    return empty()? std::numeric_limits<double>::infinity() : elems.begin()->first;
 }
 
 template <typename T>
 double BoundedPQueue<T>::worst() const {
-    return empty()? numeric_limits<double>::infinity() : elems.rbegin()->first;
+    return empty()? std::numeric_limits<double>::infinity() : elems.rbegin()->first;
 }
 
 #endif // BOUNDED_PQUEUE_INCLUDED

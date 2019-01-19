@@ -1,13 +1,13 @@
 //
-//  KDTreeMetaData.hpp
+//  KDTreeExpandLongest.hpp
 //  274F16NearestSB
 //
-//  Created by nick on 1/13/19.
+//  Created by nick on 1/18/19.
 //  Copyright © 2019 Yunlong Liu. All rights reserved.
 //
 
-#ifndef KDTreeMetaData_hpp
-#define KDTreeMetaData_hpp
+#ifndef KDTreeExpandLongest_hpp
+#define KDTreeExpandLongest_hpp
 
 
 #include "Point.hpp"
@@ -27,57 +27,72 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <array>
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT
 = Point<N>::DistType::EUC>
-class KDTreeMetaData {
+class KDTreeExpandLongest {
 public:
-    // Constructor: KDTreeMetaData();
-    // Usage: KDTreeMetaData<3, int> myTree;
+    // Constructor: KDTreeExpandLongest();
+    // Usage: KDTreeExpandLongest<3, int> myTree;
     // ----------------------------------------------------
-    // Constructs an empty KDTreeMetaData.
-    KDTreeMetaData() = default;
+    // Constructs an empty KDTreeExpandLongest.
+    KDTreeExpandLongest() = default;
     
-    // Constructor: KDTreeMetaData(FwdItType begin, FwdItType end);
-    // Usage: KDTreeMetaData<3, int> myTree(vec.begin(), bec.end());
+    // Constructor: KDTreeExpandLongest(FwdItType begin, FwdItType end);
+    // Usage: KDTreeExpandLongest<3, int> myTree(vec.begin(), bec.end());
     // ----------------------------------------------------
-    // Constructs a KDTreeMetaData from a collection. The tree will
+    // Constructs a KDTreeExpandLongest from a collection. The tree will
     // be balanced using median constructing method
     // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
-    template <class RAI>
-    KDTreeMetaData(RAI, RAI);
+    template <typename RAI,
+    typename std::enable_if<std::is_same<
+    typename std::iterator_traits<RAI>::iterator_category,
+    std::random_access_iterator_tag>::value &&
+    !std::is_const<typename std::remove_pointer<
+    typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type = 0>
+    KDTreeExpandLongest(RAI, RAI);
     
-    // Destructor: ~KDTreeMetaData()
+    template <typename Const_RAI,
+    typename std::enable_if<std::is_same<
+    typename std::iterator_traits<typename
+    std::remove_const_t<Const_RAI>>::iterator_category,
+    std::random_access_iterator_tag>::value && std::is_const<typename
+    std::remove_pointer<typename std::iterator_traits<Const_RAI>::pointer>
+    ::type>::value, int>::type = 0>
+    KDTreeExpandLongest(Const_RAI, Const_RAI);
+    
+    // Destructor: ~KDTreeExpandLongest()
     // Usage: (implicit)
     // ----------------------------------------------------
-    // Cleans up all resources used by the KDTreeMetaData.
-    ~KDTreeMetaData();
+    // Cleans up all resources used by the KDTreeExpandLongest.
+    ~KDTreeExpandLongest();
     
-    // KDTreeMetaData(const KDTreeMetaData& rhs);
-    // KDTreeMetaData& operator=(const KDTreeMetaData& rhs);
-    // Usage: KDTreeMetaData<3, int> one = two;
+    // KDTreeExpandLongest(const KDTreeExpandLongest& rhs);
+    // KDTreeExpandLongest& operator=(const KDTreeExpandLongest& rhs);
+    // Usage: KDTreeExpandLongest<3, int> one = two;
     // Usage: one = two;
     // -----------------------------------------------------
     // Copy constructor and copy assignment operator.
-    KDTreeMetaData(const KDTreeMetaData&);
-    KDTreeMetaData& operator=(const KDTreeMetaData&)&;
+    KDTreeExpandLongest(const KDTreeExpandLongest&);
+    KDTreeExpandLongest& operator=(const KDTreeExpandLongest&)&;
     
-    // KDTreeMetaData(const KDTreeMetaData& rhs);
-    // KDTreeMetaData& operator=(const KDTreeMetaData& rhs);
-    // Usage: KDTreeMetaData<3, int> one = two;
+    // KDTreeExpandLongest(const KDTreeExpandLongest& rhs);
+    // KDTreeExpandLongest& operator=(const KDTreeExpandLongest& rhs);
+    // Usage: KDTreeExpandLongest<3, int> one = two;
     // Usage: one = two;
     // -----------------------------------------------------
     // Move constructor and move assignment operator.
-    KDTreeMetaData(KDTreeMetaData&&) noexcept;
-    KDTreeMetaData& operator=(KDTreeMetaData&&)& noexcept;
+    KDTreeExpandLongest(KDTreeExpandLongest&&) noexcept;
+    KDTreeExpandLongest& operator=(KDTreeExpandLongest&&)& noexcept;
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
     // ----------------------------------------------------
-    // Returns the dimension of the points stored in this KDTreeMetaData.
+    // Returns the dimension of the points stored in this KDTreeExpandLongest.
     size_t dimension() const;
     typename Point<N>::DistType distType() const;
     
@@ -99,13 +114,13 @@ public:
     // bool contains(const Point<N>& pt) const;
     // Usage: if (kd.contains(pt))
     // ----------------------------------------------------
-    // Returns whether the specified point is contained in the KDTreeMetaData.
+    // Returns whether the specified point is contained in the KDTreeExpandLongest.
     bool contains(const Point<N>&) const;
     
     // void insert(const Point<N>& pt, const ElemType& value);
     // Usage: kd.insert(v, "This value is associated with v.");
     // ----------------------------------------------------
-    // Inserts the point pt into the KDTreeMetaData, associating it with the specified
+    // Inserts the point pt into the KDTreeExpandLongest, associating it with the specified
     // value. If the element already existed in the tree, the new value will
     // overwrite the existing one.
     void insert(const Point<N>&, const ElemType&);
@@ -113,8 +128,8 @@ public:
     // ElemType& operator[](const Point<N>& pt);
     // Usage: kd[v] = "Some Value";
     // ----------------------------------------------------
-    // Returns a reference to the value associated with point pt in the KDTreeMetaData.
-    // If the point does not exist, then it is added to the KDTreeMetaData using the
+    // Returns a reference to the value associated with point pt in the KDTreeExpandLongest.
+    // If the point does not exist, then it is added to the KDTreeExpandLongest using the
     // default value of ElemType as its key.
     ElemType& operator[](const Point<N>& pt);
     
@@ -123,14 +138,14 @@ public:
     // Usage: cout << kd.at(v) << endl;
     // ----------------------------------------------------
     // Returns a reference to the key associated with the point pt. If the point
-    // is not in the tree, this function throws an out_of_range exception.
+    // is not in the tree, this function //throws an out_of_range exception.
     ElemType& at(const Point<N>& pt);
     const ElemType& at(const Point<N>& pt) const;
     
     // ElemType kNNValue(const Point<N>& key, size_t k) const
     // Usage: cout << kd.kNNValue(v, 3) << endl;
     // ----------------------------------------------------
-    // Given a point v and an integer k, finds the k points in the KDTreeMetaData
+    // Given a point v and an integer k, finds the k points in the KDTreeExpandLongest
     // nearest to v and returns the most common value associated with those
     // points. In the event of a tie, one of the most frequent value will be
     // chosen.
@@ -139,7 +154,7 @@ public:
     // Iter rangeDiffKNNPairs(const Point<N>&, double, Iter) const
     // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
     // ----------------------------------------------------
-    // Given a point p and a double offset, return a set of points in the KDTreeMetaData
+    // Given a point p and a double offset, return a set of points in the KDTreeExpandLongest
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
@@ -149,9 +164,10 @@ public:
 private:
     
     struct TreeNode {
+        size_t dimToExpand;
+        Point<N> key;
         TreeNode *left;
         TreeNode *right;
-        Point<N> key;
         ElemType object;
         
         TreeNode() = default;
@@ -160,27 +176,21 @@ private:
         // TreeNode(TreeNode&&) = default;
         // TreeNode& operator = (TreeNode&&) = default;
         
-        TreeNode(const Point<N>& k, const ElemType& obj)
-        : left(nullptr), right(nullptr), key(k), object(obj) {}
+        TreeNode(size_t dimToExpand, const Point<N>& k, const ElemType& obj)
+        : dimToExpand(dimToExpand), key(k), left(nullptr), right(nullptr),
+          object(obj) {}
         
-        TreeNode(const Point<N>&& k, const ElemType&& obj)
-        : left(nullptr), right(nullptr), key(std::move(k)),
-        object(std::move(obj)) {}
+        TreeNode(size_t dimToExpand, const Point<N>&& k, const ElemType&& obj)
+        : dimToExpand(dimToExpand), key(std::move(k)), left(nullptr), right(nullptr),
+          object(std::move(obj)) {}
         
         ~TreeNode() = default;
     };
     
-    struct MetaData {
-        void* prev;
-        size_t remaining;
-        size_t treesize;
-        TreeNode *root;
-        TreeNode *cur;
-    };
     
     TreeNode *root;
     size_t treeSize;
-    PooledAllocator pool;
+    std::unique_ptr<PooledAllocator> pool;
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
@@ -189,16 +199,20 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, size_t, RAI, RAI, RAI);
+    void rangeCtorHelper(TreeNode*&, RAI, RAI, RAI, std::array<double, N*2>&);
+    
+    
+    template <class RAI>
+    static std::array<double, N*2> computeInitBBox(RAI, RAI);
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
     void kNNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
                         BoundedPQueue<ElemType> &bpq) const;
     
-    //void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N>&, double,
-    //                            std::vector<std::pair<double,
-    //                         std::pair<Point<N>, ElemType>>>&, double&, double&) const;
+    void rangeDiffKNNPairsHelper(TreeNode*, size_t, const Point<N>&, double,
+                               std::vector<std::pair<double,
+                            std::pair<Point<N>, ElemType>>>&, double&, double&) const;
     
     // ----------------------------------------------------
     // Identical to kNNValue method with k equals 1. NNValue
@@ -235,21 +249,42 @@ private:
     
 };
 
-/** KDTreeMetaData class implementation details */
+/** KDTreeExpandLongest class implementation details */
 
 
 // ----------------------------------------------------------
 // ----------------------- BIG FIVE -------------------------
 // ----------------------------------------------------------
 
+
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-template <class RAI>
-KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(RAI begin, RAI end)
-: treeSize(end-begin) {
-    
-    TreeNode* ndPoolPtr = root = pool.allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, 0, begin, end, begin + (end - begin)/2);
-    
+template <typename Const_RAI,
+typename std::enable_if<std::is_same<typename std::iterator_traits<typename
+std::remove_const_t<Const_RAI>>::iterator_category,
+std::random_access_iterator_tag>::value &&
+std::is_const<typename std::remove_pointer<typename
+std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
+KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(Const_RAI cbegin, Const_RAI cend)
+: treeSize(cend-cbegin), pool(std::make_unique<PooledAllocator>()) {
+    std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
+    TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
+    auto bbox = computeInitBBox(cbegin, cend);
+    rangeCtorHelper(ndPoolPtr, constructData.begin(), constructData.end(),
+                    constructData.begin() +
+                    (constructData.end() - constructData.begin())/2, bbox);
+}
+
+template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+template <typename RAI, typename std::enable_if<std::is_same<typename
+std::iterator_traits<RAI>::iterator_category,
+std::random_access_iterator_tag>::value && !std::is_const<typename
+std::remove_pointer< typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
+KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI end)
+//, std::array<double, N> bboxHint)
+: treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
+    auto bbox = computeInitBBox(begin, end);
+    TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
+    rangeCtorHelper(ndPoolPtr, begin, begin + (end - begin)/2, end, bbox);
     
     /*
      struct actRecord {
@@ -276,7 +311,7 @@ KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(RAI begin, RAI end)
      std::nth_element(thisBeginIt, median, thisEndIt,
      [=](const auto& p1, const auto& p2) {
      return p1.first[dim] < p2.first[dim];});
-     pool.construct(ndPoolPtr, std::move(median->first),
+     pool->construct(ndPoolPtr, std::move(median->first),
      std::move(median->second));
      curNd = ndPoolPtr++;
      dim = dim == N - 1 ? 0 : dim + 1;
@@ -301,22 +336,22 @@ KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(RAI begin, RAI end)
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(const KDTreeMetaData& rhs)
+KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(const KDTreeExpandLongest& rhs)
 : root(new TreeNode()), treeSize(rhs.treeSize) {
     // wrong logic.
     // should be check whether this size is greater than other.
     // if not allocate additional space. if yes
     //std::destroy_n(root, treeSize);
-    //pool.free_all();
-    //root = pool.allocate<TreeNode>(rhs.treeSize);
+    //pool->free_all();
+    //root = pool->allocate<TreeNode>(rhs.treeSize);
     //auto *ndPoolIt = addressof(*root);
-    //pool.construct(root, {rhs.root->key, rhs.root->obj});
+    //pool->construct(root, {rhs.root->key, rhs.root->obj});
     treeCopy(root, rhs.root);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeMetaData<N, ElemType, DT>&
-KDTreeMetaData<N, ElemType, DT>::operator=(const KDTreeMetaData& rhs) & {
+KDTreeExpandLongest<N, ElemType, DT>&
+KDTreeExpandLongest<N, ElemType, DT>::operator=(const KDTreeExpandLongest& rhs) & {
     if (this != &rhs) {
         delete root;
         treeSize = rhs.treeSize;
@@ -327,15 +362,15 @@ KDTreeMetaData<N, ElemType, DT>::operator=(const KDTreeMetaData& rhs) & {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeMetaData<N, ElemType, DT>::KDTreeMetaData(KDTreeMetaData&& rhs) noexcept
+KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(KDTreeExpandLongest&& rhs) noexcept
 : root(rhs.root), treeSize(rhs.treeSize), pool(std::move(rhs.pool)) {
     rhs.root = nullptr;
     rhs.treeSize = 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeMetaData<N, ElemType, DT>& KDTreeMetaData<N, ElemType, DT>::
-operator=(KDTreeMetaData&& rhs) & noexcept {
+KDTreeExpandLongest<N, ElemType, DT>& KDTreeExpandLongest<N, ElemType, DT>::
+operator=(KDTreeExpandLongest&& rhs) & noexcept {
     if (this != &rhs) {
         root = rhs.root;
         treeSize = rhs.treeSize;
@@ -346,42 +381,120 @@ operator=(KDTreeMetaData&& rhs) & noexcept {
     return *this;
 }
 
+/*
+ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+ template <class RAI>
+ void KDTreeExpandLongest<N, ElemType, DT>::
+ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
+ RAI median, RAI end, std::array<double, N>& bbox) {
+ size_t dim = std::max_element(bbox.begin(), bbox.end()) - bbox.begin();
+ std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
+ return p1.first[dim] < p2.first[dim];});
+ pool->construct(ndPoolPtr, std::move(median->first),
+ std::move(median->second));
+ auto curNdPtr = ndPoolPtr;
+ //size_t nextDim = dim == N - 1 ? 0 : dim + 1;
+ double dec;
+ 
+ if (begin == median - 1) {
+ curNdPtr->left = ++ndPoolPtr;
+ pool->construct(ndPoolPtr, std::move(begin->first),
+ std::move(begin->second));
+ } else if (begin != median) {
+ dec = (end-1)->first[dim] - (median-1)->first[dim];
+ bbox[dim] -= dec;
+ //nextDim = std::max_element(bbox, bbox+N)-bbox;
+ curNdPtr->left = ++ndPoolPtr;
+ rangeCtorHelper(ndPoolPtr, begin,
+ begin + (median-begin)/2, median, bbox);
+ bbox[dim] += dec;
+ }
+ 
+ if (median + 2 == end) {
+ curNdPtr->right = ++ndPoolPtr;
+ pool->construct(ndPoolPtr, std::move((median + 1)->first),
+ std::move((median+1)->second));
+ } else if (median + 1 != end) {
+ dec = (median+1)->first[dim] - begin->first[dim];
+ bbox[dim] -= dec;
+ curNdPtr->right = ++ndPoolPtr;
+ rangeCtorHelper(ndPoolPtr, median+1,
+ median + (end-median+1)/2, end, bbox);
+ bbox[dim] += dec;
+ }
+ }
+ */
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
-void KDTreeMetaData<N, ElemType, DT>::
-rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
-                RAI end, RAI median) {
+std::array<double, N*2> KDTreeExpandLongest<N, ElemType, DT>::
+computeInitBBox(RAI begin, RAI end) {
+    std::array<double, N*2> bbox;
+    std::generate(bbox.begin(), bbox.end(),
+                  [lowHighToggle = 0lu, lowHigh = std::array<double, 2>{
+                   std::numeric_limits<double>::max(),
+                   std::numeric_limits<double>::min()}]() mutable {
+                      return lowHigh[lowHighToggle++%2];});
+    std::for_each(begin, end, [&](const auto &p) mutable {
+        for (size_t i = 0; i < N; ++i) {
+            size_t bboxLowIdx = i * 2, bboxHighIdx = bboxLowIdx + 1;
+            double ptValOnithDim = p.first[i];
+            bbox[bboxLowIdx] = std::min(bbox[bboxLowIdx], ptValOnithDim);
+            bbox[bboxHighIdx] = std::max(bbox[bboxHighIdx], ptValOnithDim);
+        }
+    });
+    return bbox;
+}
+
+template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+template <class RAI>
+void KDTreeExpandLongest<N, ElemType, DT>::
+rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
+                std::array<double, N*2> &bbox) {
+    size_t dim = 0;
+    double maxSpan = bbox[1] - bbox[0];
+    for (size_t i = 1; i < N; ++i) {
+        size_t bboxLowIdx = i * 2, bboxHighIdx = bboxLowIdx + 1;
+        double span = bbox[bboxHighIdx] - bbox[bboxLowIdx];
+        if (span > maxSpan) {
+            dim = i;
+        }
+    }
+    
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
-    pool.construct(ndPoolPtr, std::move(median->first),
-                   std::move(median->second));
+    pool->construct(ndPoolPtr, dim, std::move(median->first),
+                    std::move(median->second));
     auto curNdPtr = ndPoolPtr;
-    size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     
     if (begin == median - 1) {
         curNdPtr->left = ++ndPoolPtr;
-        pool.construct(ndPoolPtr, std::move(begin->first),
-                       std::move(begin->second));
+        pool->construct(ndPoolPtr, dim, std::move(begin->first),
+                        std::move(begin->second));
     } else if (begin != median) {
         curNdPtr->left = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, nextDim, begin,
-                        median, begin + (median-begin)/2);
+        auto prevDimHigh = bbox[dim*2+1];
+        bbox[dim*2+1] = median->first[dim];
+        rangeCtorHelper(ndPoolPtr, begin, begin + (median-begin)/2, median, bbox);
+        bbox[dim*2+1] = prevDimHigh;
     }
     
     if (median + 2 == end) {
         curNdPtr->right = ++ndPoolPtr;
-        pool.construct(ndPoolPtr, std::move((median + 1)->first),
-                       std::move((median+1)->second));
+        pool->construct(ndPoolPtr, dim, std::move((median + 1)->first),
+                        std::move((median+1)->second));
     } else if (median + 1 != end) {
         curNdPtr->right = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, nextDim, median+1,
-                        end, median + (end-median+1)/2);
+        auto prevDimLow = bbox[dim*2];
+        bbox[dim*2] = median->first[dim];
+        rangeCtorHelper(ndPoolPtr, median+1, median + (end-median+1)/2, end, bbox);
+        bbox[dim*2] = prevDimLow;
     }
 }
 
+
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeMetaData<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
+void KDTreeExpandLongest<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
                                              TreeNode* otherNode
 //TreeNode* ndPoolIt
 ) {
@@ -390,7 +503,7 @@ void KDTreeMetaData<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
             thisNode->object = otherNode->object;
             thisNode->key = otherNode->key;
         } else {
-            //pool.construct(thisNode, {otherNode->key, otherNode->object});
+            //pool->construct(thisNode, {otherNode->key, otherNode->object});
             //++ndPoolIt;
             thisNode = new TreeNode(otherNode->key, otherNode->object);
         }
@@ -403,8 +516,9 @@ void KDTreeMetaData<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-KDTreeMetaData<N, ElemType, DT>::~KDTreeMetaData<N, ElemType, DT>() {
-    pool.destroy_and_free_all<TreeNode>();
+KDTreeExpandLongest<N, ElemType, DT>::~KDTreeExpandLongest<N, ElemType, DT>() {
+    if (pool)
+        pool->destroy_and_free_all<TreeNode>();
 }
 
 // ----------------------------------------------------------
@@ -412,39 +526,39 @@ KDTreeMetaData<N, ElemType, DT>::~KDTreeMetaData<N, ElemType, DT>() {
 // ----------------------------------------------------------
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeMetaData<N, ElemType, DT>::dimension() const {
+size_t KDTreeExpandLongest<N, ElemType, DT>::dimension() const {
     return N;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename Point<N>::DistType KDTreeMetaData<N, ElemType, DT>::distType() const {
+typename Point<N>::DistType KDTreeExpandLongest<N, ElemType, DT>::distType() const {
     return DT;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeMetaData<N, ElemType, DT>::size() const {
+size_t KDTreeExpandLongest<N, ElemType, DT>::size() const {
     return treeSize;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeMetaData<N, ElemType, DT>::height() const {
+size_t KDTreeExpandLongest<N, ElemType, DT>::height() const {
     return heightHelper(root);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTreeMetaData<N, ElemType, DT>::heightHelper(TreeNode *n) const {
+size_t KDTreeExpandLongest<N, ElemType, DT>::heightHelper(TreeNode *n) const {
     return n ? 1 + std::max(heightHelper(n->left),
                             heightHelper(n->right)) : -1;
 }
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-bool KDTreeMetaData<N, ElemType, DT>::empty() const {
+bool KDTreeExpandLongest<N, ElemType, DT>::empty() const {
     return treeSize == 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeMetaData<N, ElemType, DT>::printTreeInfo() const {
+void KDTreeExpandLongest<N, ElemType, DT>::printTreeInfo() const {
     std::cout << "Tree height is " << height()
     << "\nTree size is " << size() << "\n";
 }
@@ -454,31 +568,31 @@ void KDTreeMetaData<N, ElemType, DT>::printTreeInfo() const {
 // ----------------------------------------------------------
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeMetaData<N, ElemType, DT>::clear() {
-    pool.free_all();
+void KDTreeExpandLongest<N, ElemType, DT>::clear() {
+    pool->destroy_and_free_all<TreeNode>();
     root = nullptr;
     treeSize = 0;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeMetaData<N, ElemType, DT>::
+void KDTreeExpandLongest<N, ElemType, DT>::
 insert(const Point<N>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
         (*ndPtr)->object = value;
     } else {
-        *ndPtr = new TreeNode(pt, value);
+        *ndPtr = new TreeNode(0, pt, value);
         treeSize++;
     }
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-bool KDTreeMetaData<N, ElemType, DT>::contains(const Point<N>& pt) const {
+bool KDTreeExpandLongest<N, ElemType, DT>::contains(const Point<N>& pt) const {
     return *findNodePtr(pt) != nullptr;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType& KDTreeMetaData<N, ElemType, DT>::operator[] (const Point<N>& pt) {
+ElemType& KDTreeExpandLongest<N, ElemType, DT>::operator[] (const Point<N>& pt) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
         *ndPtr = new TreeNode(pt, ElemType());
@@ -488,28 +602,28 @@ ElemType& KDTreeMetaData<N, ElemType, DT>::operator[] (const Point<N>& pt) {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType& KDTreeMetaData<N, ElemType, DT>::at(const Point<N>& pt) {
-    return const_cast<ElemType&>(static_cast<const KDTreeMetaData&>(*this).at(pt));
+ElemType& KDTreeExpandLongest<N, ElemType, DT>::at(const Point<N>& pt) {
+    return const_cast<ElemType&>(static_cast<const KDTreeExpandLongest&>(*this).at(pt));
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-const ElemType& KDTreeMetaData<N, ElemType, DT>::at(const Point<N>& pt) const {
+const ElemType& KDTreeExpandLongest<N, ElemType, DT>::at(const Point<N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
-        throw out_of_range("The point is out of range");
+        //throw out_of_range("The point is out of range");
     }
     return (*n)->object;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename KDTreeMetaData<N, ElemType, DT>::TreeNode**
-KDTreeMetaData<N, ElemType, DT>::findNodePtr(const Point<N>& pt) {
-    return const_cast<TreeNode**>(static_cast<const KDTreeMetaData*>(this)->findNodePtr(pt));
+typename KDTreeExpandLongest<N, ElemType, DT>::TreeNode**
+KDTreeExpandLongest<N, ElemType, DT>::findNodePtr(const Point<N>& pt) {
+    return const_cast<TreeNode**>(static_cast<const KDTreeExpandLongest*>(this)->findNodePtr(pt));
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-typename KDTreeMetaData<N, ElemType, DT>::TreeNode*const*
-KDTreeMetaData<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
+typename KDTreeExpandLongest<N, ElemType, DT>::TreeNode*const*
+KDTreeExpandLongest<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
     TreeNode *const*n = &root;
     for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1)
         n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
@@ -518,7 +632,7 @@ KDTreeMetaData<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType KDTreeMetaData<N, ElemType, DT>::
+ElemType KDTreeExpandLongest<N, ElemType, DT>::
 kNNValue(const Point<N>& pt, size_t k) const {
     if (k == 1)
         return NNValue(pt);
@@ -565,7 +679,7 @@ kNNValue(const Point<N>& pt, size_t k) const {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeMetaData<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
+void KDTreeExpandLongest<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
                                                    const Point<N>& pt, BoundedPQueue<ElemType> &bpq) const {
     bpq.enqueue(cur->object, Point<N>::template dist<DT>(cur->key, pt));
     size_t nextDim = dim + 1 < N ? dim + 1 : 0;
@@ -582,67 +696,56 @@ void KDTreeMetaData<N, ElemType, DT>::kNNValueHelper(TreeNode *cur, size_t dim,
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class Iter>
-Iter KDTreeMetaData<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
-                                                      double fence, Iter returnIt) const {
+Iter KDTreeExpandLongest<N, ElemType, DT>::
+rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
     /*
      std::vector<std::pair<double, std::pair<Point<N>, ElemType>>> distKVPairs;
      distKVPairs.reserve(sqrt(treeSize));
      double bestSq = std::numeric_limits<double>::max(),
      bestDiffSq = std::numeric_limits<double>::max();
-     rangeDiffKNNPairsHelper(root, 0, key, diff, distKVPairs, bestSq, bestDiffSq);
+     rangeDiffKNNPairsHelper(root, 0, pt, fence, distKVPairs, bestSq, bestDiffSq);
      for (const auto &p : distKVPairs) {
      if (p.first < bestDiffSq)
-     *it++ = std::move(p.second);
+     *returnIt++ = std::move(p.second);
      }
-     return it;
+     return returnIt;
      */
     
-    std::vector<std::pair<double, std::pair<const Point<N>*, const ElemType*>>> distKVPairs;
-    distKVPairs.reserve(sqrt(treeSize));
+    std::vector<std::tuple<double, const Point<N>&, const ElemType&>> distPtElemTuple;
+    distPtElemTuple.reserve(sqrt(treeSize));
     double bestDistSq = std::numeric_limits<double>::max(),
-    bestDistDiffSq = std::numeric_limits<double>::max(),
-    curDistSq, fenceSq = fence*fence;
-    size_t dim = 0;
-    TreeNode *cur = root, *next;
+    bestDistDiffSq = std::numeric_limits<double>::max(), fenceSq = fence*fence;
+    const TreeNode *cur = root;
     bool hasNext = true;
-    
-    
-    
-    struct ActRecord {
-        double curDist;
-        TreeNode *cur;
-        size_t dim;
-    };
-    ActRecord st[static_cast<size_t>(log2(treeSize+1))],
-    *it = st;
+    std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(treeSize+1))],
+                                       *it = st;
     while (it != st || hasNext) {
         if (!hasNext) {
-            const auto &ar = *--it;
-            if (!(ar.curDist < bestDistDiffSq && (cur = ar.cur)))
+            if ((--it)->first >= bestDistDiffSq || !(cur = it->second))
                 continue;
-            dim = ar.dim;
             hasNext = true;
         }
-        curDistSq = Point<N>::template
-        dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+        double curDistSq = Point<N>::template
+                           dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
                 bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
             }
-            distKVPairs.emplace_back(curDistSq,
-                                     std::forward<std::pair<const Point<N>*,
-                                     const ElemType*>>({&cur->key, &cur->object}));
+            distPtElemTuple.emplace_back(curDistSq, cur->key, cur->object);
         }
-        curDistSq = pt[dim] - cur->key[dim];
-        next = curDistSq < 0.0 ? cur->left : cur->right;
-        curDistSq *= curDistSq;
-        dim = dim == N - 1 ? 0 : dim + 1;
+        size_t dim = cur->dimToExpand;
+        double diff = pt[dim] - cur->key[dim];
+        const TreeNode* next = diff < 0.0 ? cur->left : cur->right;
+        diff *= diff;
         if (next) {
-            *it++ = {curDistSq, next == cur->left ? cur->right : cur->left, dim};
+            //*it++ = std::tie(diff, next == cur->left ? cur->right : cur->left);
+            //auto p = std::pair{diff, next == cur->left ? cur->right : cur->left};
+            *it++ = {diff, next == cur->left ? cur->right : cur->left};
+           // st[it++-st] = {diff, next == cur->left ? cur->right : cur->left};
             cur = next;
         } else {
-            if (curDistSq < bestDistDiffSq) {
+            if (diff < bestDistDiffSq) {
                 next = next == cur->left ? cur->right : cur->left;
                 if (next) {
                     cur = next;
@@ -653,17 +756,17 @@ Iter KDTreeMetaData<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
         }
     }
     
-    for (const auto& [dist, kvPairs] : distKVPairs) {
-        if (dist < bestDistDiffSq)
-            *returnIt++ = {*kvPairs.first, *kvPairs.second};
+    for (const auto &[distSq, pt, elem] : distPtElemTuple) {
+        if (distSq < bestDistDiffSq)
+            *returnIt++ = {pt, elem};
     }
     return returnIt;
     
 }
 
-/*
+
  template <size_t N, typename ElemType, typename Point<N>::DistType DT>
- void KDTreeMetaData<N, ElemType, DT>::
+ void KDTreeExpandLongest<N, ElemType, DT>::
  rangeDiffKNNPairsHelper(TreeNode *cur, size_t dim, const Point<N>& pt,
  double diff, std::vector<std::pair<double,
  std::pair<Point<N>, ElemType>>> &distKVPairs,
@@ -686,52 +789,61 @@ Iter KDTreeMetaData<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
  if (next)
  rangeDiffKNNPairsHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
  }
- }*/
+ }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-ElemType KDTreeMetaData<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
+ElemType KDTreeExpandLongest<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
     
     double bestDist = std::numeric_limits<double>::max(), curDist, diff;
-    size_t dim = 0, nextDim;
+    size_t dim;
     const ElemType *bestValue = nullptr;
     TreeNode *cur = root, *next;
     bool hasNext = true;
+    std::pair<double, TreeNode*> st[static_cast<size_t>(log2(treeSize+1))], *it = st;
     
-    struct actRecord {
-        double curDist;
-        TreeNode *cur;
-        size_t dim;
-    };
-    actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
+    
+    // LOGGGGGGGGGGGGGGG
+    
+    /*
+     static size_t totalNumNodesSearches = 0, numNNSearches = 0, totalTreeSize = 0;
+     static size_t numOfFullSearch = 0;
+     size_t thisNumNodesSearches = 0;
+     static bool logCondition;
+     static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000;
+     logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
+     */
+    
+    
     while (it != st || hasNext) {
         if (!hasNext) {
-            const auto &ar = *--it;
-            if (!(ar.curDist < bestDist && (cur = ar.cur)))
+            if ((--it)->first >= bestDist || !(cur = it->second))
                 continue;
-            dim = ar.dim;
             hasNext = true;
         }
-        nextDim = dim == N - 1 ? 0 : dim + 1;
-        curDist = Point<N>::template
-        dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+        curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
         }
+        
+        // LOGGGGGGGGGGGGGGG
+        // if (logCondition)
+       //   thisNumNodesSearches++;
+        
+        dim = cur->dimToExpand;
         diff = pt[dim] - cur->key[dim];
         next = diff < 0.0 ? cur->left : cur->right;
         curDist = diff*diff;
         if (next) {
-            *it++ = {curDist, next == cur->left ? cur->right : cur->left, nextDim};
+            //*it++ = std::tie(curDist, next == cur->left ? cur->right : cur->left);
+            *it++ = {curDist, next == cur->left ? cur->right : cur->left};
             cur = next;
-            dim = nextDim;
         } else {
             if (curDist < bestDist) {
                 next = next == cur->left ? cur->right : cur->left;
                 if (next) {
                     cur = next;
-                    dim = nextDim;
                     continue;
                 }
             }
@@ -739,8 +851,28 @@ ElemType KDTreeMetaData<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
         }
     }
     
+    // LOGGGGGGGGGGGGGGG
     /*
+     if (logCondition) {
+     numNNSearches++;
+     totalTreeSize += treeSize;
+     totalNumNodesSearches += thisNumNodesSearches;
+     if (thisNumNodesSearches == treeSize)
+     numOfFullSearch++;
+     std::cout << "***** Log of treesize from " << TREE_SIZE_LOWER_BOUND
+     << " to " << TREE_SIZE_UPPER_BOUND << " *****"
+     << "\nTotal num of NN searches with this criteria: " << numNNSearches
+     << "\n\nTreesize: " << treeSize
+     << "\nNum of nodes searched in this NN search: " << thisNumNodesSearches
+     << "\n\nAve treesize: " << totalTreeSize/numNNSearches
+     << "\nAve num of nodes searched in each NN search: " << totalNumNodesSearches/numNNSearches
+     << "\n\nnum of full searches percentage: " << numOfFullSearch*100.0/numNNSearches
+     << "%\nSearched nodes over total num of nodes percentage: " << totalNumNodesSearches*100.0/totalTreeSize << "%\n\n\n\n";
      
+     }
+    */
+    
+     /*
      double bestDist = std::numeric_limits<double>::max();
      const ElemType *bestValue = nullptr;
      NNValueHelper(root, 0, pt, bestValue, bestDist);
@@ -753,7 +885,7 @@ ElemType KDTreeMetaData<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <typename Point<N>::DistType thisDt,
 typename std::enable_if<thisDt == Point<N>::DistType::EUC, int>::type>
-void KDTreeMetaData<N, ElemType, DT>::
+void KDTreeExpandLongest<N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
               const ElemType *&bestValue, double &bestDist) const {
     double curDist = Point<N>::template
@@ -777,7 +909,7 @@ NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <typename Point<N>::DistType thisDt,
 typename std::enable_if<thisDt != Point<N>::DistType::EUC, int>::type>
-void KDTreeMetaData<N, ElemType, DT>::
+void KDTreeExpandLongest<N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
               const ElemType *&bestValue, double &bestDist) const {
     double curDist = Point<N>::template dist<DT>(cur->key, pt);
@@ -797,7 +929,7 @@ NNValueHelper(TreeNode *cur, size_t dim, const Point<N> &pt,
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-double KDTreeMetaData<N, ElemType, DT>::branchMin(const Point<N> &trPt,
+double KDTreeExpandLongest<N, ElemType, DT>::branchMin(const Point<N> &trPt,
                                                 const Point<N> &searchPt, size_t idx) const {
     switch (DT) {
         case Point<N>::DistType::EUC:
@@ -815,4 +947,6 @@ double KDTreeMetaData<N, ElemType, DT>::branchMin(const Point<N> &trPt,
 
 
 
-#endif /* KDTreeMetaData_hpp */
+
+
+#endif /* KDTreeExpandLongest_hpp */

@@ -21,6 +21,8 @@ public:
     void build(const std::shared_ptr<std::vector<SBLoc>> &sbData) override;
     void printSolverInfo() const override;
     
+    virtual ~BFSBSolver() {}
+    
 protected:
     std::shared_ptr<std::vector<SBLoc>> locData;
 };

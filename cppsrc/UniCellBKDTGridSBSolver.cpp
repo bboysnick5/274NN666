@@ -22,7 +22,7 @@ void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
     this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
     std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs;
-    ptLocPairs.reserve(std::sqrt(this->locKdt.size()));
+    ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
     //reduction(+:totalTreeSize, singleLocs) collapse(2)
@@ -59,6 +59,7 @@ findNearest(double lng, double lat) const {
 
 template class UniCellBKDTGridSBSolver<KDTree>;
 template class UniCellBKDTGridSBSolver<KDTreeCusMem>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongest>;
 
 
 

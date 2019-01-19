@@ -26,6 +26,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <array>
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT
@@ -134,7 +135,7 @@ public:
     // Usage: cout << kd.at(v) << endl;
     // ----------------------------------------------------
     // Returns a reference to the key associated with the point pt. If the point
-    // is not in the tree, this function throws an out_of_range exception.
+    // is not in the tree, this function //throws an out_of_range exception.
     ElemType& at(const Point<N>& pt);
     const ElemType& at(const Point<N>& pt) const;
     
@@ -160,9 +161,9 @@ public:
 private:
     
     struct TreeNode {
+        Point<N> key;
         TreeNode *left;
         TreeNode *right;
-        Point<N> key;
         ElemType object;
         
         TreeNode() = default;
@@ -172,10 +173,10 @@ private:
        // TreeNode& operator = (TreeNode&&) = default;
 
         TreeNode(const Point<N>& k, const ElemType& obj)
-        : left(nullptr), right(nullptr), key(k), object(obj) {}
+        : key(k), left(nullptr), right(nullptr), object(obj) {}
         
         TreeNode(const Point<N>&& k, const ElemType&& obj)
-        : left(nullptr), right(nullptr), key(std::move(k)),
+        :  key(std::move(k)), left(nullptr), right(nullptr),
           object(std::move(obj)) {}
         
         ~TreeNode() {
@@ -277,7 +278,11 @@ KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
         root = new TreeNode(std::move(begin->first),
                             std::move(begin->second));
     } else if (treeSize > 1) {
-        rangeCtorHelper(root, 0, begin, end, begin + (end - begin)/2);
+        rangeCtorHelper(root, 0, begin, begin + (end - begin)/2, end);
+    } else {
+        this->root = nullptr;
+        treeSize = 0;
+        std::cerr << "invalid iterators to construct KDTree.\n";
     }
      
 
@@ -286,7 +291,7 @@ KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
     struct actRecord {
         TreeNode** curNdPtr;
         size_t dim;
-        RAI thisBeginIt, thisEndIt, median;
+        RAI thisBeginIt, median, thisEndIt;
     };
     
     actRecord st[static_cast<size_t>(log2(treeSize+1))];
@@ -304,7 +309,6 @@ KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
             thisBeginIt = it->thisBeginIt;
             thisEndIt = it->thisEndIt;
             median = it->median;
-            //std::tie(curNdPtr, dim, thisBeginIt, thisEndIt, median) = *--it;
         }
         
         std::nth_element(thisBeginIt, median, thisEndIt,
@@ -317,7 +321,7 @@ KDTree<N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
         
        if (median != thisBeginIt) {
             if (median + 1 != thisEndIt) {
-                *it++ = {&(*curNdPtr)->left, nextDim, thisBeginIt, median, thisBeginIt + (median-thisBeginIt)/2};
+                *it++ = {&(*curNdPtr)->left, nextDim, thisBeginIt, thisBeginIt + (median-thisBeginIt)/2, median};
                 curNdPtr = &(*curNdPtr)->right;
                 thisBeginIt = median+1;
                 median = median + (thisEndIt-median+1)/2;
@@ -390,7 +394,7 @@ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
 void KDTree<N, ElemType, DT>::
 rangeCtorHelper(TreeNode*& curNdPtr, size_t dim, RAI begin,
-                RAI end, RAI median) {
+                RAI median, RAI end) {
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
     curNdPtr = new TreeNode(std::move(median->first),
@@ -401,14 +405,14 @@ rangeCtorHelper(TreeNode*& curNdPtr, size_t dim, RAI begin,
                                       std::move(begin->second));
     } else if (begin != median) {
         rangeCtorHelper(curNdPtr->left, nextDim, begin,
-                        median, begin + (median-begin)/2);
+                        begin + (median-begin)/2, median);
     }
     if (median + 1 == end - 1) {
         curNdPtr->right = new TreeNode(std::move((median + 1)->first),
                                        std::move((median+1)->second));
     } else if (median + 1 != end) {
         rangeCtorHelper(curNdPtr->right, nextDim, median+1,
-                        end, median + (end-median+1)/2);
+                        median + (end-median+1)/2, end);
     }
 } 
 
@@ -524,7 +528,7 @@ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 const ElemType& KDTree<N, ElemType, DT>::at(const Point<N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
-        throw out_of_range("The point is out of range");
+        //throw out_of_range("The point is out of range");
     }
     return (*n)->object;
 }

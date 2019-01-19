@@ -44,7 +44,7 @@ fillCacheCell(double thisCtrLng, double thisCtrLat, double thisDiff,
     } else if (locsSize < MAX_CACHE_CELL_VEC_SIZE) {
         ptLocPairs.shrink_to_fit();
         this->gridCache.emplace_back(std::move(ptLocPairs));
-        ptLocPairs.reserve(std::sqrt(this->locKdt.size()));
+        ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
         this->vecLocs++;
     } else {
         this->gridCache.emplace_back(std::in_place_type<KDT<KDTType>>,
@@ -60,7 +60,8 @@ void UniLatLngBKDTGridSBSolver<KDTType>::fillGridCache() {
     colSize = rowSize;
     lngInc = 2*M_PI/colSize + 2*M_PI/(colSize*colSize*0xFFFF);
     gridCache.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
-    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(this->locKdt.size());
+    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs;
+    ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
     
     double thisCtrLat = 0.5 * (latInc - M_PI);
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
@@ -125,5 +126,6 @@ findNearest(double lng, double lat) const {
 
 template class UniLatLngBKDTGridSBSolver<KDTree>;
 template class UniLatLngBKDTGridSBSolver<KDTreeCusMem>;
+template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongest>;
 
 

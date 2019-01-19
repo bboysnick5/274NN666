@@ -44,12 +44,12 @@
 /* Begin PBXFileReference section */
 		01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BFEUCPtSolver.cpp; sourceTree = "<group>"; };
 		01183DA321EEE5240002C03A /* BFEUCPtSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BFEUCPtSolver.hpp; sourceTree = "<group>"; };
+		011BE34121F1B09400C44DDE /* KDTreeExpandLongest.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeExpandLongest.hpp; sourceTree = "<group>"; };
 		011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6B921D711EE0052024D /* UniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0122F1A821D4A16E004422B6 /* refCities.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = refCities.txt; sourceTree = "<group>"; };
-		0142A72721EB55C9002FDD43 /* KDTreeMetaData.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeMetaData.hpp; sourceTree = "<group>"; };
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
@@ -111,7 +111,7 @@
 				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
 				01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */,
-				0142A72721EB55C9002FDD43 /* KDTreeMetaData.hpp */,
+				011BE34121F1B09400C44DDE /* KDTreeExpandLongest.hpp */,
 				016197E921E8F94C009F8E48 /* PoolAllocator.hpp */,
 				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
@@ -246,10 +246,7 @@
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = (
-					"DEBUG=1",
-					"$(inherited)",
-				);
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
@@ -301,6 +298,7 @@
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
+				GCC_PREPROCESSOR_DEFINITIONS = "";
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
 				GCC_WARN_UNDECLARED_SELECTOR = YES;

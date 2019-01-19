@@ -12,6 +12,8 @@
 #include <stdio.h>
 #include "KDTSBSolver.hpp"
 
+
+
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 class BKDTSBSolver : public KDTSBSolver<KDTType> {
     

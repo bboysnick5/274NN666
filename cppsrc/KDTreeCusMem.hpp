@@ -27,6 +27,7 @@
 #include <functional>
 #include <iostream>
 #include <memory>
+#include <array>
 
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT
@@ -137,7 +138,7 @@ public:
     // Usage: cout << kd.at(v) << endl;
     // ----------------------------------------------------
     // Returns a reference to the key associated with the point pt. If the point
-    // is not in the tree, this function throws an out_of_range exception.
+    // is not in the tree, this function //throws an out_of_range exception.
     ElemType& at(const Point<N>& pt);
     const ElemType& at(const Point<N>& pt) const;
     
@@ -163,9 +164,9 @@ public:
 private:
     
     struct TreeNode {
+        Point<N> key;
         TreeNode *left;
         TreeNode *right;
-        Point<N> key;
         ElemType object;
         
         TreeNode() = default;
@@ -175,10 +176,10 @@ private:
         // TreeNode& operator = (TreeNode&&) = default;
         
         TreeNode(const Point<N>& k, const ElemType& obj)
-        : left(nullptr), right(nullptr), key(k), object(obj) {}
+        : key(k), left(nullptr), right(nullptr), object(obj) {}
         
         TreeNode(const Point<N>&& k, const ElemType&& obj)
-        : left(nullptr), right(nullptr), key(std::move(k)),
+        : key(std::move(k)), left(nullptr), right(nullptr),
         object(std::move(obj)) {}
         
         ~TreeNode() = default;
@@ -272,10 +273,10 @@ template <typename RAI, typename std::enable_if<std::is_same<typename
     std::random_access_iterator_tag>::value && !std::is_const<typename
     std::remove_pointer< typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTreeCusMem<N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
+                                            //, std::array<double, N> bboxHint)
 : treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
-    
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, 0, begin, end, begin + (end - begin)/2);
+    rangeCtorHelper(ndPoolPtr, 0, begin, begin + (end - begin)/2, end);
     
     /*
     struct actRecord {
@@ -372,12 +373,55 @@ operator=(KDTreeCusMem&& rhs) & noexcept {
     return *this;
 }
 
+/*
+template <size_t N, typename ElemType, typename Point<N>::DistType DT>
+template <class RAI>
+void KDTreeCusMem<N, ElemType, DT>::
+rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
+                RAI median, RAI end, std::array<double, N>& bbox) {
+    size_t dim = std::max_element(bbox.begin(), bbox.end()) - bbox.begin();
+    std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
+        return p1.first[dim] < p2.first[dim];});
+    pool->construct(ndPoolPtr, std::move(median->first),
+                    std::move(median->second));
+    auto curNdPtr = ndPoolPtr;
+    //size_t nextDim = dim == N - 1 ? 0 : dim + 1;
+    double dec;
+    
+    if (begin == median - 1) {
+        curNdPtr->left = ++ndPoolPtr;
+        pool->construct(ndPoolPtr, std::move(begin->first),
+                        std::move(begin->second));
+    } else if (begin != median) {
+        dec = (end-1)->first[dim] - (median-1)->first[dim];
+        bbox[dim] -= dec;
+        //nextDim = std::max_element(bbox, bbox+N)-bbox;
+        curNdPtr->left = ++ndPoolPtr;
+        rangeCtorHelper(ndPoolPtr, begin,
+                        begin + (median-begin)/2, median, bbox);
+        bbox[dim] += dec;
+    }
+    
+    if (median + 2 == end) {
+        curNdPtr->right = ++ndPoolPtr;
+        pool->construct(ndPoolPtr, std::move((median + 1)->first),
+                        std::move((median+1)->second));
+    } else if (median + 1 != end) {
+        dec = (median+1)->first[dim] - begin->first[dim];
+        bbox[dim] -= dec;
+        curNdPtr->right = ++ndPoolPtr;
+        rangeCtorHelper(ndPoolPtr, median+1,
+                        median + (end-median+1)/2, end, bbox);
+        bbox[dim] += dec;
+    }
+}
+*/
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
 void KDTreeCusMem<N, ElemType, DT>::
 rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
-                RAI end, RAI median) {
+                RAI median, RAI end) {
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
     pool->construct(ndPoolPtr, std::move(median->first),
@@ -388,24 +432,25 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
     if (begin == median - 1) {
         curNdPtr->left = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move(begin->first),
-                       std::move(begin->second));
+                        std::move(begin->second));
     } else if (begin != median) {
         curNdPtr->left = ++ndPoolPtr;
         rangeCtorHelper(ndPoolPtr, nextDim, begin,
-                        median, begin + (median-begin)/2);
+                        begin + (median-begin)/2, median);
     }
     
     if (median + 2 == end) {
         curNdPtr->right = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move((median + 1)->first),
-                       std::move((median+1)->second));
+                        std::move((median+1)->second));
     } else if (median + 1 != end) {
         curNdPtr->right = ++ndPoolPtr;
         rangeCtorHelper(ndPoolPtr, nextDim, median+1,
-                        end, median + (end-median+1)/2);
+                        median + (end-median+1)/2, end);
     }
 }
 
+ 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 void KDTreeCusMem<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
                                              TreeNode* otherNode
@@ -523,7 +568,7 @@ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 const ElemType& KDTreeCusMem<N, ElemType, DT>::at(const Point<N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
-        throw out_of_range("The point is out of range");
+        //throw out_of_range("The point is out of range");
     }
     return (*n)->object;
 }
@@ -735,14 +780,14 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
     // LOGGGGGGGGGGGGGGG
     
-    /*
+    
     static size_t totalNumNodesSearches = 0, numNNSearches = 0, totalTreeSize = 0;
     static size_t numOfFullSearch = 0;
     size_t thisNumNodesSearches = 0;
     static bool logCondition;
-    static constexpr size_t TREE_SIZE_LOWER_BOUND = 1000, TREE_SIZE_UPPER_BOUND = 1200;
+    static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000;
     logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
-    */
+    
 
 
     while (it != st || hasNext) {
@@ -761,8 +806,8 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
         }
         
         // LOGGGGGGGGGGGGGGG
-       // if (logCondition)
-          //  thisNumNodesSearches++;
+        if (logCondition)
+            thisNumNodesSearches++;
         
         
         diff = pt[dim] - cur->key[dim];
@@ -786,7 +831,7 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     }
     
     // LOGGGGGGGGGGGGGGG
-    /*
+    
     if (logCondition) {
         numNNSearches++;
         totalTreeSize += treeSize;
@@ -803,7 +848,9 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
         << "\n\nnum of full searches percentage: " << numOfFullSearch*100.0/numNNSearches
         << "%\nSearched nodes over total num of nodes percentage: " << totalNumNodesSearches*100.0/totalTreeSize << "%\n\n\n\n";
         
-    } */
+    }
+    
+    
     /*
      
      double bestDist = std::numeric_limits<double>::max();

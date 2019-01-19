@@ -12,7 +12,7 @@
 #include "SBSolver.hpp"
 #include "KDTree.hpp"
 #include "KDTreeCusMem.hpp"
-#include "KDTreeMetaData.hpp"
+#include "KDTreeExpandLongest.hpp"
 #include <stdio.h>
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
