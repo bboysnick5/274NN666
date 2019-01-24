@@ -31,7 +31,7 @@
 #include <random>
 #include <regex>
 
-std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials, std::mt19937& mt) {
+std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials, std::mt19937_64& mt) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
     std::vector<std::pair<double, double>> testLocs;
     testLocs.reserve(numTrials+4);
@@ -153,7 +153,8 @@ int main(int argc, const char * argv[]) {
    // return 0;
     
     std::random_device rd;
-    std::mt19937 mt(rd());
+    std::mt19937_64 mt(rd());
+    //mt.seed(10);
     
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<const SBLoc*> testResults, refResults;
@@ -217,7 +218,7 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<BFEUCPtSBSolver>(),
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
-        //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
+       // std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),

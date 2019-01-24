@@ -785,7 +785,7 @@ ElemType KDTreeCusMem<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     static size_t numOfFullSearch = 0;
     size_t thisNumNodesSearches = 0;
     static bool logCondition;
-    static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000;
+    static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 600000000;
     logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
     
 

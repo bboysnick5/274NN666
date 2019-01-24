@@ -269,9 +269,8 @@ KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(Const_RAI cbegin, Cons
     std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
     auto bbox = computeInitBBox(cbegin, cend);
-    rangeCtorHelper(ndPoolPtr, constructData.begin(), constructData.end(),
-                    constructData.begin() +
-                    (constructData.end() - constructData.begin())/2, bbox);
+    rangeCtorHelper(ndPoolPtr, constructData.begin(),
+                    constructData.begin() + (constructData.end() - constructData.begin())/2, constructData.end(), bbox);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
@@ -288,51 +287,57 @@ KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI end)
     
     /*
      struct actRecord {
-     TreeNode** curNdPtr;
-     size_t dim;
-     RAI thisBeginIt, median, thisEndIt;
+         TreeNode** curNdPtr;
+         RAI thisBeginIt, median, thisEndIt;
      };
      
      actRecord st[static_cast<size_t>(log2(treeSize+1))], *it = st;
      bool hasChild = true;
-     TreeNode* curNd;
-     size_t dim = 0;
      RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
      while (it != st || hasChild) {
-     if (!hasChild) {
-     hasChild = true;
-     *(--it)->curNdPtr = ndPoolPtr;
-     dim = it->dim;
-     thisBeginIt = it->thisBeginIt;
-     thisEndIt = it->thisEndIt;
-     median = it->median;
-     }
+         if (!hasChild) {
+             hasChild = true;
+             *(--it)->curNdPtr = ndPoolPtr;
+             thisBeginIt = it->thisBeginIt;
+             thisEndIt = it->thisEndIt;
+             median = it->median;
+         }
      
-     std::nth_element(thisBeginIt, median, thisEndIt,
-     [=](const auto& p1, const auto& p2) {
-     return p1.first[dim] < p2.first[dim];});
-     pool->construct(ndPoolPtr, std::move(median->first),
-     std::move(median->second));
-     curNd = ndPoolPtr++;
-     dim = dim == N - 1 ? 0 : dim + 1;
+         size_t dim = 0;
+         double maxSpan = bbox[1] - bbox[0];
+         for (size_t i = 1; i < N; ++i) {
+             size_t bboxLowIdx = i * 2, bboxHighIdx = bboxLowIdx + 1;
+             double span = bbox[bboxHighIdx] - bbox[bboxLowIdx];
+             if (span > maxSpan) {
+                 maxSpan = span;
+                 dim = i;
+             }
+         }
+         std::nth_element(thisBeginIt, median, thisEndIt,
+                          [=](const auto& p1, const auto& p2) {
+                              return p1.first[dim] < p2.first[dim];});
+         pool->construct(ndPoolPtr, dim, std::move(median->first),
+                         std::move(median->second));
+         TreeNode* curNd = ndPoolPtr++;
      
-     if (thisBeginIt != median) {
-     if (median + 1 != thisEndIt) {
-     *it++ = {&curNd->right, dim, median + 1,
-     median + (thisEndIt-median+1)/2, thisEndIt};
-     }
-     thisEndIt = median;
-     median = thisBeginIt + (median-thisBeginIt)/2;
-     curNd->left = ndPoolPtr;
-     } else if (median + 1 != thisEndIt) {
-     thisBeginIt = median+1;
-     median = median + (thisEndIt-median+1)/2;
-     curNd->right = ndPoolPtr;
-     } else {
-     hasChild = false;
-     }
-     }
-     */
+         if (thisBeginIt != median) {
+             if (median + 1 != thisEndIt) {
+                 *it++ = {&curNd->right, median + 1,
+                          median + (thisEndIt-median+1)/2, thisEndIt};
+             }
+             bbox[dim*2+1] = curNd->key[dim];
+             thisEndIt = median;
+             median = thisBeginIt + (median-thisBeginIt)/2;
+             curNd->left = ndPoolPtr;
+         } else if (median + 1 != thisEndIt) {
+             bbox[dim*2] = curNd->key[dim];
+             thisBeginIt = median+1;
+             median += (thisEndIt-median+1)/2;
+             curNd->right = ndPoolPtr;
+         } else {
+             hasChild = false;
+         }
+     } */
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
@@ -381,50 +386,6 @@ operator=(KDTreeExpandLongest&& rhs) & noexcept {
     return *this;
 }
 
-/*
- template <size_t N, typename ElemType, typename Point<N>::DistType DT>
- template <class RAI>
- void KDTreeExpandLongest<N, ElemType, DT>::
- rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
- RAI median, RAI end, std::array<double, N>& bbox) {
- size_t dim = std::max_element(bbox.begin(), bbox.end()) - bbox.begin();
- std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
- return p1.first[dim] < p2.first[dim];});
- pool->construct(ndPoolPtr, std::move(median->first),
- std::move(median->second));
- auto curNdPtr = ndPoolPtr;
- //size_t nextDim = dim == N - 1 ? 0 : dim + 1;
- double dec;
- 
- if (begin == median - 1) {
- curNdPtr->left = ++ndPoolPtr;
- pool->construct(ndPoolPtr, std::move(begin->first),
- std::move(begin->second));
- } else if (begin != median) {
- dec = (end-1)->first[dim] - (median-1)->first[dim];
- bbox[dim] -= dec;
- //nextDim = std::max_element(bbox, bbox+N)-bbox;
- curNdPtr->left = ++ndPoolPtr;
- rangeCtorHelper(ndPoolPtr, begin,
- begin + (median-begin)/2, median, bbox);
- bbox[dim] += dec;
- }
- 
- if (median + 2 == end) {
- curNdPtr->right = ++ndPoolPtr;
- pool->construct(ndPoolPtr, std::move((median + 1)->first),
- std::move((median+1)->second));
- } else if (median + 1 != end) {
- dec = (median+1)->first[dim] - begin->first[dim];
- bbox[dim] -= dec;
- curNdPtr->right = ++ndPoolPtr;
- rangeCtorHelper(ndPoolPtr, median+1,
- median + (end-median+1)/2, end, bbox);
- bbox[dim] += dec;
- }
- }
- */
-
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
 std::array<double, N*2> KDTreeExpandLongest<N, ElemType, DT>::
@@ -437,10 +398,10 @@ computeInitBBox(RAI begin, RAI end) {
                       return lowHigh[lowHighToggle++%2];});
     std::for_each(begin, end, [&](const auto &p) mutable {
         for (size_t i = 0; i < N; ++i) {
-            size_t bboxLowIdx = i * 2, bboxHighIdx = bboxLowIdx + 1;
             double ptValOnithDim = p.first[i];
-            bbox[bboxLowIdx] = std::min(bbox[bboxLowIdx], ptValOnithDim);
-            bbox[bboxHighIdx] = std::max(bbox[bboxHighIdx], ptValOnithDim);
+            auto &bboxLow = bbox[i*2], &bboxHigh = bbox[i*2+1];
+            bboxLow = std::min(bboxLow, ptValOnithDim);
+            bboxHigh = std::max(bboxHigh, ptValOnithDim);
         }
     });
     return bbox;
@@ -457,15 +418,16 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
         size_t bboxLowIdx = i * 2, bboxHighIdx = bboxLowIdx + 1;
         double span = bbox[bboxHighIdx] - bbox[bboxLowIdx];
         if (span > maxSpan) {
+            maxSpan = span;
             dim = i;
         }
     }
-    
+        
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
     pool->construct(ndPoolPtr, dim, std::move(median->first),
                     std::move(median->second));
-    auto curNdPtr = ndPoolPtr;
+    TreeNode* curNdPtr = ndPoolPtr;
     
     if (begin == median - 1) {
         curNdPtr->left = ++ndPoolPtr;
@@ -474,7 +436,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
     } else if (begin != median) {
         curNdPtr->left = ++ndPoolPtr;
         auto prevDimHigh = bbox[dim*2+1];
-        bbox[dim*2+1] = median->first[dim];
+        bbox[dim*2+1] = curNdPtr->key[dim];
         rangeCtorHelper(ndPoolPtr, begin, begin + (median-begin)/2, median, bbox);
         bbox[dim*2+1] = prevDimHigh;
     }
@@ -486,7 +448,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
     } else if (median + 1 != end) {
         curNdPtr->right = ++ndPoolPtr;
         auto prevDimLow = bbox[dim*2];
-        bbox[dim*2] = median->first[dim];
+        bbox[dim*2] = curNdPtr->key[dim];
         rangeCtorHelper(ndPoolPtr, median+1, median + (end-median+1)/2, end, bbox);
         bbox[dim*2] = prevDimLow;
     }
@@ -505,7 +467,7 @@ void KDTreeExpandLongest<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
         } else {
             //pool->construct(thisNode, {otherNode->key, otherNode->object});
             //++ndPoolIt;
-            thisNode = new TreeNode(otherNode->key, otherNode->object);
+            thisNode = new TreeNode(otherNode->dimToExpand, otherNode->key, otherNode->object);
         }
         treeCopy(thisNode->left, otherNode->left);
         treeCopy(thisNode->right, otherNode->right);
@@ -714,7 +676,8 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
     std::vector<std::tuple<double, const Point<N>&, const ElemType&>> distPtElemTuple;
     distPtElemTuple.reserve(sqrt(treeSize));
     double bestDistSq = std::numeric_limits<double>::max(),
-    bestDistDiffSq = std::numeric_limits<double>::max(), fenceSq = fence*fence;
+           bestDistDiffSq = std::numeric_limits<double>::max(),
+           fenceSq = fence*fence;
     const TreeNode *cur = root;
     bool hasNext = true;
     std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(treeSize+1))],
@@ -739,10 +702,8 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
         const TreeNode* next = diff < 0.0 ? cur->left : cur->right;
         diff *= diff;
         if (next) {
-            //*it++ = std::tie(diff, next == cur->left ? cur->right : cur->left);
-            //auto p = std::pair{diff, next == cur->left ? cur->right : cur->left};
-            *it++ = {diff, next == cur->left ? cur->right : cur->left};
-           // st[it++-st] = {diff, next == cur->left ? cur->right : cur->left};
+            //*it++ = {diff, next == cur->left ? cur->right : cur->left};
+            new(it++) std::pair<double, const TreeNode*>(diff, next == cur->left ? cur->right : cur->left);
             cur = next;
         } else {
             if (diff < bestDistDiffSq) {
@@ -755,13 +716,12 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
             hasNext = false;
         }
     }
-    
+        
     for (const auto &[distSq, pt, elem] : distPtElemTuple) {
         if (distSq < bestDistDiffSq)
             *returnIt++ = {pt, elem};
     }
     return returnIt;
-    
 }
 
 
@@ -795,12 +755,11 @@ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 ElemType KDTreeExpandLongest<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
     
-    double bestDist = std::numeric_limits<double>::max(), curDist, diff;
-    size_t dim;
+    double bestDist = std::numeric_limits<double>::max();
     const ElemType *bestValue = nullptr;
-    TreeNode *cur = root, *next;
+    const TreeNode *cur = root;
     bool hasNext = true;
-    std::pair<double, TreeNode*> st[static_cast<size_t>(log2(treeSize+1))], *it = st;
+    std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(treeSize+1))], *it = st;
     
     
     // LOGGGGGGGGGGGGGGG
@@ -810,10 +769,10 @@ ElemType KDTreeExpandLongest<N, ElemType, DT>::NNValue(const Point<N> &pt) const
      static size_t numOfFullSearch = 0;
      size_t thisNumNodesSearches = 0;
      static bool logCondition;
-     static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000;
+     static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000000;
      logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
-     */
     
+    */
     
     while (it != st || hasNext) {
         if (!hasNext) {
@@ -821,29 +780,28 @@ ElemType KDTreeExpandLongest<N, ElemType, DT>::NNValue(const Point<N> &pt) const
                 continue;
             hasNext = true;
         }
-        curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+        double curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
         }
         
         // LOGGGGGGGGGGGGGGG
-        // if (logCondition)
-       //   thisNumNodesSearches++;
+         //if (logCondition)
+        // thisNumNodesSearches++;
         
-        dim = cur->dimToExpand;
-        diff = pt[dim] - cur->key[dim];
-        next = diff < 0.0 ? cur->left : cur->right;
+        size_t dim = cur->dimToExpand;
+        double diff = pt[dim] - cur->key[dim];
+        const TreeNode* next = diff < 0.0 ? cur->left : cur->right;
         curDist = diff*diff;
         if (next) {
-            //*it++ = std::tie(curDist, next == cur->left ? cur->right : cur->left);
-            *it++ = {curDist, next == cur->left ? cur->right : cur->left};
+            //*it++ = {curDist, next == cur->left ? cur->right : cur->left};
+            new(it++) std::pair<double, const TreeNode*>(curDist, next == cur->left ? cur->right : cur->left);
             cur = next;
         } else {
             if (curDist < bestDist) {
-                next = next == cur->left ? cur->right : cur->left;
-                if (next) {
-                    cur = next;
+                cur = next == cur->left ? cur->right : cur->left;
+                if (cur) {
                     continue;
                 }
             }

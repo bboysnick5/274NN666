@@ -40,17 +40,19 @@ fillCacheCell(double thisCtrLng, double thisCtrLat, double thisDiff,
     size_t locsSize = ptLocPairs.size();
     if (locsSize == 1) {
         this->gridCache.emplace_back(ptLocPairs[0].second);
+        ptLocPairs.clear();
         this->singleLocs++;
     } else if (locsSize < MAX_CACHE_CELL_VEC_SIZE) {
         ptLocPairs.shrink_to_fit();
         this->gridCache.emplace_back(std::move(ptLocPairs));
+        ptLocPairs.clear();
         ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
         this->vecLocs++;
     } else {
         this->gridCache.emplace_back(std::in_place_type<KDT<KDTType>>,
                                      ptLocPairs.begin(), ptLocPairs.end());
+        ptLocPairs.clear();
     }
-    ptLocPairs.clear();
     this->totalNodeSize += locsSize;
 }
 
