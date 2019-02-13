@@ -13,6 +13,7 @@
 #include "KDTree.hpp"
 #include "KDTreeCusMem.hpp"
 #include "KDTreeExpandLongest.hpp"
+#include "KDTreeExpandLongestVec.hpp"
 #include <stdio.h>
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>

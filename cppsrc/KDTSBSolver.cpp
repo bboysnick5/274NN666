@@ -36,4 +36,7 @@ void KDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>>
 template class KDTSBSolver<KDTree>;
 template class KDTSBSolver<KDTreeCusMem>;
 template class KDTSBSolver<KDTreeExpandLongest>;
+template class KDTSBSolver<KDTreeExpandLongestVec>;
+
+
 

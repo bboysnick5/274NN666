@@ -101,7 +101,7 @@ public:
     // Returns the number of elements in the kd-tree, the max height
     // and whether the tree is empty.
     size_t size() const;
-    size_t height() const;
+    int height() const;
     bool empty() const;
     
     void clear();
@@ -175,7 +175,7 @@ private:
         TreeNode(const Point<N>& k, const ElemType& obj)
         : key(k), left(nullptr), right(nullptr), object(obj) {}
         
-        TreeNode(const Point<N>&& k, const ElemType&& obj)
+        TreeNode(Point<N>&& k, ElemType&& obj)
         :  key(std::move(k)), left(nullptr), right(nullptr),
           object(std::move(obj)) {}
         
@@ -191,7 +191,7 @@ private:
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
-    size_t heightHelper(TreeNode *n) const;
+    int heightHelper(TreeNode *n) const;
     
     // ----------------------------------------------------
     // Helper method for range constructor
@@ -460,12 +460,12 @@ size_t KDTree<N, ElemType, DT>::size() const {
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTree<N, ElemType, DT>::height() const {
+int KDTree<N, ElemType, DT>::height() const {
     return heightHelper(root);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-size_t KDTree<N, ElemType, DT>::heightHelper(TreeNode *n) const {
+int KDTree<N, ElemType, DT>::heightHelper(TreeNode *n) const {
     return n ? 1 + std::max(heightHelper(n->left),
                             heightHelper(n->right)) : -1;
 }
@@ -629,7 +629,7 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
     return it;
     */
     
-    std::vector<std::pair<double, std::pair<const Point<N>*, const ElemType*>>> distKVPairs;
+    std::vector<std::pair<double, std::pair<const Point<N>&, const ElemType&>>> distKVPairs;
     distKVPairs.reserve(sqrt(treeSize));
     double bestDistSq = std::numeric_limits<double>::max(),
            bestDistDiffSq = std::numeric_limits<double>::max(),
@@ -663,8 +663,8 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
                 bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
             }
             distKVPairs.emplace_back(curDistSq,
-                                     std::forward<std::pair<const Point<N>*,
-                                     const ElemType*>>({&cur->key, &cur->object}));
+                                     std::forward<std::pair<const Point<N>&,
+                                     const ElemType&>>({cur->key, cur->object}));
         }
         curDistSq = pt[dim] - cur->key[dim];
         next = curDistSq < 0.0 ? cur->left : cur->right;
@@ -687,7 +687,7 @@ Iter KDTree<N, ElemType, DT>::rangeDiffKNNPairs(const Point<N>& pt,
     
     for (const auto& [dist, kvPairs] : distKVPairs) {
         if (dist < bestDistDiffSq)
-            *returnIt++ = {*kvPairs.first, *kvPairs.second};
+            *returnIt++ = {kvPairs.first, kvPairs.second};
     }
     return returnIt;
     

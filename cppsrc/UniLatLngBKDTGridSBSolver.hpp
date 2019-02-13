@@ -30,7 +30,8 @@ protected:
     const double AVE_LOC_PER_CELL;
     const size_t MAX_CACHE_CELL_VEC_SIZE;
     double lngInc, latInc, sideLen;
-    size_t totalNodeSize = 0, singleLocs = 0, vecLocs = 0, rowSize, colSize;
+    size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
+           vecLocs = 0, rowSize, colSize;
     std::vector<std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
                              const SBLoc*, KDT<KDTType>>> gridCache;
     std::vector<std::pair<Point<3>, const SBLoc*>> vecData;

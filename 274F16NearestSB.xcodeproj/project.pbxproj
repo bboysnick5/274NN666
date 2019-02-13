@@ -50,9 +50,11 @@
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0122F1A821D4A16E004422B6 /* refCities.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = refCities.txt; sourceTree = "<group>"; };
+		0131C9882213136D00F073C9 /* KDTreeExpandLongestVec.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeExpandLongestVec.hpp; sourceTree = "<group>"; };
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
+		01E8C01E220B3AB8009CA542 /* countries.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = countries.csv; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
 		823641461E00D1AE007AE0FD /* SBLoc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBLoc.hpp; sourceTree = "<group>"; };
@@ -92,6 +94,7 @@
 				82A66E381E003B5400D5FAFD /* starbucks.csv */,
 				01AC07D621CB9AA500ECF497 /* cities.csv */,
 				0122F1A821D4A16E004422B6 /* refCities.txt */,
+				01E8C01E220B3AB8009CA542 /* countries.csv */,
 			);
 			sourceTree = "<group>";
 		};
@@ -112,6 +115,7 @@
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
 				01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */,
 				011BE34121F1B09400C44DDE /* KDTreeExpandLongest.hpp */,
+				0131C9882213136D00F073C9 /* KDTreeExpandLongestVec.hpp */,
 				016197E921E8F94C009F8E48 /* PoolAllocator.hpp */,
 				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,

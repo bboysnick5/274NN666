@@ -30,6 +30,9 @@
 #include <typeinfo>
 #include <random>
 #include <regex>
+#include <thread>
+
+
 
 std::vector<std::pair<double, double>> generateTestLocs(size_t numTrials, std::mt19937_64& mt) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -141,7 +144,31 @@ void writeResults(const char* argv[],
 
 
 int main(int argc, const char * argv[]) {
-
+    /*
+    std::ifstream infileLocs(argv[1]);
+    std::ofstream outfileLocs(argv[2]);
+    std::string line;
+    while (std::getline(infileLocs, line)) {
+        std::istringstream iss(line, '\t');
+        std::string id, token, desc;
+        std::getline(iss, id, '\t');
+        std::getline(iss, token, '\t');
+        desc = token;
+        std::getline(iss, token, '\t');
+        desc += " " + token;
+        std::getline(iss, token, '\t');
+        desc += " " + token;
+        double lat, lng;
+        std::getline(iss, token, '\t');
+        lat = std::stod(token);
+        std::getline(iss, token, '\t');
+        lng = std::stod(token);
+        outfileLocs << id + "," + std::to_string(lat) + ","
+                       + std::to_string(lng) + "," + desc + "\r";
+    }
+    return 0;
+    */
+    
     //for (int i = 0; i < argc; ++i)
    //     printf(argv[i]);
     //return 0;
@@ -154,15 +181,15 @@ int main(int argc, const char * argv[]) {
     
     std::random_device rd;
     std::mt19937_64 mt(rd());
-    //mt.seed(10);
+    //mt.seed(686868);
     
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<const SBLoc*> testResults, refResults;
     std::vector<std::pair<double, double>> testLocs = generateTestLocs(MAX_TRIALS, mt);
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
-    double aveLocPerCell = argc < 4 ? 0.8 : std::stod(argv[3]);
-    size_t maxCacheCellVecSize = argc < 5 ? 1200 : std::stoi(argv[4]);
+    double aveLocPerCell = argc < 4 ? 0.6 : std::stod(argv[3]);
+    size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
     size_t numOfLocsToWriteToFile = argc < 6 ? false : std::stoi(argv[5]);
     
     infileLocs.ignore(256, '\r');
@@ -197,11 +224,11 @@ int main(int argc, const char * argv[]) {
     std::transform(locData->begin(), locData->end(),
                    std::ostream_iterator<std::string>(outFile),
                    [&](const auto &l){
-                       return l.city + "," +to_string(SBLoc::toDegree( l.lat)) + "," + to_string(SBLoc::toDegree( l.lng)) + "," + l.addr + "\r";});
+                       return l.city + "," +std::to_string(SBLoc::toDegree( l.lat)) + "," + std::to_string(SBLoc::toDegree( l.lng)) + "," + l.addr + "\r";});
     
     return 0;
+    */
     
-     */
     if (numOfLocsToWriteToFile) {
         auto solver = std::make_shared<BFSBSolver>();
         //auto solver = std::make_shared<BKDTSBSolver<KDTree>>();
@@ -218,24 +245,32 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<BFEUCPtSBSolver>(),
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
-       // std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
+        //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
         std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
+        std::make_shared<BKDTSBSolver<KDTreeExpandLongestVec>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell, maxCacheCellVecSize),
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
-        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest>>(aveLocPerCell, maxCacheCellVecSize),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };
     
     
-    std::for_each(solvers.cbegin(), solvers.cend(),
-                  [&](const auto &solver) {timeBuild(locData, solver);});
+   // std::for_each(solvers.cbegin(), solvers.cend(),
+         //         [&](const auto &solver) {timeBuild(locData, solver);});
     for (size_t i = 0; i < solvers.size(); ++i) {
-        //timeBuild(locData, solvers[i].get());
+        using namespace std::chrono_literals;
+        timeBuild(locData, solvers[i]);
+        std::this_thread::sleep_for(100ms);
         timeNN(solvers[i], testLocs, testResults,
                refResults.size() == 0 ? MAX_TRIALS : refResults.size());
+        solvers[i].reset();
+        std::this_thread::sleep_for(100ms);
+        
         if (i == 0) {
             refResults = std::move(testResults);
         } else {

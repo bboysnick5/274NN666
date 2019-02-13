@@ -60,6 +60,7 @@ findNearest(double lng, double lat) const {
 template class UniCellBKDTGridSBSolver<KDTree>;
 template class UniCellBKDTGridSBSolver<KDTreeCusMem>;
 template class UniCellBKDTGridSBSolver<KDTreeExpandLongest>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>;
 
 
 
