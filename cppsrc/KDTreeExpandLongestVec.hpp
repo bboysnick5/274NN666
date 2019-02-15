@@ -165,9 +165,9 @@ private:
     
     
     struct TreeNode {
+        unsigned int rightIdx;
         int dimToExpand;
         Point<N> key;
-        unsigned int rightIdx;
         //ElemType object;
         
         TreeNode() = default;
@@ -177,10 +177,10 @@ private:
         // TreeNode& operator = (TreeNode&&) = default;
         
         TreeNode(int dimToExpand, const Point<N>& k)
-        : dimToExpand(dimToExpand), key(k), rightIdx(0) {}
+        : rightIdx(0), dimToExpand(dimToExpand), key(k) {}
         
         TreeNode(int dimToExpand, Point<N>&& k)
-        : dimToExpand(dimToExpand), key(std::move(k)), rightIdx(0) {}
+        : rightIdx(0), dimToExpand(dimToExpand), key(std::move(k)) {}
         
         ~TreeNode() = default;
     };

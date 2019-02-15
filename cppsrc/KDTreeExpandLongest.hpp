@@ -165,10 +165,10 @@ private:
     
     
     struct TreeNode {
-        size_t dimToExpand;
-        Point<N> key;
-        TreeNode *left;
         TreeNode *right;
+        size_t dimToExpand;
+        TreeNode *left;
+        Point<N> key;
         ElemType object;
         
         enum class dimEnum : size_t {
@@ -183,12 +183,12 @@ private:
         // TreeNode& operator = (TreeNode&&) = default;
         
         TreeNode(size_t dimToExpand, const Point<N>& k, const ElemType& obj)
-        : dimToExpand(dimToExpand), key(k), left(nullptr), right(nullptr),
+        : right(nullptr), dimToExpand(dimToExpand), left(nullptr), key(k),
           object(obj) {}
         
         TreeNode(size_t dimToExpand, Point<N>&& k, ElemType&& obj)
-        : dimToExpand(dimToExpand), key(std::move(k)), left(nullptr), right(nullptr),
-          object(std::move(obj)) {}
+        : right(nullptr), dimToExpand(dimToExpand), left(nullptr),
+        key(std::move(k)), object(std::move(obj)) {}
         
         ~TreeNode() = default;
     };

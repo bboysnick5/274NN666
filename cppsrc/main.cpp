@@ -185,7 +185,7 @@ int main(int argc, const char * argv[]) {
     std::vector<std::pair<double, double>> testLocs = generateTestLocs(MAX_TRIALS, mt);
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
-    double aveLocPerCell = argc < 4 ? 0.6 : std::stod(argv[3]);
+    double aveLocPerCell = argc < 4 ? 0.4 : std::stod(argv[3]);
     size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
     size_t numOfLocsToWriteToFile = argc < 6 ? false : std::stoi(argv[5]);
     
@@ -243,7 +243,7 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
-        std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
+        //std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
         std::make_shared<BKDTSBSolver<KDTreeExpandLongestVec>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),
