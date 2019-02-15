@@ -677,8 +677,7 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
     const TreeNode *cur = root;
    
     while (true) {
-        double curDistSq = Point<N>::template
-                           dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
+        double curDistSq = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
@@ -701,7 +700,7 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
             do {
                 if (it == st)
                     goto FINAL;
-            } while ((--it)->first >= bestDistDiffSq || !(cur = it->second));
+            } while ((--it)->first > bestDistDiffSq || !(cur = it->second));
         } 
     }
     
@@ -759,7 +758,7 @@ ElemType KDTreeExpandLongest<N, ElemType, DT>::NNValue(const Point<N> &pt) const
             do {
                 if (it == st)
                     return bestValue ? *bestValue : ElemType();
-            } while ((--it)->first >= bestDist || !(cur = it->second));
+            } while ((--it)->first > bestDist || !(cur = it->second));
         }
     }
     

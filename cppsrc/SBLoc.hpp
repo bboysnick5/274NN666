@@ -57,8 +57,8 @@ inline SBLoc::SBLoc(const Point<3> &pt) : lat(asin(pt[2])), lng(asin(pt[1]/cos(a
 inline bool SBLoc::operator==(const SBLoc &other) const {
     if (other.lng == lng && other.lat == lat)
         return true;
-    return std::fabs(other.lng - lng) < 0.0000001 &&
-           std::fabs(other.lat - lat) < 0.0000001;
+    return std::fabs(other.lng - lng) < 0.000001 &&
+           std::fabs(other.lat - lat) < 0.000001;
 }
 
 inline bool SBLoc::operator!=(const SBLoc &other) const {

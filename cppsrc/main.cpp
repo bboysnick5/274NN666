@@ -144,6 +144,12 @@ void writeResults(const char* argv[],
 
 
 int main(int argc, const char * argv[]) {
+    
+    //int *x = new int[20];
+    //std::cout << sizeof(std::pair<int*, int*>);
+    //delete[] x;
+    //return 0;
+    
     /*
     std::ifstream infileLocs(argv[1]);
     std::ofstream outfileLocs(argv[2]);
@@ -167,17 +173,8 @@ int main(int argc, const char * argv[]) {
                        + std::to_string(lng) + "," + desc + "\r";
     }
     return 0;
+    
     */
-    
-    //for (int i = 0; i < argc; ++i)
-   //     printf(argv[i]);
-    //return 0;
-    //std::cout << std::is_pod<Point<3>>::value;
-    
-    //std::cout << std::is_const<typename std::remove_pointer<typename std::iterator_traits<std::vector<int>::const_iterator>::pointer>::type>::value << "\n";
-    
-   //std::cout << "Size of: " << sizeof(std::variant<KDT<KDTreeCusMem>, std::vector<std::pair<Point<3>, const SBLoc*>>, const SBLoc*>) << std::endl;
-   // return 0;
     
     std::random_device rd;
     std::mt19937_64 mt(rd());
@@ -203,15 +200,16 @@ int main(int argc, const char * argv[]) {
     locData->shrink_to_fit();
     std::shuffle(locData->begin(), locData->end(), mt);
     
+    
     /*
     std::stable_sort(locData->begin(), locData->end(), [](const auto &l1,
-        const auto& l2){return l1.lng*10000000+l1.lat<l2.lng*10000000+l2.lat;});
+        const auto& l2){return l1.lng*100000000+l1.lat<l2.lng*100000000+l2.lat;});
     locData->erase(locData->begin(),
                    std::unique(locData->rbegin(), locData->rend()).base());
     locData->shrink_to_fit();
     infileLocs.close();
     
-    std::random_device rd;
+    //std::random_device rd;
     std::mt19937 g(rd());
     std::shuffle(locData->begin(), locData->end(), g);
     
@@ -224,8 +222,7 @@ int main(int argc, const char * argv[]) {
     std::transform(locData->begin(), locData->end(),
                    std::ostream_iterator<std::string>(outFile),
                    [&](const auto &l){
-                       return l.city + "," +std::to_string(SBLoc::toDegree( l.lat)) + "," + std::to_string(SBLoc::toDegree( l.lng)) + "," + l.addr + "\r";});
-    
+                       return l.city + "," +std::to_string(SBLoc::toDegree(l.lat)) + "," + std::to_string(SBLoc::toDegree(l.lng)) + "," + l.addr + "\r";});
     return 0;
     */
     

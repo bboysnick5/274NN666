@@ -165,16 +165,10 @@ private:
     
     
     struct TreeNode {
-        long long dimToExpand;
+        int dimToExpand;
         Point<N> key;
-        TreeNode *left;
-        TreeNode *right;
-        ElemType object;
-        
-        enum class dimEnum : size_t {
-            LEFT_CHILD = N,
-            NO_CHILDREN
-        };
+        unsigned int rightIdx;
+        //ElemType object;
         
         TreeNode() = default;
         // TreeNode(const TreeNode&) = default;
@@ -182,18 +176,17 @@ private:
         // TreeNode(TreeNode&&) = default;
         // TreeNode& operator = (TreeNode&&) = default;
         
-        TreeNode(long long dimToExpand, const Point<N>& k, const ElemType& obj)
-        : dimToExpand(dimToExpand), key(k), left(nullptr), right(nullptr),
-        object(obj) {}
+        TreeNode(int dimToExpand, const Point<N>& k)
+        : dimToExpand(dimToExpand), key(k), rightIdx(0) {}
         
-        TreeNode(long long dimToExpand, Point<N>&& k, ElemType&& obj)
-        : dimToExpand(dimToExpand), key(std::move(k)), left(nullptr), right(nullptr),
-        object(std::move(obj)) {}
+        TreeNode(int dimToExpand, Point<N>&& k)
+        : dimToExpand(dimToExpand), key(std::move(k)), rightIdx(0) {}
         
         ~TreeNode() = default;
     };
     
     std::vector<TreeNode> ndVec;
+    std::vector<ElemType> objectVec;
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
@@ -229,10 +222,6 @@ private:
     void NNValueHelper(TreeNode*, size_t, const Point<N>&,
                        const ElemType*&, double&) const;
     
-    // ----------------------------------------------------
-    // Helper meothod for deep copy
-    void treeCopy(TreeNode*& thisNd, TreeNode *otherNd //TreeNode* ndPoolPtr
-    );
     
     // TreeNode** findNodePtr(const Point<N>& pt);
     // TreeNode*const* findNodePtr(const Point<N>& pt) const;
@@ -265,6 +254,7 @@ std::is_const<typename std::remove_pointer<typename
 std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
 KDTreeExpandLongestVec<N, ElemType, DT>::KDTreeExpandLongestVec(Const_RAI cbegin, Const_RAI cend) {
     ndVec.reserve(cend - cbegin);
+    objectVec.reserve(cend - cbegin);
     std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
     auto bbox = computeInitBBox(cbegin, cend);
     rangeCtorHelper(constructData.begin(), constructData.begin() +
@@ -279,6 +269,7 @@ std::random_access_iterator_tag>::value && !std::is_const<typename
 std::remove_pointer< typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTreeExpandLongestVec<N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, RAI end) {
     ndVec.reserve(end - begin);
+    objectVec.reserve(end - begin);
     auto bbox = computeInitBBox(begin, end);
     rangeCtorHelper(begin, begin + (end - begin)/2, end, bbox);
     
@@ -376,14 +367,15 @@ rangeCtorHelper(RAI begin, RAI median, RAI end,
     
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
-    ndVec.emplace_back(dim, std::move(median->first), std::move(median->second));
+    ndVec.emplace_back(dim, std::move(median->first));
+    objectVec.emplace_back(std::move(median->second));
     TreeNode* curNdPtr = &ndVec[ndVec.size()-1];
     
     if (begin == median - 1) {
-        curNdPtr->left = &*ndVec.end();
-        ndVec.emplace_back(-1, std::move(begin->first), std::move(begin->second));
+        //curNdPtr->left = &*ndVec.end();
+        ndVec.emplace_back(-1, std::move(begin->first));
+        objectVec.emplace_back(std::move(begin->second));
     } else if (begin != median) {
-        curNdPtr->left = &*ndVec.end();
         auto prevDimHigh = bbox[dim*2+1];
         bbox[dim*2+1] = curNdPtr->key[dim];
         //bbox[dim*2+1] = std::max_element(begin, median, [dim](const auto &p1, const auto&p2){return p1.first[dim] < p2.first[dim];})->first[dim];
@@ -392,39 +384,16 @@ rangeCtorHelper(RAI begin, RAI median, RAI end,
     }
     
     if (median + 2 == end) {
-        //curNdPtr->dimToExpand = dim;
-        curNdPtr->right = &*ndVec.end();
-        ndVec.emplace_back(-1, std::move((median+1)->first), std::move((median+1)->second));
+        curNdPtr->rightIdx = static_cast<unsigned int>(ndVec.size());
+        ndVec.emplace_back(-1, std::move((median+1)->first));
+        objectVec.emplace_back(std::move((median+1)->second));
     } else if (median + 1 != end) {
-        curNdPtr->right = &*ndVec.end();
+        curNdPtr->rightIdx = static_cast<unsigned int>(ndVec.size());
         auto prevDimLow = bbox[dim*2];
         bbox[dim*2] = curNdPtr->key[dim];
         //bbox[dim*2] = std::min_element(median + 1, end, [dim](const auto &p1, const auto &p2){return p1.first[dim] < p2.first[dim];})->first[dim];
         rangeCtorHelper(median+1, median + (end-median+1)/2, end, bbox);
         bbox[dim*2] = prevDimLow;
-    }
-}
-
-
-template <size_t N, typename ElemType, typename Point<N>::DistType DT>
-void KDTreeExpandLongestVec<N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
-                                                    TreeNode* otherNode
-//TreeNode* ndPoolIt
-) {
-    if (otherNode) {
-        if (thisNode) {
-            thisNode->object = otherNode->object;
-            thisNode->key = otherNode->key;
-        } else {
-            //pool->construct(thisNode, {otherNode->key, otherNode->object});
-            //++ndPoolIt;
-            thisNode = new TreeNode(otherNode->dimToExpand, otherNode->key, otherNode->object);
-        }
-        treeCopy(thisNode->left, otherNode->left);
-        treeCopy(thisNode->right, otherNode->right);
-    } else if (thisNode) {
-        delete thisNode;
-        thisNode = nullptr;
     }
 }
 
@@ -455,7 +424,8 @@ int KDTreeExpandLongestVec<N, ElemType, DT>::height() const {
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 int KDTreeExpandLongestVec<N, ElemType, DT>::heightHelper(const TreeNode *n) const {
-    return n ? 1 + std::max(heightHelper(n->left), heightHelper(n->right)) : -1;
+    //return n ? 1 + std::max(heightHelper(n->left), heightHelper(n->right)) : -1;
+    return 1;
 }
 
 
@@ -484,9 +454,9 @@ void KDTreeExpandLongestVec<N, ElemType, DT>::
 insert(const Point<N>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
-        (*ndPtr)->object = value;
+        //(*ndPtr)->object = value;
     } else {
-        *ndPtr = new TreeNode(0, pt, value);
+        //*ndPtr = new TreeNode(0, pt, value);
         //treeSize++;
     }
 }
@@ -531,8 +501,8 @@ typename KDTreeExpandLongestVec<N, ElemType, DT>::TreeNode*const*
 KDTreeExpandLongestVec<N, ElemType, DT>::findNodePtr(const Point<N>& pt) const {
     //TreeNode *const*n = &root;
     TreeNode *const*n;
-    for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1)
-        n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
+    for (size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1){}
+        //n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
     return n;
 }
 
@@ -609,11 +579,10 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
     std::vector<std::tuple<double, const Point<N>&, const ElemType&>> distPtElemTuple;
     distPtElemTuple.reserve(std::sqrt(ndVec.size()));
     std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(ndVec.size()+1))],
-    *it = st;
+                                       *it = st;
     double bestDistSq = std::numeric_limits<double>::max(),
-    bestDistDiffSq = std::numeric_limits<double>::max(),
-    fenceSq = fence*fence;
-    const TreeNode *cur = &ndVec[0];
+           bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
+    const TreeNode *cur = ndVec.data();
     
     while (true) {
         double curDistSq = Point<N>::template
@@ -623,20 +592,20 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
                 bestDistSq = curDistSq;
                 bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
             }
-            distPtElemTuple.emplace_back(curDistSq, cur->key, cur->object);
+            distPtElemTuple.emplace_back(curDistSq, cur->key, objectVec[cur-ndVec.data()]);
         }
         
-        if (cur->right) {
-            long long dim = cur->dimToExpand;
+        if (unsigned int rightIdx = cur->rightIdx) {
+            int dim = cur->dimToExpand;
             double diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur->right);
-                cur = cur->left;
+                new(it++) std::pair<double, const TreeNode*>(diff*diff, ndVec.data() + rightIdx);
+                ++cur;
             } else {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur->left);
-                cur = cur->right;
+                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur+1);
+                cur = ndVec.data() + rightIdx;
             }
-        } else if (!(cur = cur->left)) {
+        } else if (cur++->dimToExpand == -1) {
             do {
                 if (it == st)
                     goto FINAL;
@@ -659,7 +628,7 @@ ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) co
                                        *it = st;
     double bestDist = std::numeric_limits<double>::max();
     const ElemType *bestValue = nullptr;
-    const TreeNode *cur = &ndVec[0];
+    const TreeNode *cur = ndVec.data();
     
     // LOGGGGGGGGGGGGGGG
     
@@ -672,29 +641,29 @@ ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) co
      logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
      
      */
-    
+
     while (true) {
         double curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
-            bestValue = &cur->object;
+            bestValue = &objectVec[cur-ndVec.data()];
         }
         
         // LOGGGGGGGGGGGGGGG
         //if (logCondition)
         // thisNumNodesSearches++;
         
-        if (cur->right) {
-            long long dim = cur->dimToExpand;
+        if (unsigned int rightIdx = cur->rightIdx) {
+            int dim = cur->dimToExpand;
             double diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur->right);
-                cur = cur->left;
+                new(it++) std::pair<double, const TreeNode*>(diff*diff, ndVec.data() + rightIdx);
+                ++cur;
             } else {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur->left);
-                cur = cur->right;
+                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur+1);
+                cur = ndVec.data() + rightIdx;
             }
-        } else if (!(cur = cur->left)) {
+        } else if (cur++->dimToExpand == -1) {
             do {
                 if (it == st)
                     return bestValue ? *bestValue : ElemType();
