@@ -144,9 +144,11 @@ void writeResults(const char* argv[],
 
 
 int main(int argc, const char * argv[]) {
+    //std::cout << std::is_pod<Point<3>>::value;
+    //return 0;
     
     //int *x = new int[20];
-    //std::cout << sizeof(std::pair<int*, int*>);
+    //std::cout << sizeof(std::pair<double, std::pair<const Point<3>*, const SBLoc*>>);
     //delete[] x;
     //return 0;
     
@@ -189,8 +191,8 @@ int main(int argc, const char * argv[]) {
     size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
     size_t numOfLocsToWriteToFile = argc < 6 ? false : std::stoi(argv[5]);
     
-    infileLocs.ignore(256, '\r');
-    infileLocs.ignore(256, '\r');
+    //infileLocs.ignore(256, '\r');
+    //infileLocs.ignore(256, '\r');
     
     
     auto locData = std::make_shared<std::vector<SBLoc>>();
@@ -243,7 +245,7 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<KDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTree>>(),
         //std::make_shared<BKDTSBSolver<KDTreeCusMem>>(),
-        //std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
+        std::make_shared<BKDTSBSolver<KDTreeExpandLongest>>(),
         std::make_shared<BKDTSBSolver<KDTreeExpandLongestVec>>(),
         //std::make_shared<GridSBSolver>(),
         //std::make_shared<BKDTGridSBSolver>(aveLocPerCell),

@@ -205,7 +205,7 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, RAI, RAI, RAI, std::array<double, N*2>&);
+    void rangeCtorHelper(TreeNode*&, RAI, RAI, std::array<double, N*2>&);
     
     
     template <class RAI>
@@ -271,8 +271,7 @@ KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(Const_RAI cbegin, Cons
     std::vector<std::pair<Point<N>, ElemType>> constructData(cbegin, cend);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
     auto bbox = computeInitBBox(cbegin, cend);
-    rangeCtorHelper(ndPoolPtr, constructData.begin(),
-                    constructData.begin() + (constructData.end() - constructData.begin())/2, constructData.end(), bbox);
+    rangeCtorHelper(ndPoolPtr, constructData.begin(), constructData.end(), bbox);
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
@@ -285,7 +284,7 @@ KDTreeExpandLongest<N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI end)
 : treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
     auto bbox = computeInitBBox(begin, end);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, begin, begin + (end - begin)/2, end, bbox);
+    rangeCtorHelper(ndPoolPtr, begin, end, bbox);
     
     /*
      struct actRecord {
@@ -412,7 +411,7 @@ computeInitBBox(RAI begin, RAI end) {
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongest<N, ElemType, DT>::
-rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
+rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
                 std::array<double, N*2> &bbox) {
     size_t dim = 0;
     double maxSpan = bbox[1] - bbox[0];
@@ -424,7 +423,8 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
             dim = i;
         }
     }
-        
+    
+    RAI median = begin + (end - begin)/2;
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.first[dim] < p2.first[dim];});
     pool->construct(ndPoolPtr, dim, std::move(median->first),
@@ -441,7 +441,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
         auto prevDimHigh = bbox[dim*2+1];
         bbox[dim*2+1] = curNdPtr->key[dim];
         //bbox[dim*2+1] = std::max_element(begin, median, [dim](const auto &p1, const auto&p2){return p1.first[dim] < p2.first[dim];})->first[dim];
-        rangeCtorHelper(ndPoolPtr, begin, begin + (median-begin)/2, median, bbox);
+        rangeCtorHelper(ndPoolPtr, begin, median, bbox);
         bbox[dim*2+1] = prevDimHigh;
     }
     
@@ -455,7 +455,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI median, RAI end,
         auto prevDimLow = bbox[dim*2];
         bbox[dim*2] = curNdPtr->key[dim];
         //bbox[dim*2] = std::min_element(median + 1, end, [dim](const auto &p1, const auto &p2){return p1.first[dim] < p2.first[dim];})->first[dim];
-        rangeCtorHelper(ndPoolPtr, median+1, median + (end-median+1)/2, end, bbox);
+        rangeCtorHelper(ndPoolPtr, median+1, end, bbox);
         bbox[dim*2] = prevDimLow;
     }
 }

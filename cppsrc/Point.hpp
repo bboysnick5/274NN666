@@ -51,6 +51,7 @@ public:
     double& operator[](size_t index);
     double operator[](size_t index) const;
     
+    const double* data() const;
     
     // static double eulDist(const Point<N>& one, const Point<N>& two);
     // Usage: double d = Distance(one, two);
@@ -113,6 +114,12 @@ template <size_t N>
 double Point<N>::operator[] (size_t index) const {
     return *(coords + index);
 }
+
+template <size_t N>
+const double* Point<N>::data() const {
+    return coords;
+}
+
 
 template <size_t N>
 typename Point<N>::iterator Point<N>::begin() {
