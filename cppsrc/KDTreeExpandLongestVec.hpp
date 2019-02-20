@@ -656,14 +656,22 @@ template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 template <class Iter>
 Iter KDTreeExpandLongestVec<N, ElemType, DT>::
 rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
-    std::vector<std::tuple<double, const Point<N>&, const ElemType&>> distPtElemTuple;
-    distPtElemTuple.reserve(std::sqrt(_size));
-    std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(_size+1))],
-    *it = st;
+    
+    
+    struct actRecord {
+        double dist;
+        const TreeNode* nd;
+    } st[static_cast<size_t>(log2(_size+1))], *it = st;
     double bestDistSq = std::numeric_limits<double>::max(),
-    bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
+           bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
     const TreeNode *cur = _ndVec;
     
+    struct distPtElem {
+        double dist;
+        const Point<N>* pt;
+        const ElemType* elem;
+    } distPtElems[19000], *distPtElemsIt = distPtElems;
+   
     while (true) {
         double curDistSq = Point<N>::template
         dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
@@ -672,42 +680,43 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
                 bestDistSq = curDistSq;
                 bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
             }
-            distPtElemTuple.emplace_back(curDistSq, cur->key, _objVec[cur-_ndVec]);
+            *distPtElemsIt++ = {curDistSq, &cur->key, &_objVec[cur-_ndVec]};
         }
         
         if (unsigned int rightIdx = cur->rightIdx) {
             unsigned int dim = cur->dimToExpand;
             double diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, _ndVec + rightIdx);
+                new(it++) actRecord {diff*diff, _ndVec + rightIdx};
                 ++cur;
             } else {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur+1);
+                new(it++) actRecord {diff*diff, cur+1};
                 cur = _ndVec + rightIdx;
             }
         } else if (cur++->dimToExpand == N) {
             do {
                 if (it == st)
                     goto FINAL;
-            } while ((--it)->first > bestDistDiffSq || !(cur = it->second));
+            } while ((--it)->dist > bestDistDiffSq || !(cur = it->nd));
         }
     }
     
 FINAL:
-    for (const auto &[distSq, pt, elem] : distPtElemTuple) {
-        if (distSq < bestDistDiffSq)
-            *returnIt++ = {pt, elem};
-    }
+    std::for_each(distPtElems, distPtElemsIt, [&returnIt, bestDistDiffSq](const auto& dpe){
+        if (dpe.dist < bestDistDiffSq)
+            *returnIt++ = {*dpe.pt, *dpe.elem};
+    });
     return returnIt;
 }
 
 template <size_t N, typename ElemType, typename Point<N>::DistType DT>
 ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) const {
     
-    std::pair<double, const TreeNode*> st[static_cast<size_t>(log2(_size+1))],
-    *it = st;
+    struct actRecord {
+        double dist;
+        const TreeNode* nd;
+    } st[static_cast<size_t>(log2(_size+1))], *it = st;
     double bestDist = std::numeric_limits<double>::max();
-    //const ElemType *bestValue = nullptr;
     const TreeNode *cur = _ndVec, *best = _ndVec;
     
     // LOGGGGGGGGGGGGGGG
@@ -738,17 +747,17 @@ ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) co
             unsigned int dim = cur->dimToExpand;
             double diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, _ndVec + rightIdx);
+                new(it++) actRecord {diff*diff, _ndVec + rightIdx};
                 ++cur;
             } else {
-                new(it++) std::pair<double, const TreeNode*>(diff*diff, cur+1);
+                new(it++) actRecord {diff*diff, cur+1};
                 cur = _ndVec + rightIdx;
             }
         } else if (cur++->dimToExpand == N) {
             do {
                 if (it == st)
                     return _objVec[best - _ndVec];
-            } while ((--it)->first >= bestDist || !(cur = it->second));
+            } while ((--it)->dist >= bestDist || !(cur = it->nd));
         }
     }
     

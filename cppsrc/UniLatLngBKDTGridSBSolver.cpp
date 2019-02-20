@@ -95,7 +95,7 @@ template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 const SBLoc* UniLatLngBKDTGridSBSolver<KDTType>::
 returnNNLocFromCacheVariant(double lng, double lat,
                             const std::variant<std::vector<std::pair<Point<3>,
-                            const SBLoc*>>, const SBLoc*, KDT<KDTType>>& v) {
+                            const SBLoc*>>, const SBLoc*, KDT<KDTType>>& v) const {
     switch (v.index()) {
         case 0: {
             const auto p = SBLoc::latLngToCart3DPt(lng, lat);

@@ -10,6 +10,8 @@
 		01183DA421EEE5240002C03A /* BFEUCPtSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */; };
 		011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6B821D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp */; };
 		011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */; };
+		013D9B69221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 013D9B67221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp */; };
+		013D9B6C221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */; };
 		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
 		82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */; };
 		82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */; };
@@ -51,6 +53,10 @@
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0131C9882213136D00F073C9 /* KDTreeExpandLongestVec.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeExpandLongestVec.hpp; sourceTree = "<group>"; };
 		013914F222164BD500A920EE /* countries.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = countries.csv; sourceTree = "<group>"; };
+		013D9B67221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnionUniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
+		013D9B68221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnionUniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
+		013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnionUniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
+		013D9B6B221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnionUniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		013F20632217DB8A002B556E /* test.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.csv; sourceTree = "<group>"; };
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
@@ -135,6 +141,10 @@
 				011CF6B921D711EE0052024D /* UniLatLngBKDTGridSBSolver.hpp */,
 				011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */,
 				011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */,
+				013D9B67221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp */,
+				013D9B68221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.hpp */,
+				013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */,
+				013D9B6B221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.hpp */,
 			);
 			path = cppsrc;
 			sourceTree = "<group>";
@@ -198,6 +208,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */,
+				013D9B69221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
 				011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */,
@@ -206,6 +217,7 @@
 				82A66E371E003B0800D5FAFD /* main.cpp in Sources */,
 				823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */,
 				82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */,
+				013D9B6C221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,6 +332,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -328,6 +341,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				GCC_C_LANGUAGE_STANDARD = c99;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

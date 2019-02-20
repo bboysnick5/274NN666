@@ -14,6 +14,8 @@
 #include "BKDTGridSBSolver.hpp"
 #include "UniLatLngBKDTGridSBSolver.hpp"
 #include "UniCellBKDTGridSBSolver.hpp"
+#include "UnionUniLatLngBKDTGridSBSolver.hpp"
+#include "UnionUniCellBKDTGridSBSolver.hpp"
 
 
 
@@ -31,6 +33,7 @@
 #include <random>
 #include <regex>
 #include <thread>
+#include <cstdlib>
 
 
 
@@ -143,14 +146,15 @@ void writeResults(const char* argv[],
 }
 
 
+
 int main(int argc, const char * argv[]) {
-    //std::cout << std::is_pod<Point<3>>::value;
-    //return 0;
+
+    
     
     //int *x = new int[20];
     //std::cout << sizeof(std::pair<double, std::pair<const Point<3>*, const SBLoc*>>);
     //delete[] x;
-    //return 0;
+    //return 0; */
     
     /*
     std::ifstream infileLocs(argv[1]);
@@ -252,10 +256,13 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTree>>(0.85*aveLocPerCell, maxCacheCellVecSize),
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
         //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_shared<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_shared<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_shared<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };
     
     

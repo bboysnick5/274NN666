@@ -37,9 +37,9 @@ protected:
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
                        std::vector<std::pair<Point<3>, const SBLoc*>>&);
-    static const SBLoc* returnNNLocFromCacheVariant(double, double,
+    const SBLoc* returnNNLocFromCacheVariant(double, double,
           const std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
-          const SBLoc*, KDT<KDTType>>&);
+          const SBLoc*, KDT<KDTType>>&) const;
     
 private:
     virtual void fillGridCache();
