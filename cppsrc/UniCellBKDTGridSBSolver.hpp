@@ -22,7 +22,7 @@ class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType> {
 public:
     UniCellBKDTGridSBSolver(double = 1, size_t = 1500);
     //void build(const std::shared_ptr<std::vector<SBLoc>>&) override final;
-    const SBLoc* findNearest(double lng, double lat) const override final;
+    const SBLoc* findNearest(double lat, double lng) const override final;
     //virtual void printSolverInfo() const override;
     
 

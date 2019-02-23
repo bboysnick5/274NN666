@@ -8,7 +8,7 @@
 
 #include "BFEUCPtSolver.hpp"
 
-const SBLoc* BFEUCPtSBSolver::findNearest(double lng, double lat) const {
+const SBLoc* BFEUCPtSBSolver::findNearest(double lat, double lng) const {
     const auto testPt = SBLoc::latLngToCart3DPt(lng, lat);
     return &*std::min_element(locData->cbegin(), locData->cend(),
                               [&](const SBLoc& l1, const SBLoc& l2) {

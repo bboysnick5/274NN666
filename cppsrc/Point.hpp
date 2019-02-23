@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <stdlib.h>
+#include <array>
 
 template <size_t N>
 class Point {
@@ -22,6 +23,7 @@ public:
         MAN,
         HAV
     };
+    
     
     template <typename... T>
     Point(T... ts) : coords{ts...} {}
@@ -42,6 +44,10 @@ public:
     // Returns N, the dimension of the point.
     size_t size() const;
     
+    bool operator == (const Point<N>& rhs);
+    bool operator != (const Point<N>& rhs);
+    
+    
     // double& operator[](size_t index);
     // double operator[](size_t index) const;
     // Usage: myPoint[3] = 137;
@@ -52,6 +58,10 @@ public:
     double operator[](size_t index) const;
     
     const double* data() const;
+    double* data();
+    
+    const std::array<double, N>& dataArray() const;
+    std::array<double, N>& dataArray();
     
     // static double eulDist(const Point<N>& one, const Point<N>& two);
     // Usage: double d = Distance(one, two);
@@ -70,12 +80,12 @@ public:
     iterator begin();
     iterator end();
     
-    const_iterator begin() const;
-    const_iterator end() const;
+    const_iterator cbegin() const;
+    const_iterator cend() const;
     
 private:
     // The point's actual coordinates are stored in an array.
-    double coords[N];
+    std::array<double, N> coords;
     
     static double eucDist(const Point<N>& pt1, const Point<N>& pt2);
     static double eucSqDist(const Point<N>& pt1, const Point<N>& pt2);
@@ -107,38 +117,52 @@ size_t Point<N>::size() const {
 
 template <size_t N>
 double& Point<N>::operator[] (size_t index) {
-    return *(coords + index);
+    return coords[index];
 }
 
 template <size_t N>
 double Point<N>::operator[] (size_t index) const {
-    return *(coords + index);
+    return coords[index];
 }
 
 template <size_t N>
 const double* Point<N>::data() const {
+    return coords.data();
+}
+
+template <size_t N>
+double* Point<N>::data() {
+    return coords.data();
+}
+
+template <size_t N>
+const std::array<double, N>& Point<N>::dataArray() const {
     return coords;
 }
 
+template <size_t N>
+std::array<double, N>& Point<N>::dataArray() {
+    return coords;
+}
 
 template <size_t N>
 typename Point<N>::iterator Point<N>::begin() {
-    return coords;
+    return coords.begin();
 }
 
 template <size_t N>
-typename Point<N>::const_iterator Point<N>::begin() const {
-    return coords;
+typename Point<N>::const_iterator Point<N>::cbegin() const {
+    return coords.cbegin();
 }
 
 template <size_t N>
 typename Point<N>::iterator Point<N>::end() {
-    return begin() + size();
+    return coords.end();
 }
 
 template <size_t N>
-typename Point<N>::const_iterator Point<N>::end() const {
-    return begin() + size();
+typename Point<N>::const_iterator Point<N>::cend() const {
+    return coords.cend();
 }
 
 template <size_t N>
@@ -163,9 +187,9 @@ double Point<N>::eucDist(const Point<N>& one, const Point<N>& two) {
 
 template <size_t N>
 double Point<N>::eucSqDist(const Point<N>& one, const Point<N>& two) {
-    double diff = *one.coords - *two.coords, result = diff*diff;
+    double diff = one[0] - two[0], result = diff*diff;
     for (size_t i = 1; i < N; ++i) {
-        diff = *(one.coords+i) - *(two.coords+i);
+        diff = one[i] - two[i];
         result += diff*diff;
     }
     return result;
@@ -193,16 +217,14 @@ double Point<N>::manDist(const Point<N>& one, const Point<N>& two) {
     return result;
 }
 
-// Equality is implemented using the equal algorithm, which takes in two ranges
-// and reports whether they contain equal values.
 template <size_t N>
-bool operator==(const Point<N>& one, const Point<N>& two) {
-    return std::equal(one.begin(), one.end(), two.begin());
+bool Point<N>::operator == (const Point<N>& rhs) {
+    return coords == rhs.coords;
 }
 
 template <size_t N>
-bool operator!=(const Point<N>& one, const Point<N>& two) {
-    return !(one == two);
+bool Point<N>::operator != (const Point<N>& rhs) {
+    return !(*this == rhs);
 }
 
 

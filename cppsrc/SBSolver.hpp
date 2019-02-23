@@ -19,7 +19,7 @@
 class SBSolver {
 public:
     virtual void build(const std::shared_ptr<std::vector<SBLoc>>&) = 0;
-    virtual const SBLoc* findNearest(double lng, double lat) const = 0;
+    virtual const SBLoc* findNearest(double, double) const = 0;
     virtual void printSolverInfo() const = 0;
 };
 

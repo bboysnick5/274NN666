@@ -28,8 +28,8 @@ BKDTGridSBSolver::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, double diff,
     double cellCtrLat = SBLoc::latFromHavDist(rowDistCellCtrGridCtr, midLat),
            cellCtrLng = SBLoc::lngFromHavDist(colDistCellCtrGridCtr,
                                               midLng, cellCtrLat);
-    return sbKdt.rangeDiffKNNPairs(SBLoc::latLngToCart3DPt(cellCtrLng,
-                                                           cellCtrLat),
+    return sbKdt.rangeDiffKNNPairs(SBLoc::latLngToCart3DPt(cellCtrLat,
+                                                           cellCtrLng),
                                    diff, begin);
 }
 
@@ -69,7 +69,7 @@ double BKDTGridSBSolver::xyzDistFromSideLen() {
     double lat2 = SBLoc::latFromHavDist(sideLen*sqrt(2), 0);
     return Point<3>::template
            dist<Point<3>::DistType::EUC>(SBLoc::latLngToCart3DPt(0, 0),
-                                         SBLoc::latLngToCart3DPt(0, lat2));
+                                         SBLoc::latLngToCart3DPt(lat2, 0));
 }
  
 
@@ -78,7 +78,7 @@ void BKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData)
     kdtData.reserve(locData->size());
     std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
                    [&](const SBLoc& loc){ return
-                       std::make_pair(SBLoc::latLngToCart3DPt(loc.lng, loc.lat), &loc);});
+                       std::make_pair(SBLoc::latLngToCart3DPt(loc.lat, loc.lng), &loc);});
     sbKdt = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>(kdtData.begin(), kdtData.end());
     numLocs = sbKdt.size();
     findKeyLngLat(locData);
@@ -92,12 +92,12 @@ void BKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData)
     fillGridCache();
 }
 
-const SBLoc* BKDTGridSBSolver::findNearest(double lng, double lat) const {
+const SBLoc* BKDTGridSBSolver::findNearest(double lat, double lng) const {
     auto idxPr = getIdx(lng, lat);
     size_t idx = idxPr.first*colSize+idxPr.second;
     auto singleLoc = gridSingleCache[idx];
     return singleLoc != nullptr ? singleLoc :
-           gridTreeCache[idx].kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
+           gridTreeCache[idx].kNNValue(SBLoc::latLngToCart3DPt(lat, lng), 1);
 }
 
 

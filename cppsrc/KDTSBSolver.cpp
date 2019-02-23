@@ -22,8 +22,8 @@ void KDTSBSolver<KDTType>::printSolverInfo() const {
 
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
-const SBLoc* KDTSBSolver<KDTType>::findNearest(double lng, double lat) const {
-    return locKdt.kNNValue(SBLoc::latLngToCart3DPt(lng, lat), 1);
+const SBLoc* KDTSBSolver<KDTType>::findNearest(double lat, double lng) const {
+    return locKdt.kNNValue(SBLoc::latLngToCart3DPt(lat, lng), 1);
 }
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>

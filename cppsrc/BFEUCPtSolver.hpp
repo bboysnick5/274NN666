@@ -14,7 +14,7 @@
 
 class BFEUCPtSBSolver : public BFSBSolver {
 public:
-    const SBLoc* findNearest(double lng, double lat) const override;
+    const SBLoc* findNearest(double lat, double lng) const override;
     void printSolverInfo() const override;
 };
 

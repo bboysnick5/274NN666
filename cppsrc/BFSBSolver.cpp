@@ -14,7 +14,7 @@ void BFSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     this->locData = locData;
 }
 
-const SBLoc* BFSBSolver::findNearest(double lng, double lat) const {
+const SBLoc* BFSBSolver::findNearest(double lat, double lng) const {
     return &*std::min_element(locData->cbegin(), locData->cend(),
                               [=](const SBLoc& l1, const SBLoc& l2) {
                                   return SBLoc::havDist(l1.lng,l1.lat, lng, lat)

@@ -79,7 +79,7 @@ double lng, double lat, double &minDist, const SBLoc* &best) const {
 }
 
 
-const SBLoc* GridSBSolver::findNearest(double lng, double lat) const {
+const SBLoc* GridSBSolver::findNearest(double lat, double lng) const {
     auto idxPr = getIdx(lng, lat);
     size_t r0 = idxPr.first, c0 = idxPr.second;
     double minDist = DOUBLE_MAX;

@@ -23,13 +23,13 @@ class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
     UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lng, double lat) const override;
+    const SBLoc* findNearest(double lat, double lng) const override;
     virtual void printSolverInfo() const override final;
     
 protected:
     const double AVE_LOC_PER_CELL;
     const size_t MAX_CACHE_CELL_VEC_SIZE;
-    double lngInc, latInc, sideLen;
+    double lngInc, latInc, latIncInverse, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
            vecLocs = 0, rowSize, colSize;
     std::vector<std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,

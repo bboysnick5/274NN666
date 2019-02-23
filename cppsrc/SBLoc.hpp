@@ -44,7 +44,7 @@ struct SBLoc {
     
     static double lngFromHavDist(double dist, double lng1, double lat);
     
-    static Point<3> latLngToCart3DPt(double lng, double lat);
+    static Point<3> latLngToCart3DPt(double lat, double lng);
     
     static double xyzDistFromLngLat(double lat1, double lat2, double lngDiff);
 };
@@ -55,10 +55,10 @@ inline SBLoc::SBLoc(const Point<3> &pt) : lat(asin(pt[2])), lng(asin(pt[1]/cos(a
 
 
 inline bool SBLoc::operator==(const SBLoc &other) const {
-    if (other.lng == lng && other.lat == lat)
+    if (lat == other.lat && lng == other.lng)
         return true;
-    return std::fabs(other.lng - lng) < 0.000001 &&
-           std::fabs(other.lat - lat) < 0.000001;
+    return std::fabs(lat - other.lat) < 0.000001 &&
+           std::fabs(lng - other.lng) < 0.000001;
 }
 
 inline bool SBLoc::operator!=(const SBLoc &other) const {
@@ -95,10 +95,10 @@ inline double SBLoc::lngFromHavDist(double dist, double lng1, double lat) {
 }
 
 inline Point<3> SBLoc::locToCart3DPt() const {
-    return latLngToCart3DPt(lng, lat);
+    return latLngToCart3DPt(lat, lng);
 }
 
-inline Point<3> SBLoc::latLngToCart3DPt(double lng, double lat) {
+inline Point<3> SBLoc::latLngToCart3DPt(double lat, double lng) {
     return Point<3>{cos(lat)*cos(lng), cos(lat)*sin(lng), sin(lat)};
 }
 
@@ -125,8 +125,8 @@ namespace std {
 }
 
 inline std::ostream& operator<<(std::ostream &os, const SBLoc &l) {
-    return os << "Lng: " << SBLoc::toDegree(l.lng) << ", Lat: "
-              << SBLoc::toDegree(l.lat) << std::endl << "City: "
+    return os << "Lat: " << SBLoc::toDegree(l.lat) << ", Lng: "
+              << SBLoc::toDegree(l.lng) << "\nCity: "
               << l.city << std::endl << "Addr: " << l.addr << std::endl;
 }
 

@@ -21,7 +21,7 @@ class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
     UnionUniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lng, double lat) const override;
+    const SBLoc* findNearest(double lat, double lng) const override;
     virtual void printSolverInfo() const override final;
     
     
@@ -29,21 +29,34 @@ public:
     
 protected:
     
-    struct Cell {
-        
-    public:
+    struct UnionCell {
         union {
             const SBLoc *cacheLoc;
-            std::pair<Point<3>, const SBLoc*>* cacheLocs;
-            KDT<KDTType>* cacheTree;
+            std::pair<Point<3>, const SBLoc*> *cacheLocs;
+            const KDT<KDTType> *cacheTree;
         };
         
-        Cell(size_t, const std::vector<std::pair<Point<3>, const SBLoc*>>&);
-        ~Cell();
+        UnionCell(size_t, const std::vector<std::pair<Point<3>, const SBLoc*>>&);
+        ~UnionCell();
         size_t size() const;
         
     private:
         size_t _size;
+    };
+    
+    struct BitCell {
+        
+        BitCell(size_t, const std::vector<std::pair<Point<3>, const SBLoc*>>&);
+        ~BitCell();
+        size_t size() const;
+        size_t rawSize() const;
+        
+        const SBLoc* getSingleLoc() const;
+        const std::pair<Point<3>, const SBLoc*>* getLocPairs() const;
+        const KDT<KDTType>* getCacheTree() const;
+        
+    private:
+        uintptr_t ptr;
     };
     
     /*
@@ -57,15 +70,15 @@ protected:
     
     const double AVE_LOC_PER_CELL;
     const size_t MAX_CACHE_CELL_VEC_SIZE;
-    double lngInc, latInc, sideLen;
+    double lngInc, lngIncInverse, latInc, latIncInverse, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
     vecLocs = 0, rowSize, colSize;
-    std::vector<Cell> gridCache;
+    std::vector<BitCell> gridCache;
     
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
                        std::vector<std::pair<Point<3>, const SBLoc*>>&);
-    const SBLoc* returnNNLocFromCacheVariant(double, double, const Cell&) const;
+    const SBLoc* returnNNLocFromCacheVariant(double, double, const BitCell&) const;
     
 private:
     virtual void fillGridCache();

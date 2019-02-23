@@ -31,15 +31,14 @@ void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
          ++r, thisCtrLat += this->latInc, thisLat += this->latInc) {
         size_t thisColSize = static_cast<size_t>(2*M_PI * SBLoc::EARTH_RADIUS *
                              cos(thisLat > 0 ? thisLat-this->latInc : thisLat)/
-                             this->sideLen) + 2,
-               thisEndIdx = idx + thisColSize;
-        double thisLngInc = 2*M_PI/thisColSize +
-                            2*M_PI/(thisColSize*thisColSize*0xFFFF),
-               thisDiff = SBLoc::xyzDistFromLngLat(r*this->latInc - 0.5*M_PI,
+                             this->sideLen) + 2;
+        double thisLngInc = 2*M_PI/thisColSize + 2*M_PI/(thisColSize*thisColSize*0xFFFF);
+        thisRowStartIdx.emplace_back(idx, 1.0/thisLngInc);
+        double thisDiff = SBLoc::xyzDistFromLngLat(r*this->latInc - 0.5*M_PI,
                           (r+1)*this->latInc - 0.5*M_PI, thisLngInc),
                thisCtrLng = 0.5 * thisLngInc - M_PI;
-        thisRowStartIdx.emplace_back(idx, thisLngInc);
-        for (; idx < thisEndIdx; ++idx, thisCtrLng += thisLngInc) {
+        for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
+             ++idx, thisCtrLng += thisLngInc) {
             UniLatLngBKDTGridSBSolver<KDTType>::fillCacheCell
             (thisCtrLng, thisCtrLat, thisDiff, ptLocPairs);
         }
@@ -48,10 +47,10 @@ void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
 
 template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 const SBLoc* UniCellBKDTGridSBSolver<KDTType>::
-findNearest(double lng, double lat) const {
-    const auto[startIdx, thisLngInc] = thisRowStartIdx[(lat+0.5*M_PI)/this->latInc];
-    return UniLatLngBKDTGridSBSolver<KDTType>::returnNNLocFromCacheVariant(lng,
-    lat, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)/thisLngInc)]);
+findNearest(double lat, double lng) const {
+    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(lat+0.5*M_PI)*this->latIncInverse];
+    return UniLatLngBKDTGridSBSolver<KDTType>::returnNNLocFromCacheVariant(lat,
+    lng, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)*thisLngIncInverse)]);
 }
 
 

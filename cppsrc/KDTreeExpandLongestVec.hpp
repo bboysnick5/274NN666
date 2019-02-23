@@ -666,11 +666,14 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
            bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
     const TreeNode *cur = _ndVec;
     
+    const size_t MAX_DISTPTELEMS_SIZE = 16384;
     struct distPtElem {
         double dist;
         const Point<N>* pt;
         const ElemType* elem;
-    } distPtElems[19000], *distPtElemsIt = distPtElems;
+    } distPtElems[MAX_DISTPTELEMS_SIZE], *distPtElemsIt = distPtElems,
+      *distPtElemsEnd = distPtElems + MAX_DISTPTELEMS_SIZE;
+    std::vector<distPtElem> distPtElemVec;
    
     while (true) {
         double curDistSq = Point<N>::template
@@ -681,6 +684,10 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
                 bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
             }
             *distPtElemsIt++ = {curDistSq, &cur->key, &_objVec[cur-_ndVec]};
+            if (distPtElemsIt == distPtElemsEnd) {
+                distPtElemVec.insert(distPtElemVec.end(), distPtElems, distPtElemsEnd);
+                distPtElemsIt = distPtElems;
+            }
         }
         
         if (unsigned int rightIdx = cur->rightIdx) {
@@ -702,6 +709,10 @@ rangeDiffKNNPairs(const Point<N>& pt, double fence, Iter returnIt) const {
     }
     
 FINAL:
+    std::for_each(distPtElemVec.begin(), distPtElemVec.end(), [&returnIt, bestDistDiffSq](const auto& dpe){
+        if (dpe.dist < bestDistDiffSq)
+            *returnIt++ = {*dpe.pt, *dpe.elem};
+    });
     std::for_each(distPtElems, distPtElemsIt, [&returnIt, bestDistDiffSq](const auto& dpe){
         if (dpe.dist < bestDistDiffSq)
             *returnIt++ = {*dpe.pt, *dpe.elem};
@@ -717,7 +728,7 @@ ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) co
         const TreeNode* nd;
     } st[static_cast<size_t>(log2(_size+1))], *it = st;
     double bestDist = std::numeric_limits<double>::max();
-    const TreeNode *cur = _ndVec, *best = _ndVec;
+    const TreeNode *cur = _ndVec, *best = cur;
     
     // LOGGGGGGGGGGGGGGG
     
@@ -735,7 +746,6 @@ ElemType KDTreeExpandLongestVec<N, ElemType, DT>::NNValue(const Point<N> &pt) co
         double curDist = Point<N>::template dist<Point<N>::DistType::EUCSQ>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
-            //bestValue = &_objVec[cur-_ndVec];
             best = cur;
         }
         

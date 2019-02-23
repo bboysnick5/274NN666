@@ -23,7 +23,7 @@ template <template <size_t, class, typename Point<3>::DistType> class KDTType>
 class KDTSBSolver : public SBSolver {
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lng, double lat) const override;
+    const SBLoc* findNearest(double lat, double lng) const override;
     virtual void printSolverInfo() const override;
     
 protected:
