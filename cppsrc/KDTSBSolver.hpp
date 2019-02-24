@@ -16,10 +16,11 @@
 #include "KDTreeExpandLongestVec.hpp"
 #include <stdio.h>
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
-using KDT = KDTType<3, const SBLoc*, Point<3>::DistType::EUC>;
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
+using KDT = KDTType<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>;
+
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 class KDTSBSolver : public SBSolver {
 public:
     void build(const std::shared_ptr<std::vector<SBLoc>>&) override;

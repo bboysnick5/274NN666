@@ -12,8 +12,8 @@ const SBLoc* BFEUCPtSBSolver::findNearest(double lat, double lng) const {
     const auto testPt = SBLoc::latLngToCart3DPt(lng, lat);
     return &*std::min_element(locData->cbegin(), locData->cend(),
                               [&](const SBLoc& l1, const SBLoc& l2) {
-                                  return Point<3>::dist<Point<3>::DistType::EUCSQ>(l1.locToCart3DPt(), testPt)
-                                  < Point<3>::dist<Point<3>::DistType::EUCSQ>(l2.locToCart3DPt(), testPt);});
+                                  return Point<double, 3>::dist<Point<double, 3>::DistType::EUCSQ>(l1.locToCart3DPt(), testPt)
+                                  < Point<double, 3>::dist<Point<double, 3>::DistType::EUCSQ>(l2.locToCart3DPt(), testPt);});
 }
 
 

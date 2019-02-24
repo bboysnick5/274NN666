@@ -13,9 +13,22 @@
 #include <stdlib.h>
 #include <array>
 
-template <size_t N>
+template <typename _Tp, size_t _N>
 class Point {
 public:
+    
+    typedef Point                                 __self;
+    typedef _Tp                                   value_type;
+    typedef value_type&                           reference;
+    typedef const value_type&                     const_reference;
+    typedef value_type*                           iterator;
+    typedef const value_type*                     const_iterator;
+    typedef value_type*                           pointer;
+    typedef const value_type*                     const_pointer;
+    typedef size_t                                size_type;
+    typedef ptrdiff_t                             difference_type;
+    typedef std::reverse_iterator<iterator>       reverse_iterator;
+    typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     
     enum class DistType {
         EUC = 0,
@@ -30,45 +43,37 @@ public:
     
     Point() = default;
     
-    // Type: iterator
-    // Type: const_iterator
-    // ------------------------------------------------------------------------
-    // Types representing iterators that can traverse and optionally modify the
-    // elements of the Point.
-    typedef double* iterator;
-    typedef const double* const_iterator;
-    
     // size_t size() const;
     // Usage: for (size_t i = 0; i < myPoint.size(); ++i)
     // ------------------------------------------------------------------------
     // Returns N, the dimension of the point.
     size_t size() const;
     
-    bool operator == (const Point<N>& rhs);
-    bool operator != (const Point<N>& rhs);
+    bool operator == (const Point<_Tp, _N>& rhs);
+    bool operator != (const Point<_Tp, _N>& rhs);
     
     
-    // double& operator[](size_t index);
-    // double operator[](size_t index) const;
+    // _Tp& operator[](size_t index);
+    // _Tp operator[](size_t index) const;
     // Usage: myPoint[3] = 137;
     // ------------------------------------------------------------------------
     // Queries or retrieves the value of the point at a particular point. The
     // index is assumed to be in-range.
-    double& operator[](size_t index);
-    double operator[](size_t index) const;
+    value_type& operator[](size_t index);
+    value_type operator[](size_t index) const;
     
-    const double* data() const;
-    double* data();
+    const value_type* data() const;
+    value_type* data();
     
-    const std::array<double, N>& dataArray() const;
-    std::array<double, N>& dataArray();
+    const std::array<_Tp, _N>& dataArray() const;
+    std::array<_Tp, _N>& dataArray();
     
-    // static double eulDist(const Point<N>& one, const Point<N>& two);
-    // Usage: double d = Distance(one, two);
+    // static _Tp eulDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two);
+    // Usage: _Tp d = Distance(one, two);
     // ----------------------------------------------------------------------------
     // Returns the Euclidean distance between two points.
     template <DistType>
-    static double dist(const Point<N>& pt1, const Point<N>& pt2);
+    static value_type dist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
     
     // iterator begin();
     // iterator end();
@@ -85,89 +90,77 @@ public:
     
 private:
     // The point's actual coordinates are stored in an array.
-    std::array<double, N> coords;
+    std::array<value_type, _N> coords;
     
-    static double eucDist(const Point<N>& pt1, const Point<N>& pt2);
-    static double eucSqDist(const Point<N>& pt1, const Point<N>& pt2);
-    static double havDist(const Point<N>& pt1, const Point<N>& pt2);
-    static double manDist(const Point<N>& pt1, const Point<N>& pt2);
+    static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    static value_type eucSqDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    static value_type havDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    static value_type manDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
 
 };
-
-
-// bool operator==(const Point<N>& one, const Point<N>& two);
-// bool operator!=(const Point<N>& one, const Point<N>& two);
-// Usage: if (one == two)
-// ----------------------------------------------------------------------------
-// Returns whether two points are equal or not equal.
-template <size_t N>
-bool operator==(const Point<N>& one, const Point<N>& two);
-
-template <size_t N>
-bool operator!=(const Point<N>& one, const Point<N>& two);
 
 /** Point class implementation details */
 
 #include <algorithm>
 
-template <size_t N>
-size_t Point<N>::size() const {
-    return N;
+template <typename _Tp, size_t _N>
+size_t Point<_Tp, _N>::size() const {
+    return _N;
 }
 
-template <size_t N>
-double& Point<N>::operator[] (size_t index) {
+template <typename _Tp, size_t _N>
+_Tp& Point<_Tp, _N>::operator[] (size_t index) {
     return coords[index];
 }
 
-template <size_t N>
-double Point<N>::operator[] (size_t index) const {
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::operator[] (size_t index) const {
     return coords[index];
 }
 
-template <size_t N>
-const double* Point<N>::data() const {
+template <typename _Tp, size_t _N>
+const _Tp* Point<_Tp, _N>::data() const {
     return coords.data();
 }
 
-template <size_t N>
-double* Point<N>::data() {
+template <typename _Tp, size_t _N>
+_Tp* Point<_Tp, _N>::data() {
     return coords.data();
 }
 
-template <size_t N>
-const std::array<double, N>& Point<N>::dataArray() const {
+template <typename _Tp, size_t _N>
+const std::array<_Tp, _N>& Point<_Tp, _N>::dataArray() const {
     return coords;
 }
 
-template <size_t N>
-std::array<double, N>& Point<N>::dataArray() {
+template <typename _Tp, size_t _N>
+std::array<_Tp, _N>& Point<_Tp, _N>::dataArray() {
     return coords;
 }
 
-template <size_t N>
-typename Point<N>::iterator Point<N>::begin() {
+template <typename _Tp, size_t _N>
+typename Point<_Tp, _N>::iterator Point<_Tp, _N>::begin() {
     return coords.begin();
 }
 
-template <size_t N>
-typename Point<N>::const_iterator Point<N>::cbegin() const {
+template <typename _Tp, size_t _N>
+typename Point<_Tp, _N>::const_iterator Point<_Tp, _N>::cbegin() const {
     return coords.cbegin();
 }
 
-template <size_t N>
-typename Point<N>::iterator Point<N>::end() {
+template <typename _Tp, size_t _N>
+typename Point<_Tp, _N>::iterator Point<_Tp, _N>::end() {
     return coords.end();
 }
 
-template <size_t N>
-typename Point<N>::const_iterator Point<N>::cend() const {
+template <typename _Tp, size_t _N>
+typename Point<_Tp, _N>::const_iterator Point<_Tp, _N>::cend() const {
     return coords.cend();
 }
 
-template <size_t N>
-template <typename Point<N>::DistType DT>
-double Point<N>::dist(const Point<N>& one, const Point<N>& two) {
+template <typename _Tp, size_t _N>
+template <typename Point<_Tp, _N>::DistType DT>
+_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
     switch (DT) {
         case DistType::EUC:
             return eucDist(one, two);
@@ -180,15 +173,15 @@ double Point<N>::dist(const Point<N>& one, const Point<N>& two) {
     }
 }
 
-template <size_t N>
-double Point<N>::eucDist(const Point<N>& one, const Point<N>& two) {
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
     return sqrt(eucSqDist(one, two));
 }
 
-template <size_t N>
-double Point<N>::eucSqDist(const Point<N>& one, const Point<N>& two) {
-    double diff = one[0] - two[0], result = diff*diff;
-    for (size_t i = 1; i < N; ++i) {
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::eucSqDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    _Tp diff = one[0] - two[0], result = diff*diff;
+    for (size_t i = 1; i < _N; ++i) {
         diff = one[i] - two[i];
         result += diff*diff;
     }
@@ -196,34 +189,34 @@ double Point<N>::eucSqDist(const Point<N>& one, const Point<N>& two) {
 }
 
 
-template <size_t N>
-double Point<N>::havDist(const Point<N>& one, const Point<N>& two) {
-    constexpr static double EARTH_RADIUS = 6371;
-    double dLat = (one[1]-two[1])*M_PI/180;
-    double dLon = (one[0]-two[0])*M_PI/180;
-    double lat1 = one[1]*M_PI/180;
-    double lat2 = two[1]*M_PI/180;
-    double a = sin(dLat/2) * sin(dLat/2) +
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::havDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    constexpr static _Tp EARTH_RADIUS = 6371;
+    _Tp dLat = (one[1]-two[1])*M_PI/180;
+    _Tp dLon = (one[0]-two[0])*M_PI/180;
+    _Tp lat1 = one[1]*M_PI/180;
+    _Tp lat2 = two[1]*M_PI/180;
+    _Tp a = sin(dLat/2) * sin(dLat/2) +
                sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2);
-    double c = 2 * atan2(sqrt(a), sqrt(1-a));
+    _Tp c = 2 * atan2(sqrt(a), sqrt(1-a));
     return EARTH_RADIUS * c;
 }
 
-template <size_t N>
-double Point<N>::manDist(const Point<N>& one, const Point<N>& two) {
-    double result = std::fabs(one[0] - two[0]);
-    for (size_t i = 1; i < N; ++i)
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::manDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    _Tp result = std::fabs(one[0] - two[0]);
+    for (size_t i = 1; i < _N; ++i)
         result += std::fabs(one[i] - two[i]);
     return result;
 }
 
-template <size_t N>
-bool Point<N>::operator == (const Point<N>& rhs) {
+template <typename _Tp, size_t _N>
+bool Point<_Tp, _N>::operator == (const Point<_Tp, _N>& rhs) {
     return coords == rhs.coords;
 }
 
-template <size_t N>
-bool Point<N>::operator != (const Point<N>& rhs) {
+template <typename _Tp, size_t _N>
+bool Point<_Tp, _N>::operator != (const Point<_Tp, _N>& rhs) {
     return !(*this == rhs);
 }
 

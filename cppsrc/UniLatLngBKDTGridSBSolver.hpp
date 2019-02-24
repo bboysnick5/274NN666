@@ -18,7 +18,7 @@
 #include <variant>
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
     UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
@@ -32,13 +32,13 @@ protected:
     double lngInc, latInc, latIncInverse, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
            vecLocs = 0, rowSize, colSize;
-    std::vector<std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
+    std::vector<std::variant<std::vector<std::pair<Point<double, 3>, const SBLoc*>>,
                              const SBLoc*, KDT<KDTType>>> gridCache;
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
-                       std::vector<std::pair<Point<3>, const SBLoc*>>&);
+                       std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
     const SBLoc* returnNNLocFromCacheVariant(double, double,
-          const std::variant<std::vector<std::pair<Point<3>, const SBLoc*>>,
+          const std::variant<std::vector<std::pair<Point<double, 3>, const SBLoc*>>,
           const SBLoc*, KDT<KDTType>>&) const;
     
 private:
@@ -47,7 +47,7 @@ private:
 
 /*
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
     UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
@@ -61,13 +61,13 @@ protected:
     double lngInc, latInc, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
     vecLocs = 0, rowSize, colSize;
-    std::vector<std::variant<std::tuple<Point<3>*, const SBLoc**, size_t>,
+    std::vector<std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
     const SBLoc*, const KDT<KDTType>>> gridCache;
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
-                       std::vector<std::pair<Point<3>, const SBLoc*>>&);
+                       std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
     static const SBLoc* returnNNLocFromCacheVariant(double, double,
-                                                    const std::variant<std::tuple<Point<3>*, const SBLoc**, size_t>,
+                                                    const std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
                                                     const SBLoc*, const KDT<KDTType>>&);
     ~UniLatLngBKDTGridSBSolver();
 private:

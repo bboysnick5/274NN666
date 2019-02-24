@@ -25,10 +25,10 @@ struct SBLoc {
     static constexpr double EARTH_RADIUS = 6371;
     
     SBLoc() = default;
-    SBLoc(const Point<3>&);
+    SBLoc(const Point<double, 3>&);
     SBLoc(double lat, double lng);
     
-    Point<3> locToCart3DPt() const;
+    Point<double, 3> locToCart3DPt() const;
     
     bool operator==(const SBLoc &other) const;
     
@@ -44,14 +44,14 @@ struct SBLoc {
     
     static double lngFromHavDist(double dist, double lng1, double lat);
     
-    static Point<3> latLngToCart3DPt(double lat, double lng);
+    static Point<double, 3> latLngToCart3DPt(double lat, double lng);
     
     static double xyzDistFromLngLat(double lat1, double lat2, double lngDiff);
 };
 
 inline SBLoc::SBLoc(double lat, double lng) : lat(lat), lng(lng), city(""), addr("") {}
 
-inline SBLoc::SBLoc(const Point<3> &pt) : lat(asin(pt[2])), lng(asin(pt[1]/cos(asin(pt[2])))), city(""), addr("") {}
+inline SBLoc::SBLoc(const Point<double, 3> &pt) : lat(asin(pt[2])), lng(asin(pt[1]/cos(asin(pt[2])))), city(""), addr("") {}
 
 
 inline bool SBLoc::operator==(const SBLoc &other) const {
@@ -77,13 +77,13 @@ inline double SBLoc::havDist(double lng1, double lat1, double lng2, double lat2)
     double dLat = lat2-lat1, dLon = lng2-lng1;
     double a = sin(dLat/2.0) * sin(dLat/2.0) +
                sin(dLon/2.0) * sin(dLon/2.0) * cos(lat1) * cos(lat2);
-    return 2.0 * atan2(sqrt(a), sqrt(1-a)) * EARTH_RADIUS;
+    return 2.0 * atan2(sqrt(a), sqrt(1.0-a)) * EARTH_RADIUS;
 }
 
 inline double SBLoc::latFromHavDist(double dist, double lat1) {
     double c = dist/EARTH_RADIUS;
-    double sum = sin(c/2);
-    double dLat = asin(sum)*2;
+    double sum = sin(c/2.0);
+    double dLat = asin(sum)*2.0;
     return dLat + lat1;
 }
 
@@ -94,12 +94,12 @@ inline double SBLoc::lngFromHavDist(double dist, double lng1, double lat) {
     return dLng + lng1;
 }
 
-inline Point<3> SBLoc::locToCart3DPt() const {
+inline Point<double, 3> SBLoc::locToCart3DPt() const {
     return latLngToCart3DPt(lat, lng);
 }
 
-inline Point<3> SBLoc::latLngToCart3DPt(double lat, double lng) {
-    return Point<3>{cos(lat)*cos(lng), cos(lat)*sin(lng), sin(lat)};
+inline Point<double, 3> SBLoc::latLngToCart3DPt(double lat, double lng) {
+    return Point<double, 3>{cos(lat)*cos(lng), cos(lat)*sin(lng), sin(lat)};
 }
 
 inline double SBLoc::xyzDistFromLngLat(double lat1, double lat2, double lngDiff) {

@@ -24,15 +24,15 @@ public:
     
     
 private:
-    std::vector<KDTree<3, const SBLoc*, Point<3>::DistType::EUC>> gridTreeCache;
+    std::vector<KDTree<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>> gridTreeCache;
     std::vector<const SBLoc*> gridSingleCache;
-    std::vector<std::pair<Point<3>, const SBLoc*>>::iterator
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>>::iterator
         cacheAllPossibleLocsOneCell(size_t, size_t, double,
-        std::vector<std::pair<Point<3>, const SBLoc*>>::iterator);
+        std::vector<std::pair<Point<double, 3>, const SBLoc*>>::iterator);
     void fillGridCache();
     double xyzDistFromSideLen();
     
-    KDTree<3, const SBLoc*, Point<3>::DistType::EUC> sbKdt;
+    KDTree<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC> sbKdt;
 };
 
 

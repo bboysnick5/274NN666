@@ -11,17 +11,17 @@
 //#include <omp.h>
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 UniCellBKDTGridSBSolver<KDTType>::
 UniCellBKDTGridSBSolver(double alpc, size_t maxCacheCellVecSize)
 : UniLatLngBKDTGridSBSolver<KDTType>(alpc, maxCacheCellVecSize) {}
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
     this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
-    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs;
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>> ptLocPairs;
     ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -45,7 +45,7 @@ void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
     }
 }
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 const SBLoc* UniCellBKDTGridSBSolver<KDTType>::
 findNearest(double lat, double lng) const {
     const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(lat+0.5*M_PI)*this->latIncInverse];

@@ -12,21 +12,21 @@
 
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 void BKDTSBSolver<KDTType>::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     generateKDT(locData);
 }
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 void BKDTSBSolver<KDTType>::printSolverInfo() const {
     this->locKdt.printTreeInfo();
 }
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 void BKDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
     /*
-    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
     std::array<double, 6> minMaxAllDim;
     std::generate(minMaxAllDim.begin(), minMaxAllDim.end(),
@@ -35,7 +35,7 @@ void BKDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>
                   std::numeric_limits<double>::min()}]() mutable {
                   return lowHigh[lowHighToggle++%2];});
     std::transform(locData->cbegin(),locData->cend(), std::back_inserter(kdtData),
-                   [&](const SBLoc& l) mutable ->std::pair<Point<3>, const SBLoc*>{
+                   [&](const SBLoc& l) mutable ->std::pair<Point<double, 3>, const SBLoc*>{
                        const auto p = l.locToCart3DPt();
                        for (size_t i = 0, dim = 0; i < 6; i += 2, ++dim) {
                            minMaxAllDim[i] = std::min(minMaxAllDim[i], p[dim]);
@@ -52,10 +52,10 @@ void BKDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>
     
     
     
-    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->cbegin(),locData->cend(), std::back_inserter(kdtData),
-                   [&](const SBLoc& l) mutable ->std::pair<Point<3>, const SBLoc*>{
+                   [&](const SBLoc& l) mutable ->std::pair<Point<double, 3>, const SBLoc*>{
                        return {l.locToCart3DPt(), &l};});
     this->locKdt = KDT<KDTType>(kdtData.begin(), kdtData.end()); 
 }

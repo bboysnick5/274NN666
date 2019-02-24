@@ -37,20 +37,20 @@
 
 
 
-std::vector<Point<2>> generateTestLocs(size_t numTrials, std::mt19937_64& mt) {
+std::vector<Point<double, 2>> generateTestLocs(size_t numTrials, std::mt19937_64& mt) {
     std::uniform_real_distribution<double> dist(0.0, 1.0);
-    std::vector<Point<2>> testLocs;
+    std::vector<Point<double, 2>> testLocs;
     testLocs.reserve(numTrials+4);
     testLocs.insert(testLocs.cbegin(),{{M_PI/2, M_PI},{-M_PI/2, -M_PI},
                     {-M_PI/2, M_PI}, {M_PI/2, -M_PI}});
     
-    std::generate_n(std::back_inserter(testLocs), numTrials, [&]()->Point<2>{
+    std::generate_n(std::back_inserter(testLocs), numTrials, [&]()->Point<double, 2>{
         return {SBLoc::toRadians(-90.0 + 180.0*dist(mt)),
                 SBLoc::toRadians(-180.0 + 360.0*dist(mt))};});
     return testLocs;
 }
 
-void accuracyTest(const std::vector<Point<2>> &testLocs,
+void accuracyTest(const std::vector<Point<double, 2>> &testLocs,
                   const std::vector<const SBLoc*> &testResults,
                   const std::vector<const SBLoc*> &refResults) {
     double testTotal = 0.0, refTotal = 0.0;
@@ -96,7 +96,7 @@ void timeBuild(const std::shared_ptr<std::vector<SBLoc>> &locData,
 }
 
 void timeNN(const std::shared_ptr<SBSolver> &solver,
-            const std::vector<Point<2>> &testLocs,
+            const std::vector<Point<double, 2>> &testLocs,
             std::vector<const SBLoc*> &resultLocs, size_t maxResults,
             unsigned int seed, bool testAccuracy = true) {
     if (!testAccuracy)
@@ -133,7 +133,7 @@ void timeNN(const std::shared_ptr<SBSolver> &solver,
 }
 
 void writeResults(const char* argv[],
-                  const std::vector<Point<2>> &testLocs,
+                  const std::vector<Point<double, 2>> &testLocs,
                   const std::shared_ptr<SBSolver>& solver) {
     std::ofstream outRefResults(argv[2], std::ios::app);
     std::transform(testLocs.cbegin(), testLocs.cend(),
@@ -150,7 +150,7 @@ void writeResults(const char* argv[],
 
 int main(int argc, const char * argv[]) {
     
-    
+
     /*
     struct Cell {
         
@@ -209,7 +209,7 @@ int main(int argc, const char * argv[]) {
     
     size_t MAX_TRIALS = 0xFFFFFF;
     std::vector<const SBLoc*> testResults, refResults;
-    std::vector<Point<2>> testLocs = generateTestLocs(MAX_TRIALS, mt);
+    std::vector<Point<double, 2>> testLocs = generateTestLocs(MAX_TRIALS, mt);
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
     double aveLocPerCell = argc < 4 ? 0.4 : std::stod(argv[3]);
@@ -283,8 +283,8 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_shared<UniCellBKDTGridSBSolver<KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_shared<UniCellBKDTGridSBSolver<KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
-        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_shared<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_shared<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };
@@ -292,7 +292,7 @@ int main(int argc, const char * argv[]) {
     
    // std::for_each(solvers.cbegin(), solvers.cend(),
          //         [&](const auto &solver) {timeBuild(locData, solver);});
-    //testAccuracy = false;
+    testAccuracy = false;
     unsigned int timeNNSeed = rd();
     for (size_t i = 0; i < solvers.size(); ++i) {
         using namespace std::chrono_literals;

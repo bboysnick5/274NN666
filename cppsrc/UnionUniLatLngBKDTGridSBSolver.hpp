@@ -16,7 +16,7 @@
 #include <iterator>
 
 
-template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
 class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
     UnionUniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
@@ -32,11 +32,11 @@ protected:
     struct UnionCell {
         union {
             const SBLoc *cacheLoc;
-            std::pair<Point<3>, const SBLoc*> *cacheLocs;
+            std::pair<Point<double, 3>, const SBLoc*> *cacheLocs;
             const KDT<KDTType> *cacheTree;
         };
         
-        UnionCell(size_t, const std::vector<std::pair<Point<3>, const SBLoc*>>&);
+        UnionCell(size_t, const std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
         ~UnionCell();
         size_t size() const;
         
@@ -46,13 +46,13 @@ protected:
     
     struct BitCell {
         
-        BitCell(size_t, const std::vector<std::pair<Point<3>, const SBLoc*>>&);
+        BitCell(size_t, const std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
         ~BitCell();
         size_t size() const;
         size_t rawSize() const;
         
         const SBLoc* getSingleLoc() const;
-        const std::pair<Point<3>, const SBLoc*>* getLocPairs() const;
+        const std::pair<Point<double, 3>, const SBLoc*>* getLocPairs() const;
         const KDT<KDTType>* getCacheTree() const;
         
     private:
@@ -77,7 +77,7 @@ protected:
     
     void calcSideLenFromAlpc();
     void fillCacheCell(double, double, double,
-                       std::vector<std::pair<Point<3>, const SBLoc*>>&);
+                       std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
     const SBLoc* returnNNLocFromCacheVariant(double, double, const BitCell&) const;
     
 private:
@@ -86,7 +86,7 @@ private:
 
 /*
  
- template <template <size_t, class, typename Point<3>::DistType> class KDTType>
+ template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
  class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
  public:
  UnionUniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
@@ -100,13 +100,13 @@ private:
  double lngInc, latInc, sideLen;
  size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
  vecLocs = 0, rowSize, colSize;
- std::vector<std::variant<std::tuple<Point<3>*, const SBLoc**, size_t>,
+ std::vector<std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
  const SBLoc*, const KDT<KDTType>>> gridCache;
  void calcSideLenFromAlpc();
  void fillCacheCell(double, double, double,
- std::vector<std::pair<Point<3>, const SBLoc*>>&);
+ std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
  static const SBLoc* returnNNLocFromCacheVariant(double, double,
- const std::variant<std::tuple<Point<3>*, const SBLoc**, size_t>,
+ const std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
  const SBLoc*, const KDT<KDTType>>&);
  ~UnionUniLatLngBKDTGridSBSolver();
  private:

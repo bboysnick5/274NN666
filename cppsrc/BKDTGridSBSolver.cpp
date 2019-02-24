@@ -20,9 +20,9 @@
 
 BKDTGridSBSolver::BKDTGridSBSolver(double alpc) : GridSBSolver(alpc) {}
 
-std::vector<std::pair<Point<3>, const SBLoc*>>::iterator
+std::vector<std::pair<Point<double, 3>, const SBLoc*>>::iterator
 BKDTGridSBSolver::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, double diff,
-    std::vector<std::pair<Point<3>, const SBLoc*>>::iterator begin) {
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>>::iterator begin) {
     double rowDistCellCtrGridCtr = ((r0+ 0.5 -rowSize/2 )*sideLen),
            colDistCellCtrGridCtr = ((c0 + 0.5 -colSize/2)*sideLen);
     double cellCtrLat = SBLoc::latFromHavDist(rowDistCellCtrGridCtr, midLat),
@@ -34,10 +34,10 @@ BKDTGridSBSolver::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, double diff,
 }
 
 void BKDTGridSBSolver::fillGridCache() {
-    gridTreeCache = std::vector<KDTree<3, const SBLoc*, Point<3>::DistType::EUC>>
+    gridTreeCache = std::vector<KDTree<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>>
                     (rowSize*colSize);
     gridSingleCache = std::vector<const SBLoc*>(rowSize*colSize);
-    std::vector<std::pair<Point<3>, const SBLoc*>> ptLocPairs(numLocs);
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>> ptLocPairs(numLocs);
     size_t totalTreeSize = 0, singleLocs = 0;
     double diff = xyzDistFromSideLen();
 //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
@@ -50,7 +50,7 @@ void BKDTGridSBSolver::fillGridCache() {
                                                        ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
-                gridTreeCache[idx] = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>
+                gridTreeCache[idx] = KDTree<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>
                     (ptLocPairs.begin(), locsEnd);
             } else {
                 gridSingleCache[idx] = ptLocPairs[0].second;
@@ -67,19 +67,19 @@ void BKDTGridSBSolver::fillGridCache() {
 
 double BKDTGridSBSolver::xyzDistFromSideLen() {
     double lat2 = SBLoc::latFromHavDist(sideLen*sqrt(2), 0);
-    return Point<3>::template
-           dist<Point<3>::DistType::EUC>(SBLoc::latLngToCart3DPt(0, 0),
+    return Point<double, 3>::template
+           dist<Point<double, 3>::DistType::EUC>(SBLoc::latLngToCart3DPt(0, 0),
                                          SBLoc::latLngToCart3DPt(lat2, 0));
 }
  
 
 void BKDTGridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::vector<std::pair<Point<3>, const SBLoc*>> kdtData;
+    std::vector<std::pair<Point<double, 3>, const SBLoc*>> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
                    [&](const SBLoc& loc){ return
                        std::make_pair(SBLoc::latLngToCart3DPt(loc.lat, loc.lng), &loc);});
-    sbKdt = KDTree<3, const SBLoc*, Point<3>::DistType::EUC>(kdtData.begin(), kdtData.end());
+    sbKdt = KDTree<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>(kdtData.begin(), kdtData.end());
     numLocs = sbKdt.size();
     findKeyLngLat(locData);
     rowSize = sqrt(locData->size()) / AVE_LOC_PER_CELL;
