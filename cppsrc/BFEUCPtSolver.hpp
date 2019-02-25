@@ -12,9 +12,10 @@
 #include "BFSBSolver.hpp"
 #include <stdio.h>
 
-class BFEUCPtSBSolver : public BFSBSolver {
+template <typename dist_type>
+class BFEUCPtSBSolver : public BFSBSolver<dist_type> {
 public:
-    const SBLoc* findNearest(double lat, double lng) const override;
+    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
     void printSolverInfo() const override;
 };
 

@@ -10,33 +10,38 @@
 #include <algorithm>
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-void KDTSBSolver<KDTType>::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void KDTSBSolver<KDTType, dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     generateKDT(locData);
 }
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-void KDTSBSolver<KDTType>::printSolverInfo() const {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void KDTSBSolver<KDTType, dist_type>::printSolverInfo() const {
     locKdt.printTreeInfo();
 }
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-const SBLoc* KDTSBSolver<KDTType>::findNearest(double lat, double lng) const {
-    return locKdt.kNNValue(SBLoc::latLngToCart3DPt(lat, lng), 1);
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+const SBLoc<dist_type>* KDTSBSolver<KDTType, dist_type>::findNearest(dist_type lat, dist_type lng) const {
+    return locKdt.kNNValue(SBLoc<dist_type>::latLngToCart3DPt(lat, lng), 1);
 }
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-void KDTSBSolver<KDTType>::generateKDT(const std::shared_ptr<std::vector<SBLoc>> &locData) {
-    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc &loc){
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void KDTSBSolver<KDTType, dist_type>::generateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
+    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc<dist_type> &loc){
         locKdt.insert(loc.locToCart3DPt(), &loc);});
 }
 
 
-template class KDTSBSolver<KDTree>;
-template class KDTSBSolver<KDTreeCusMem>;
-template class KDTSBSolver<KDTreeExpandLongest>;
-template class KDTSBSolver<KDTreeExpandLongestVec>;
+template class KDTSBSolver<KDTree, double>;
+template class KDTSBSolver<KDTree, float>;
 
+template class KDTSBSolver<KDTreeCusMem, double>;
+template class KDTSBSolver<KDTreeCusMem, float>;
 
+template class KDTSBSolver<KDTreeExpandLongest, double>;
+template class KDTSBSolver<KDTreeExpandLongest, float>;
+
+template class KDTSBSolver<KDTreeExpandLongestVec, double>;
+template class KDTSBSolver<KDTreeExpandLongestVec, float>;
 

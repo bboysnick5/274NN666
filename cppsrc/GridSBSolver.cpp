@@ -1,5 +1,5 @@
 //
-//  GridSBSolver.cpp
+//  GridSBSolver<dist_type>.cpp
 //  274F16NearestSB
 //
 //  Created by Yunlong Liu on 12/13/16.
@@ -11,16 +11,19 @@
 #include <algorithm>
 #include <cmath>
 
+template <typename dist_type>
+const dist_type dist_type_MAX = std::numeric_limits<dist_type>::max();
+template <typename dist_type>
+const dist_type dist_type_MIN = std::numeric_limits<dist_type>::lowest();
 
-const double DOUBLE_MAX = std::numeric_limits<double>::max();
-const double DOUBLE_MIN = std::numeric_limits<double>::lowest();
-
-GridSBSolver::GridSBSolver(double alpc) :
+template <typename dist_type>
+GridSBSolver<dist_type>::GridSBSolver(dist_type alpc) :
     AVE_LOC_PER_CELL(alpc),
-    minLng(DOUBLE_MAX), maxLng(DOUBLE_MIN),
-    minLat(DOUBLE_MAX), maxLat(DOUBLE_MIN) {}
+    minLng(dist_type_MAX<dist_type>), maxLng(dist_type_MIN<dist_type>),
+    minLat(dist_type_MAX<dist_type>), maxLat(dist_type_MIN<dist_type>) {}
 
-void GridSBSolver::findKeyLngLat(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <typename dist_type>
+void GridSBSolver<dist_type>::findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     for (const auto &loc : *locData) {
         minLng = std::min(minLng, loc.lng);
         minLat = std::min(minLat, loc.lat);
@@ -32,27 +35,30 @@ void GridSBSolver::findKeyLngLat(const std::shared_ptr<std::vector<SBLoc>> &locD
     midLng = (minLng + maxLng)/2; midLat = (minLat + maxLat)/2;
 }
 
-void GridSBSolver::constructGrid(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <typename dist_type>
+void GridSBSolver<dist_type>::constructGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     rowSize = sqrt(locData->size()) / AVE_LOC_PER_CELL;
-    sideLen = SBLoc::havDist(0, minLat, 0, maxLat) / rowSize;
-    double lowestLatCircleRadius = SBLoc::EARTH_RADIUS * cos(minLat);
-    double longestColDistSpan = lowestLatCircleRadius *
+    sideLen = SBLoc<dist_type>::havDist(0, minLat, 0, maxLat) / rowSize;
+    dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * cos(minLat);
+    dist_type longestColDistSpan = lowestLatCircleRadius *
                                 std::fabs(maxLng - minLng);
     colSize = longestColDistSpan/sideLen + 1;
-    grid = std::vector<std::vector<std::unordered_set<const SBLoc*>>>(rowSize,
-           std::vector<std::unordered_set<const SBLoc*>>(colSize));
+    grid = std::vector<std::vector<std::unordered_set<const SBLoc<dist_type>*>>>(rowSize,
+           std::vector<std::unordered_set<const SBLoc<dist_type>*>>(colSize));
 }
 
-std::pair<size_t, size_t> GridSBSolver::getIdx(double lng, double lat) const {
-    double unsignedRowDistFromCenter = SBLoc::havDist(lng, lat, lng, midLat),
-           unsignedColDistFromCenter = SBLoc::havDist(lng, lat, midLng, lat);
+template <typename dist_type>
+std::pair<size_t, size_t> GridSBSolver<dist_type>::getIdx(dist_type lng, dist_type lat) const {
+    dist_type unsignedRowDistFromCenter = SBLoc<dist_type>::havDist(lng, lat, lng, midLat),
+           unsignedColDistFromCenter = SBLoc<dist_type>::havDist(lng, lat, midLng, lat);
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter :
                            unsignedRowDistFromCenter)/sideLen + rowSize/2,
                           (lng < midLng ? -unsignedColDistFromCenter :
                            unsignedColDistFromCenter)/sideLen + colSize/2);
 }
 
-void GridSBSolver::fillGrid(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <typename dist_type>
+void GridSBSolver<dist_type>::fillGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     for (const auto &l : *locData) {
         auto idxPr = getIdx(l.lng, l.lat);
         auto &cell = grid[idxPr.first][idxPr.second];
@@ -61,16 +67,18 @@ void GridSBSolver::fillGrid(const std::shared_ptr<std::vector<SBLoc>> &locData) 
     }
 }
 
-void GridSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <typename dist_type>
+void GridSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     findKeyLngLat(locData);
     constructGrid(locData);
     fillGrid(locData);
 }
 
-void GridSBSolver::NNOneCell(const std::unordered_set<const SBLoc*> &cell,
-double lng, double lat, double &minDist, const SBLoc* &best) const {
+template <typename dist_type>
+void GridSBSolver<dist_type>::NNOneCell(const std::unordered_set<const SBLoc<dist_type>*> &cell,
+dist_type lng, dist_type lat, dist_type &minDist, const SBLoc<dist_type>* &best) const {
     for (const auto &l : cell) {
-        double dist = SBLoc::havDist(lng, lat, l->lng, l->lat);
+        dist_type dist = SBLoc<dist_type>::havDist(lng, lat, l->lng, l->lat);
         if (dist < minDist) {
             minDist = dist;
             best = l;
@@ -78,12 +86,12 @@ double lng, double lat, double &minDist, const SBLoc* &best) const {
     }
 }
 
-
-const SBLoc* GridSBSolver::findNearest(double lat, double lng) const {
+template <typename dist_type>
+const SBLoc<dist_type>* GridSBSolver<dist_type>::findNearest(dist_type lat, dist_type lng) const {
     auto idxPr = getIdx(lng, lat);
     size_t r0 = idxPr.first, c0 = idxPr.second;
-    double minDist = DOUBLE_MAX;
-    const SBLoc* best = nullptr;
+    dist_type minDist = dist_type_MAX<dist_type>;
+    const SBLoc<dist_type>* best = nullptr;
     // exact cell check
     NNOneCell(grid[r0][c0], lng, lat, minDist, best);
     
@@ -107,6 +115,8 @@ const SBLoc* GridSBSolver::findNearest(double lat, double lng) const {
     return best;
 }
 
+template class GridSBSolver<double>;
+template class GridSBSolver<float>;
 
 
 

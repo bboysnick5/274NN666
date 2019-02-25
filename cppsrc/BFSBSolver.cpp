@@ -9,18 +9,24 @@
 #include <algorithm>
 #include "BFSBSolver.hpp"
 
-
-void BFSBSolver::build(const std::shared_ptr<std::vector<SBLoc>> &locData) {
+template <typename dist_type>
+void BFSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     this->locData = locData;
 }
 
-const SBLoc* BFSBSolver::findNearest(double lat, double lng) const {
+template <typename dist_type>
+const SBLoc<dist_type>* BFSBSolver<dist_type>::findNearest(dist_type lat, dist_type lng) const {
     return &*std::min_element(locData->cbegin(), locData->cend(),
-                              [=](const SBLoc& l1, const SBLoc& l2) {
-                                  return SBLoc::havDist(l1.lng,l1.lat, lng, lat)
-                                  < SBLoc::havDist(l2.lng, l2.lat, lng, lat);});
+                              [=](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
+                                  return SBLoc<dist_type>::havDist(l1.lng,l1.lat, lng, lat)
+                                  < SBLoc<dist_type>::havDist(l2.lng, l2.lat, lng, lat);});
 }
 
-void BFSBSolver::printSolverInfo() const {
+template <typename dist_type>
+void BFSBSolver<dist_type>::printSolverInfo() const {
     std::cout << "This is brute force solver using haversine distance metric.\n";
 }
+
+
+template class BFSBSolver<double>;
+template class BFSBSolver<float>;

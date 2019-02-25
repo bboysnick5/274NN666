@@ -15,30 +15,30 @@
 #include "SBSolver.hpp"
 
 
-
-class GridSBSolver : public SBSolver {
+template <typename dist_type>
+class GridSBSolver : public SBSolver<dist_type> {
     
 public:
-    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lat, double lng) const override;
-    GridSBSolver(double aveLocPerCell = 1);
+    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
+    GridSBSolver(dist_type aveLocPerCell = 1);
     
 protected:
-    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc>>&);
-    std::pair<size_t, size_t> getIdx(double lng, double lat) const;
+    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
+    std::pair<size_t, size_t> getIdx(dist_type lng, dist_type lat) const;
 
-    void constructGrid(const std::shared_ptr<std::vector<SBLoc>>&);
-    void fillGrid(const std::shared_ptr<std::vector<SBLoc>>&);
-    void NNOneCell(const std::unordered_set<const SBLoc*>&,
-                  double, double, double&, const SBLoc*&) const;
+    void constructGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
+    void fillGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
+    void NNOneCell(const std::unordered_set<const SBLoc<dist_type>*>&,
+                  dist_type, dist_type, dist_type&, const SBLoc<dist_type>*&) const;
     
-    const double AVE_LOC_PER_CELL;
-    std::vector<std::vector<std::unordered_set<const SBLoc*>>> grid;
-    double sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
+    const dist_type AVE_LOC_PER_CELL;
+    std::vector<std::vector<std::unordered_set<const SBLoc<dist_type>*>>> grid;
+    dist_type sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
     size_t rowSize, colSize, numLocs = 0;
     
 private:
-    static constexpr double DISTORT_FACTOR = 0.95;
+    static constexpr dist_type DISTORT_FACTOR = 0.95;
     
 };
 

@@ -12,6 +12,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include <array>
+#include <numeric>
 
 template <typename _Tp, size_t _N>
 class Point {
@@ -101,7 +102,6 @@ private:
 
 /** Point class implementation details */
 
-#include <algorithm>
 
 template <typename _Tp, size_t _N>
 size_t Point<_Tp, _N>::size() const {
@@ -180,12 +180,15 @@ _Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two
 
 template <typename _Tp, size_t _N>
 _Tp Point<_Tp, _N>::eucSqDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    //return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<_Tp>(),
+                 //                [](const _Tp a, const _Tp b){return (a-b)*(a-b);});
+    
     _Tp diff = one[0] - two[0], result = diff*diff;
     for (size_t i = 1; i < _N; ++i) {
         diff = one[i] - two[i];
         result += diff*diff;
     }
-    return result;
+    return result; 
 }
 
 

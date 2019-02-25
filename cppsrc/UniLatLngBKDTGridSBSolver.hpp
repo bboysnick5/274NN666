@@ -18,28 +18,28 @@
 #include <variant>
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
 public:
-    UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
-    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lat, double lng) const override;
+    UniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
     virtual void printSolverInfo() const override final;
     
 protected:
-    const double AVE_LOC_PER_CELL;
+    const dist_type AVE_LOC_PER_CELL;
     const size_t MAX_CACHE_CELL_VEC_SIZE;
-    double lngInc, latInc, latIncInverse, sideLen;
+    dist_type lngInc, latInc, latIncInverse, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
            vecLocs = 0, rowSize, colSize;
-    std::vector<std::variant<std::vector<std::pair<Point<double, 3>, const SBLoc*>>,
-                             const SBLoc*, KDT<KDTType>>> gridCache;
+    std::vector<std::variant<std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>,
+                             const SBLoc<dist_type>*, KDT<KDTType, dist_type>>> gridCache;
     void calcSideLenFromAlpc();
-    void fillCacheCell(double, double, double,
-                       std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
-    const SBLoc* returnNNLocFromCacheVariant(double, double,
-          const std::variant<std::vector<std::pair<Point<double, 3>, const SBLoc*>>,
-          const SBLoc*, KDT<KDTType>>&) const;
+    void fillCacheCell(dist_type, dist_type, dist_type,
+                       std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
+    const SBLoc<dist_type>* returnNNLocFromCacheVariant(dist_type, dist_type,
+          const std::variant<std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>,
+          const SBLoc<dist_type>*, KDT<KDTType, dist_type>>&) const;
     
 private:
     virtual void fillGridCache();
@@ -47,28 +47,28 @@ private:
 
 /*
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
 public:
-    UniLatLngBKDTGridSBSolver(double = 1, size_t = 1500);
-    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lng, double lat) const override;
+    UniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* findNearest(dist_type lng, dist_type lat) const override;
     virtual void printSolverInfo() const override final;
     
 protected:
-    const double AVE_LOC_PER_CELL;
+    const dist_type AVE_LOC_PER_CELL;
     const size_t MAX_CACHE_CELL_VEC_SIZE;
-    double lngInc, latInc, sideLen;
+    dist_type lngInc, latInc, sideLen;
     size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
     vecLocs = 0, rowSize, colSize;
-    std::vector<std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
-    const SBLoc*, const KDT<KDTType>>> gridCache;
+    std::vector<std::variant<std::tuple<Point<dist_type, 3>*, const SBLoc<dist_type>**, size_t>,
+    const SBLoc<dist_type>*, const KDT<KDTType>>> gridCache;
     void calcSideLenFromAlpc();
-    void fillCacheCell(double, double, double,
-                       std::vector<std::pair<Point<double, 3>, const SBLoc*>>&);
-    static const SBLoc* returnNNLocFromCacheVariant(double, double,
-                                                    const std::variant<std::tuple<Point<double, 3>*, const SBLoc**, size_t>,
-                                                    const SBLoc*, const KDT<KDTType>>&);
+    void fillCacheCell(dist_type, dist_type, dist_type,
+                       std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
+    static const SBLoc<dist_type>* returnNNLocFromCacheVariant(dist_type, dist_type,
+                                                    const std::variant<std::tuple<Point<dist_type, 3>*, const SBLoc<dist_type>**, size_t>,
+                                                    const SBLoc<dist_type>*, const KDT<KDTType>>&);
     ~UniLatLngBKDTGridSBSolver();
 private:
     virtual void fillGridCache();

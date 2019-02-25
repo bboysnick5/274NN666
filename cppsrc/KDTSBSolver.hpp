@@ -16,20 +16,19 @@
 #include "KDTreeExpandLongestVec.hpp"
 #include <stdio.h>
 
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+using KDT = KDTType<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>;
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-using KDT = KDTType<double, 3, const SBLoc*, Point<double, 3>::DistType::EUC>;
-
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-class KDTSBSolver : public SBSolver {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+class KDTSBSolver : public SBSolver<dist_type> {
 public:
-    void build(const std::shared_ptr<std::vector<SBLoc>>&) override;
-    const SBLoc* findNearest(double lat, double lng) const override;
+    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
     virtual void printSolverInfo() const override;
     
 protected:
-    KDT<KDTType> locKdt;
-    virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc>>&);
+    KDT<KDTType, dist_type> locKdt;
+    virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
 };
 
 

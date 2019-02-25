@@ -7,16 +7,21 @@
 //
 
 #include "BFEUCPtSolver.hpp"
+#include <algorithm>
 
-const SBLoc* BFEUCPtSBSolver::findNearest(double lat, double lng) const {
-    const auto testPt = SBLoc::latLngToCart3DPt(lng, lat);
-    return &*std::min_element(locData->cbegin(), locData->cend(),
-                              [&](const SBLoc& l1, const SBLoc& l2) {
-                                  return Point<double, 3>::dist<Point<double, 3>::DistType::EUCSQ>(l1.locToCart3DPt(), testPt)
-                                  < Point<double, 3>::dist<Point<double, 3>::DistType::EUCSQ>(l2.locToCart3DPt(), testPt);});
+template <typename dist_type>
+const SBLoc<dist_type>* BFEUCPtSBSolver<dist_type>::findNearest(dist_type lat, dist_type lng) const {
+    const auto testPt = SBLoc<dist_type>::latLngToCart3DPt(lng, lat);
+    return &*std::min_element(this->locData->cbegin(), this->locData->cend(),
+                              [&testPt](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
+                                  return Point<dist_type, 3>::template dist<Point<dist_type, 3>::DistType::EUCSQ>(l1.locToCart3DPt(), testPt)
+                                  < Point<dist_type, 3>::template dist<Point<dist_type, 3>::DistType::EUCSQ>(l2.locToCart3DPt(), testPt);});
 }
 
-
-void BFEUCPtSBSolver::printSolverInfo() const {
+template <typename dist_type>
+void BFEUCPtSBSolver<dist_type>::printSolverInfo() const {
     std::cout << "This is brute force solver using converted euclidean distance metric.\n";
 }
+
+template class BFEUCPtSBSolver<double>;
+template class BFEUCPtSBSolver<float>;

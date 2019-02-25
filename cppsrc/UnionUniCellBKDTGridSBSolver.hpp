@@ -17,15 +17,15 @@
 #include <iterator>
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTType> {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type> {
 public:
-    UnionUniCellBKDTGridSBSolver(double = 1, size_t = 1500);
-    const SBLoc* findNearest(double lat, double lng) const override final;
+    UnionUniCellBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override final;
     
     
 private:
-    std::vector<std::pair<size_t, double>> thisRowStartIdx;
+    std::vector<std::pair<size_t, dist_type>> thisRowStartIdx;
     void fillGridCache() override final;
 };
 

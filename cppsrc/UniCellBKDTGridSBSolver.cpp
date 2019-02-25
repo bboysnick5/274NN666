@@ -11,55 +11,61 @@
 //#include <omp.h>
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-UniCellBKDTGridSBSolver<KDTType>::
-UniCellBKDTGridSBSolver(double alpc, size_t maxCacheCellVecSize)
-: UniLatLngBKDTGridSBSolver<KDTType>(alpc, maxCacheCellVecSize) {}
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+UniCellBKDTGridSBSolver<KDTType, dist_type>::
+UniCellBKDTGridSBSolver(dist_type alpc, size_t maxCacheCellVecSize)
+: UniLatLngBKDTGridSBSolver<KDTType, dist_type>(alpc, maxCacheCellVecSize) {}
 
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-void UniCellBKDTGridSBSolver<KDTType>::fillGridCache() {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void UniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
-    std::vector<std::pair<Point<double, 3>, const SBLoc*>> ptLocPairs;
+    std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>> ptLocPairs;
     ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
     //reduction(+:totalTreeSize, singleLocs) collapse(2)
-    double thisLat = -0.5 * M_PI, thisCtrLat = thisLat + 0.5 * this->latInc;
+    dist_type thisLat = -0.5 * M_PI, thisCtrLat = thisLat + 0.5 * this->latInc;
     for (size_t r = 0, idx = 0; r < this->rowSize;
          ++r, thisCtrLat += this->latInc, thisLat += this->latInc) {
-        size_t thisColSize = static_cast<size_t>(2*M_PI * SBLoc::EARTH_RADIUS *
+        size_t thisColSize = static_cast<size_t>(2*M_PI * SBLoc<dist_type>::EARTH_RADIUS *
                              cos(thisLat > 0 ? thisLat-this->latInc : thisLat)/
                              this->sideLen) + 2;
-        double thisLngInc = 2*M_PI/thisColSize + 2*M_PI/(thisColSize*thisColSize*0xFFFF);
+        dist_type thisLngInc = 2*M_PI/thisColSize + 2*M_PI/(thisColSize*thisColSize*0xFFFF);
         thisRowStartIdx.emplace_back(idx, 1.0/thisLngInc);
-        double thisDiff = SBLoc::xyzDistFromLngLat(r*this->latInc - 0.5*M_PI,
+        dist_type thisDiff = SBLoc<dist_type>::xyzDistFromLngLat(r*this->latInc - 0.5*M_PI,
                           (r+1)*this->latInc - 0.5*M_PI, thisLngInc),
                thisCtrLng = 0.5 * thisLngInc - M_PI;
         for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
              ++idx, thisCtrLng += thisLngInc) {
-            UniLatLngBKDTGridSBSolver<KDTType>::fillCacheCell
+            UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillCacheCell
             (thisCtrLng, thisCtrLat, thisDiff, ptLocPairs);
         }
     }
 }
 
-template <template <class value_type, size_t, class, typename Point<value_type, 3>::DistType> class KDTType>
-const SBLoc* UniCellBKDTGridSBSolver<KDTType>::
-findNearest(double lat, double lng) const {
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+const SBLoc<dist_type>* UniCellBKDTGridSBSolver<KDTType, dist_type>::
+findNearest(dist_type lat, dist_type lng) const {
     const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(lat+0.5*M_PI)*this->latIncInverse];
-    return UniLatLngBKDTGridSBSolver<KDTType>::returnNNLocFromCacheVariant(lat,
+    return UniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(lat,
     lng, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)*thisLngIncInverse)]);
 }
 
 
 
+template class UniCellBKDTGridSBSolver<KDTree, double>;
+template class UniCellBKDTGridSBSolver<KDTree, float>;
 
-template class UniCellBKDTGridSBSolver<KDTree>;
-template class UniCellBKDTGridSBSolver<KDTreeCusMem>;
-template class UniCellBKDTGridSBSolver<KDTreeExpandLongest>;
-template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec>;
+template class UniCellBKDTGridSBSolver<KDTreeCusMem, double>;
+template class UniCellBKDTGridSBSolver<KDTreeCusMem, float>;
+
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongest, double>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongest, float>;
+
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, double>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, float>;
 
 
 
