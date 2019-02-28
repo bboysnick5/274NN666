@@ -51,10 +51,10 @@ void BKDTSBSolver<KDTType, dist_type>::generateKDT(const std::shared_ptr<std::ve
     */
     
     
-    std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>> kdtData;
+    std::vector<typename KDT<KDTType, dist_type>::node_type> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->cbegin(),locData->cend(), std::back_inserter(kdtData),
-                   [&](const SBLoc<dist_type>& l) mutable ->std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>{
+                   [&](const SBLoc<dist_type>& l) mutable -> typename KDT<KDTType, dist_type>::node_type{
                        return {l.locToCart3DPt(), &l};});
     this->locKdt = KDT<KDTType, dist_type>(kdtData.begin(), kdtData.end());
 }

@@ -10,8 +10,8 @@
 #include <algorithm>
 
 template <typename dist_type>
-const SBLoc<dist_type>* BFEUCPtSBSolver<dist_type>::findNearest(dist_type lat, dist_type lng) const {
-    const auto testPt = SBLoc<dist_type>::latLngToCart3DPt(lng, lat);
+const SBLoc<dist_type>* BFEUCPtSBSolver<dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
+    const auto testPt = SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt);
     return &*std::min_element(this->locData->cbegin(), this->locData->cend(),
                               [&testPt](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
                                   return Point<dist_type, 3>::template dist<Point<dist_type, 3>::DistType::EUCSQ>(l1.locToCart3DPt(), testPt)

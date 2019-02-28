@@ -21,7 +21,7 @@ class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
 public:
     UnionUniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
+    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     virtual void printSolverInfo() const override final;
     
     
@@ -32,11 +32,11 @@ protected:
     struct UnionCell {
         union {
             const SBLoc<dist_type> *cacheLoc;
-            std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*> *cacheLocs;
+            typename KDT<KDTType, dist_type>::node_type *cacheLocs;
             const KDT<KDTType, dist_type> *cacheTree;
         };
         
-        UnionCell(size_t, const std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
+        UnionCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&, size_t);
         ~UnionCell();
         size_t size() const;
         
@@ -46,13 +46,18 @@ protected:
     
     struct BitCell {
         
-        BitCell(size_t, const std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
+        BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
+                size_t, const BitCell&, const BitCell&);
+        BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
+                size_t, const BitCell&);
+        BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
+                size_t);
         ~BitCell();
         size_t size() const;
         size_t rawSize() const;
         
         const SBLoc<dist_type>* getSingleLoc() const;
-        const std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>* getLocPairs() const;
+        const typename KDT<KDTType, dist_type>::node_type* getLocPairs() const;
         const KDT<KDTType, dist_type>* getCacheTree() const;
         
     private:
@@ -76,9 +81,9 @@ protected:
     std::vector<BitCell> gridCache;
     
     void calcSideLenFromAlpc();
-    void fillCacheCell(dist_type, dist_type, dist_type,
-                       std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
-    const SBLoc<dist_type>* returnNNLocFromCacheVariant(dist_type, dist_type, const BitCell&) const;
+    void fillCacheCell(const Point<dist_type, 2>&, dist_type, size_t,
+                       std::vector<typename KDT<KDTType, dist_type>::node_type>&);
+    const SBLoc<dist_type>* returnNNLocFromCacheVariant(const Point<dist_type, 2>&, const BitCell&) const;
     
 private:
     virtual void fillGridCache();
@@ -105,7 +110,7 @@ private:
  const SBLoc<dist_type>*, const KDT<KDTType>>> gridCache;
  void calcSideLenFromAlpc();
  void fillCacheCell(dist_type, dist_type, dist_type,
- std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>&);
+ std::vector<typename KDT<KDTType, dist_type>::node_type>&);
  static const SBLoc<dist_type>* returnNNLocFromCacheVariant(dist_type, dist_type,
  const std::variant<std::tuple<Point<dist_type, 3>*, const SBLoc<dist_type>**, size_t>,
  const SBLoc<dist_type>*, const KDT<KDTType>>&);

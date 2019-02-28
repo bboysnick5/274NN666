@@ -21,7 +21,7 @@ template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> cl
 void UniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
-    std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>> ptLocPairs;
+    std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
     ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -47,10 +47,10 @@ void UniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 const SBLoc<dist_type>* UniCellBKDTGridSBSolver<KDTType, dist_type>::
-findNearest(dist_type lat, dist_type lng) const {
-    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(lat+0.5*M_PI)*this->latIncInverse];
-    return UniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(lat,
-    lng, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)*thisLngIncInverse)]);
+findNearest(const Point<dist_type, 2>& geoSearchPt) const {
+    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(geoSearchPt[0]+0.5*M_PI)*this->latIncInverse];
+    return UniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(geoSearchPt,
+        this->gridCache[startIdx + static_cast<size_t>((geoSearchPt[1]+M_PI)*thisLngIncInverse)]);
 }
 
 

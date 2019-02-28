@@ -15,11 +15,11 @@ void BFSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_t
 }
 
 template <typename dist_type>
-const SBLoc<dist_type>* BFSBSolver<dist_type>::findNearest(dist_type lat, dist_type lng) const {
+const SBLoc<dist_type>* BFSBSolver<dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
     return &*std::min_element(locData->cbegin(), locData->cend(),
                               [=](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
-                                  return SBLoc<dist_type>::havDist(l1.lng,l1.lat, lng, lat)
-                                  < SBLoc<dist_type>::havDist(l2.lng, l2.lat, lng, lat);});
+                                  return SBLoc<dist_type>::havDist(l1.geoPt, geoSearchPt)
+                                  < SBLoc<dist_type>::havDist(l2.geoPt, geoSearchPt);});
 }
 
 template <typename dist_type>

@@ -20,9 +20,9 @@
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType, dist_type> {
 public:
-    UniCellBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+    UniCellBKDTGridSBSolver(dist_type = 1.0, size_t = 1500);
     //void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
-    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override final;
+    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override final;
     //virtual void printSolverInfo() const override;
     
 

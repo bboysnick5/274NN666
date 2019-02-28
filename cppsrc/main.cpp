@@ -60,12 +60,12 @@ void accuracyTest(const std::vector<Point<dist_type, 2>> &testLocs,
         const auto &refResult = refResults[i],
                    &testResult = testResults[i];
         const auto &[testLat, testLng] = testLocs[i].dataArray();
-        dist_type refDist = SBLoc<dist_type>::havDist(refResult->lng, refResult->lat, testLng, testLat);
+        dist_type refDist = SBLoc<dist_type>::havDist(refResult->geoPt, {testLat, testLng});
         refTotal += refDist;
         if (*testResult == *refResult) {
             testTotal += refDist;
         } else {
-            testTotal += SBLoc<dist_type>::havDist(testResult->lng, testResult->lat, testLng, testLat);
+            testTotal += SBLoc<dist_type>::havDist(testResult->geoPt, {testLat, testLng});
             ++errorCount;
             std::cout << "Test Point lng: " << SBLoc<dist_type>::toDegree(testLng)
             << ", lat: " << SBLoc<dist_type>::toDegree(testLat)
@@ -107,7 +107,7 @@ void timeNN(const std::shared_ptr<SBSolver<dist_type>> &solver,
     std::mt19937_64 mt(seed);
     std::chrono::time_point<std::chrono::system_clock> start, end;
     std::chrono::duration<dist_type> elapsedSeconds;
-    size_t numTrials = 64;
+    size_t numTrials = 4;
     resultLocs.reserve(maxResults);
     do {
         numTrials *= 4;
@@ -116,13 +116,13 @@ void timeNN(const std::shared_ptr<SBSolver<dist_type>> &solver,
             std::transform(testLocs.cbegin() + resultLocs.size(),
                            testLocs.cbegin() + resultLocs.size() + numTrials,
                            std::back_inserter(resultLocs), [&](const auto &p){
-                               return solver->findNearest(p[0], p[1]);});
+                               return solver->findNearest(p);});
             end = std::chrono::system_clock::now();
         } else {
             //std::shuffle(testLocs.begin(), testLocs.end(), mt);
             start = std::chrono::system_clock::now();
             std::for_each(testLocs.cbegin() + maxResults, testLocs.begin() + maxResults+ numTrials,
-                            [&](const auto &p){solver->findNearest(p[0], p[1]);});
+                            [&](const auto &p){solver->findNearest(p);});
             end = std::chrono::system_clock::now();
         }
         elapsedSeconds = end - start;
@@ -143,9 +143,9 @@ void writeResults(const char* argv[],
     std::transform(testLocs.cbegin(), testLocs.cend(),
                    std::ostream_iterator<std::string>(outRefResults),
                    [&](const auto &p){
-                       const auto resultLoc = solver->findNearest(p[0], p[1]);
+                       const auto resultLoc = solver->findNearest(p);
                        return std::to_string(p[0]) + " " + std::to_string(p[1]) + " " +
-                       std::to_string(resultLoc->lat) + " " + std::to_string(resultLoc->lng) +
+                       std::to_string(resultLoc->geoPt[0]) + " " + std::to_string(resultLoc->geoPt[1]) +
                        resultLoc->city + "," + resultLoc->addr + "\n";});
     outRefResults.close();
 }
@@ -289,9 +289,8 @@ int main(int argc, const char * argv[]) {
         //std::make_shared<UnionUniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_shared<UniCellBKDTGridSBSolver<dist_type><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_shared<UniCellBKDTGridSBSolver<dist_type><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
-        //std::make_shared<UniCellBKDTGridSBSolver<dist_type><KDTreeExpandLongest>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_shared<UniCellBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-    
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_shared<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_shared<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_shared<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };
@@ -299,7 +298,7 @@ int main(int argc, const char * argv[]) {
     
    // std::for_each(solvers.cbegin(), solvers.cend(),
          //         [&](const auto &solver) {timeBuild(locData, solver);});
-    //testAccuracy = false;
+    testAccuracy = false;
     unsigned int timeNNSeed = rd();
     for (size_t i = 0; i < solvers.size(); ++i) {
         using namespace std::chrono_literals;

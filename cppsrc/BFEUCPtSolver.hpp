@@ -15,7 +15,7 @@
 template <typename dist_type>
 class BFEUCPtSBSolver : public BFSBSolver<dist_type> {
 public:
-    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
+    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     void printSolverInfo() const override;
 };
 

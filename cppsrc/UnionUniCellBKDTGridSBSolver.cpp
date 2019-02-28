@@ -17,11 +17,10 @@ UnionUniCellBKDTGridSBSolver(dist_type alpc, size_t maxCacheCellVecSize)
 
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
-    std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>> ptLocPairs;
+    std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
     ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
     //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
@@ -37,23 +36,23 @@ void UnionUniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
         dist_type thisLngInc = rawThisLngInc + rawThisLngInc*thisColSizeInverse/0xFFFF;
         thisRowStartIdx.emplace_back(idx, 1.0/thisLngInc);
         dist_type thisDiff = SBLoc<dist_type>::xyzDistFromLngLat(r*this->latInc - 0.5*M_PI,
-                          (r+1)*this->latInc - 0.5*M_PI, thisLngInc),
-               thisCtrLng = 0.5 * thisLngInc - M_PI;
+                             (r+1)*this->latInc - 0.5*M_PI, thisLngInc),
+                  thisCtrLng = 0.5 * thisLngInc - M_PI;
         for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
              ++idx, thisCtrLng += thisLngInc) {
             UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillCacheCell
-            (thisCtrLng, thisCtrLat, thisDiff, ptLocPairs);
+            ({thisCtrLat, thisCtrLng}, thisDiff, thisColSize, ptLocPairs);
         }
     }
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-
 const SBLoc<dist_type>* UnionUniCellBKDTGridSBSolver<KDTType, dist_type>::
-findNearest(dist_type lat, dist_type lng) const {
-    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(lat+0.5*M_PI)*this->latIncInverse];
-    return UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(lat,
-        lng, this->gridCache[startIdx + static_cast<size_t>((lng+M_PI)*thisLngIncInverse)]);
+findNearest(const Point<dist_type, 2>& geoPt) const {
+    //const auto &[lat, lng] = geoPt;
+    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(geoPt[0]+0.5*M_PI)*this->latIncInverse];
+    return UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(geoPt,
+        this->gridCache[startIdx + static_cast<size_t>((geoPt[1]+M_PI)*thisLngIncInverse)]);
 }
 
 

@@ -40,7 +40,8 @@ public:
     
     
     template <typename... T>
-    Point(T... ts) : coords{ts...} {}
+    //Point(T... ts) : coords{ts...} {}
+    Point(T... ts) : coords{static_cast<value_type>(ts)...} {}
     
     Point() = default;
     
@@ -50,8 +51,8 @@ public:
     // Returns N, the dimension of the point.
     size_t size() const;
     
-    bool operator == (const Point<_Tp, _N>& rhs);
-    bool operator != (const Point<_Tp, _N>& rhs);
+    bool operator == (const Point<_Tp, _N>& rhs) const;
+    bool operator != (const Point<_Tp, _N>& rhs) const;
     
     
     // _Tp& operator[](size_t index);
@@ -194,14 +195,14 @@ _Tp Point<_Tp, _N>::eucSqDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& t
 
 template <typename _Tp, size_t _N>
 _Tp Point<_Tp, _N>::havDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
-    constexpr static _Tp EARTH_RADIUS = 6371;
-    _Tp dLat = (one[1]-two[1])*M_PI/180;
-    _Tp dLon = (one[0]-two[0])*M_PI/180;
-    _Tp lat1 = one[1]*M_PI/180;
-    _Tp lat2 = two[1]*M_PI/180;
-    _Tp a = sin(dLat/2) * sin(dLat/2) +
-               sin(dLon/2) * sin(dLon/2) * cos(lat1) * cos(lat2);
-    _Tp c = 2 * atan2(sqrt(a), sqrt(1-a));
+    constexpr static _Tp EARTH_RADIUS = 6371.0;
+    _Tp dLat = (one[1]-two[1])*M_PI/180.0;
+    _Tp dLon = (one[0]-two[0])*M_PI/180.0;
+    _Tp lat1 = one[1]*M_PI/180.0;
+    _Tp lat2 = two[1]*M_PI/180.0;
+    _Tp a = sin(dLat*0.5) * sin(dLat*0.5) +
+               sin(dLon*0.5) * sin(dLon*0.5) * cos(lat1) * cos(lat2);
+    _Tp c = 2.0 * atan2(sqrt(a), sqrt(1.0-a));
     return EARTH_RADIUS * c;
 }
 
@@ -214,12 +215,12 @@ _Tp Point<_Tp, _N>::manDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two
 }
 
 template <typename _Tp, size_t _N>
-bool Point<_Tp, _N>::operator == (const Point<_Tp, _N>& rhs) {
+bool Point<_Tp, _N>::operator == (const Point<_Tp, _N>& rhs) const {
     return coords == rhs.coords;
 }
 
 template <typename _Tp, size_t _N>
-bool Point<_Tp, _N>::operator != (const Point<_Tp, _N>& rhs) {
+bool Point<_Tp, _N>::operator != (const Point<_Tp, _N>& rhs) const {
     return !(*this == rhs);
 }
 

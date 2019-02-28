@@ -20,15 +20,15 @@ class BKDTGridSBSolver : public GridSBSolver<dist_type> {
 public:
     BKDTGridSBSolver(dist_type aveLocPerCell = 1);
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* findNearest(dist_type lat, dist_type lng) const override;
+    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     
     
 private:
     std::vector<KDTType<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>> gridTreeCache;
     std::vector<const SBLoc<dist_type>*> gridSingleCache;
-    typename std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>::iterator
+    typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator
         cacheAllPossibleLocsOneCell(size_t, size_t, dist_type,
-                                    typename std::vector<std::pair<Point<dist_type, 3>, const SBLoc<dist_type>*>>::iterator);
+                                    typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator);
     void fillGridCache();
     dist_type xyzDistFromSideLen();
     

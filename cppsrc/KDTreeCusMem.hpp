@@ -37,6 +37,11 @@ public:
     
     typedef _Tp                                   value_type;
     
+    struct node_type {
+        Point<value_type, N> key;
+        ElemType value;
+    };
+    
     // Constructor: KDTreeCusMem();
     // Usage: KDTreeCusMem<3, int> myTree;
     // ----------------------------------------------------
@@ -263,7 +268,7 @@ template <typename Const_RAI,
     std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
 KDTreeCusMem<_Tp, N, ElemType, DT>::KDTreeCusMem(Const_RAI cbegin, Const_RAI cend)
 : treeSize(cend-cbegin), pool(std::make_unique<PooledAllocator>()) {
-    std::vector<std::pair<Point<_Tp, N>, ElemType>> constructData(cbegin, cend);
+    std::vector<node_type> constructData(cbegin, cend);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
     rangeCtorHelper(ndPoolPtr, 0, constructData.begin(), constructData.end(),
                     constructData.begin() +
@@ -425,17 +430,17 @@ template <class RAI>
 void KDTreeCusMem<_Tp, N, ElemType, DT>::
 rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
                 RAI median, RAI end) {
-    std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
-        return p1.first[dim] < p2.first[dim];});
-    pool->construct(ndPoolPtr, std::move(median->first),
-                   std::move(median->second));
+    std::nth_element(begin, median, end, [=](const auto& nh1, const auto& nh2) {
+        return nh1.key[dim] < nh2.key[dim];});
+    pool->construct(ndPoolPtr, std::move(median->key),
+                   std::move(median->value));
     auto curNdPtr = ndPoolPtr;
     size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     
     if (begin == median - 1) {
         curNdPtr->left = ++ndPoolPtr;
-        pool->construct(ndPoolPtr, std::move(begin->first),
-                        std::move(begin->second));
+        pool->construct(ndPoolPtr, std::move(begin->key),
+                        std::move(begin->value));
     } else if (begin != median) {
         curNdPtr->left = ++ndPoolPtr;
         rangeCtorHelper(ndPoolPtr, nextDim, begin,
@@ -444,8 +449,8 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, size_t dim, RAI begin,
     
     if (median + 2 == end) {
         curNdPtr->right = ++ndPoolPtr;
-        pool->construct(ndPoolPtr, std::move((median + 1)->first),
-                        std::move((median+1)->second));
+        pool->construct(ndPoolPtr, std::move((median + 1)->key),
+                        std::move((median+1)->value));
     } else if (median + 1 != end) {
         curNdPtr->right = ++ndPoolPtr;
         rangeCtorHelper(ndPoolPtr, nextDim, median+1,

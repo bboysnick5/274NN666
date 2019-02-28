@@ -37,6 +37,12 @@ public:
     
     typedef _Tp                                   value_type;
 
+    struct node_type {
+        Point<value_type, N> key;
+        ElemType value;
+    };
+    
+
     
     // Constructor: KDTreeExpandLongestVec();
     // Usage: KDTreeExpandLongestVec<3, int> myTree;
@@ -303,7 +309,7 @@ _size(cend - cbegin) {
     _ndVec = static_cast<TreeNode*>(::operator new(_size * sizeof(TreeNode), std::nothrow));
     _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
     
-    std::vector<std::pair<Point<_Tp, N>, ElemType>> constructData(cbegin, cend);
+    std::vector<node_type> constructData(cbegin, cend);
     auto bbox = computeInitBBox(cbegin, cend);
     auto curNd = _ndVec;
     auto curObj = _objVec;
@@ -419,9 +425,9 @@ computeInitBBox(RAI begin, RAI end) {
                    std::numeric_limits<_Tp>::max(),
                    std::numeric_limits<_Tp>::min()}]() mutable {
                        return lowHigh[lowHighToggle++%2];});
-    std::for_each(begin, end, [&](const auto &p) mutable {
+    std::for_each(begin, end, [&](const auto &nh) mutable {
         for (size_t i = 0; i < N; ++i) {
-            _Tp ptValOnithDim = p.first[i];
+            _Tp ptValOnithDim = nh.key[i];
             auto &bboxLow = bbox[i*2], &bboxHigh = bbox[i*2+1];
             bboxLow = std::min(bboxLow, ptValOnithDim);
             bboxHigh = std::max(bboxHigh, ptValOnithDim);
@@ -449,15 +455,15 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
     TreeNode* curNdPtr = curNd;
     RAI median = begin + (end - begin)/2;
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
-        return p1.first[dim] < p2.first[dim];});
-    new (curNd++) TreeNode {0, dim, median->first};
-    new (curObj++) ElemType (median->second);
+        return p1.key[dim] < p2.key[dim];});
+    new (curNd++) TreeNode {0, dim, median->key};
+    new (curObj++) ElemType (median->value);
     _Tp curValOnDim = curNdPtr->key[dim];
     _Tp *bboxChangePtr = bbox.data() + dim*2+1;
     
     if (begin == median - 1) {
-        new (curNd++) TreeNode {0, N, begin->first};
-        new (curObj++) ElemType (begin->second);
+        new (curNd++) TreeNode {0, N, begin->key};
+        new (curObj++) ElemType (begin->value);
     } else if (begin != median) {
         auto prevDimHigh = *bboxChangePtr;
         *bboxChangePtr = curValOnDim;
@@ -467,8 +473,8 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
     
     if (median + 2 == end) {
         curNdPtr->rightIdx = static_cast<unsigned int>(curNd - _ndVec);
-        new (curNd++) TreeNode {0, N, (median+1)->first};
-        new (curObj++) ElemType ((median+1)->second);
+        new (curNd++) TreeNode {0, N, (median+1)->key};
+        new (curObj++) ElemType ((median+1)->value);
     } else if (median + 1 != end) {
         curNdPtr->rightIdx = static_cast<unsigned int>(curNd - _ndVec);
         auto prevDimLow = *--bboxChangePtr;

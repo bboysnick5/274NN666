@@ -36,6 +36,10 @@ public:
     
     typedef _Tp                                   value_type;
 
+    struct node_type {
+        Point<value_type, N> key;
+        ElemType value;
+    };
     
     // Constructor: KDTree();
     // Usage: KDTree<3, int> myTree;
@@ -263,7 +267,7 @@ std::random_access_iterator_tag>::value && std::is_const<typename
 std::remove_pointer< typename std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
 KDTree<_Tp, N, ElemType, DT>::KDTree(Const_RAI cbegin, Const_RAI cend)
 : treeSize(cend-cbegin) {
-    std::vector<std::pair<Point<_Tp, N>, ElemType>> constructData(cbegin, cend);
+    std::vector<node_type> constructData(cbegin, cend);
 //std::copy(cbegin, cend, std::back_inserter(constructData));
     rangeCtorHelper(root, 0, constructData.begin(), constructData.end(),
                     constructData.begin() +
@@ -279,8 +283,8 @@ typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTree<_Tp, N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin) {
     
     if (treeSize == 1) {
-        root = new TreeNode(std::move(begin->first),
-                            std::move(begin->second));
+        root = new TreeNode(std::move(begin->key),
+                            std::move(begin->value));
     } else if (treeSize > 1) {
         rangeCtorHelper(root, 0, begin, begin + (end - begin)/2, end);
     } else {
@@ -399,21 +403,21 @@ template <class RAI>
 void KDTree<_Tp, N, ElemType, DT>::
 rangeCtorHelper(TreeNode*& curNdPtr, size_t dim, RAI begin,
                 RAI median, RAI end) {
-    std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
-        return p1.first[dim] < p2.first[dim];});
-    curNdPtr = new TreeNode(std::move(median->first),
-                            std::move(median->second));
+    std::nth_element(begin, median, end, [=](const auto& nh1, const auto& nh2) {
+        return nh1.key[dim] < nh2.key[dim];});
+    curNdPtr = new TreeNode(std::move(median->key),
+                            std::move(median->value));
     size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     if (begin == median - 1) {
-        curNdPtr->left = new TreeNode(std::move(begin->first),
-                                      std::move(begin->second));
+        curNdPtr->left = new TreeNode(std::move(begin->key),
+                                      std::move(begin->value));
     } else if (begin != median) {
         rangeCtorHelper(curNdPtr->left, nextDim, begin,
                         begin + (median-begin)/2, median);
     }
     if (median + 1 == end - 1) {
-        curNdPtr->right = new TreeNode(std::move((median + 1)->first),
-                                       std::move((median+1)->second));
+        curNdPtr->right = new TreeNode(std::move((median + 1)->key),
+                                       std::move((median+1)->value));
     } else if (median + 1 != end) {
         rangeCtorHelper(curNdPtr->right, nextDim, median+1,
                         median + (end-median+1)/2, end);
