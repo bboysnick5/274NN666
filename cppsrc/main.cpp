@@ -60,12 +60,12 @@ void accuracyTest(const std::vector<Point<dist_type, 2>> &testLocs,
         const auto &refResult = refResults[i],
                    &testResult = testResults[i];
         const auto &[testLat, testLng] = testLocs[i].dataArray();
-        dist_type refDist = SBLoc<dist_type>::havDist(refResult->geoPt, {testLat, testLng});
+        dist_type refDist = refResult->havDist(std::forward<Point<dist_type, 2>>({testLat, testLng}));
         refTotal += refDist;
         if (*testResult == *refResult) {
             testTotal += refDist;
         } else {
-            testTotal += SBLoc<dist_type>::havDist(testResult->geoPt, {testLat, testLng});
+            testTotal += testResult->havDist(std::forward<Point<dist_type, 2>>({testLat, testLng}));
             ++errorCount;
             std::cout << "Test Point lng: " << SBLoc<dist_type>::toDegree(testLng)
             << ", lat: " << SBLoc<dist_type>::toDegree(testLat)
@@ -273,8 +273,8 @@ int main(int argc, const char * argv[]) {
 
     
     std::vector<std::shared_ptr<SBSolver<dist_type>>> solvers{
-        //std::make_shared<BFSBSolver<dist_type>>(),
-        //std::make_shared<BFEUCPtSBSolver<dist_type>>(),
+        std::make_shared<BFSBSolver<dist_type>>(),
+        std::make_shared<BFEUCPtSBSolver<dist_type>>(),
         //std::make_shared<KDTSBSolver<dist_type><KDTree>>(),
         //std::make_shared<BKDTSBSolver<dist_type><KDTree>>(),
         //std::make_shared<BKDTSBSolver<dist_type><KDTreeCusMem>>(),

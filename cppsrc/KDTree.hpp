@@ -98,7 +98,7 @@ public:
     // Usage: size_t dim = kd.dimension();
     // ----------------------------------------------------
     // Returns the dimension of the points stored in this KDTree.
-    size_t dimension() const;
+    constexpr size_t dimension() const;
     typename Point<value_type, N>::DistType distType() const;
     
     // size_t size() const;
@@ -453,7 +453,7 @@ KDTree<_Tp, N, ElemType, DT>::~KDTree() {
 // ----------------------------------------------------------
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-size_t KDTree<_Tp, N, ElemType, DT>::dimension() const {
+constexpr size_t KDTree<_Tp, N, ElemType, DT>::dimension() const {
     return N;
 }
 

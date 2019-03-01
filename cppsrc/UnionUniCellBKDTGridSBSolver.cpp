@@ -18,8 +18,8 @@ UnionUniCellBKDTGridSBSolver(dist_type alpc, size_t maxCacheCellVecSize)
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
-    this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     thisRowStartIdx.reserve(this->rowSize);
+    this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
     std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
     ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\

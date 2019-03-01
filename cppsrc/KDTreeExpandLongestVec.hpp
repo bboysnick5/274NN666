@@ -103,7 +103,7 @@ public:
     // Usage: size_t dim = kd.dimension();
     // ----------------------------------------------------
     // Returns the dimension of the points stored in this KDTreeExpandLongestVec.
-    size_t dimension() const;
+    constexpr size_t dimension() const;
     typename Point<value_type, N>::DistType distType() const;
     
     // size_t size() const;
@@ -114,6 +114,7 @@ public:
     // Returns the number of elements in the kd-tree, the max height
     // and whether the tree is empty.
     size_t size() const;
+    size_t cap() const;
     int height() const;
     bool empty() const;
     
@@ -182,7 +183,8 @@ private:
     
     TreeNode *_ndVec;
     ElemType *_objVec;
-    size_t _size;
+    uint32_t _size;
+    uint32_t _cap;
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
@@ -242,10 +244,10 @@ private:
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : _size(rhs._size) {
-    _ndVec = static_cast<TreeNode*>(::operator new[](_size, std::nothrow));
-    _objVec = static_cast<ElemType*>(::operator new[](_size, std::nothrow));
-    std::uninitialized_copy_n(rhs._ndVec, _size, _ndVec);
+KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : _size(rhs._size), _cap(rhs._cap) {
+    _ndVec = new TreeNode[_size];
+    std::copy(rhs._ndVec, _size, _ndVec);
+    _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
     std::uninitialized_copy_n(rhs._objVec, _size, _objVec);
 }
 
@@ -253,14 +255,13 @@ template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::Dis
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>&
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLongestVec& rhs) & {
     if (this != &rhs) {
-        std::destroy_n(_ndVec, _size);
-        ::operator delete(_ndVec);
+        delete[] _ndVec;
         std::destroy_n(_objVec, _size);
         ::operator delete(_objVec);
         _size = rhs._size;
-        _ndVec = static_cast<TreeNode*>(::operator new[](_size, std::nothrow));
-        _objVec = static_cast<ElemType*>(::operator new[](_size, std::nothrow));
-        std::uninitialized_copy_n(rhs._ndVec, _size, _ndVec);
+        _ndVec = new TreeNode[_size];
+        std::copy(rhs._ndVec, _size, _ndVec);
+        _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
         std::uninitialized_copy_n(rhs._objVec, _size, _objVec);
     }
     return *this;
@@ -291,8 +292,7 @@ operator=(KDTreeExpandLongestVec&& rhs) & noexcept {
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::~KDTreeExpandLongestVec<_Tp, N, ElemType, DT>() {
-    std::destroy_n(_ndVec, _size);
-    ::operator delete(_ndVec);
+    delete[] _ndVec;
     std::destroy_n(_objVec, _size);
     ::operator delete(_objVec);
 }
@@ -306,7 +306,7 @@ std::is_const<typename std::remove_pointer<typename
 std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(Const_RAI cbegin, Const_RAI cend) :
 _size(cend - cbegin) {
-    _ndVec = static_cast<TreeNode*>(::operator new(_size * sizeof(TreeNode), std::nothrow));
+    _ndVec = new TreeNode[_size];
     _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
     
     std::vector<node_type> constructData(cbegin, cend);
@@ -322,7 +322,7 @@ std::iterator_traits<RAI>::iterator_category,
 std::random_access_iterator_tag>::value && !std::is_const<typename
 std::remove_pointer< typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, RAI end) :_size(end - begin) {
-    _ndVec = static_cast<TreeNode*>(::operator new(_size * sizeof(TreeNode), std::nothrow));
+    _ndVec = new TreeNode[_size];
     _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
     auto bbox = computeInitBBox(begin, end);
     auto curNd = _ndVec;
@@ -456,13 +456,13 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
     RAI median = begin + (end - begin)/2;
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
         return p1.key[dim] < p2.key[dim];});
-    new (curNd++) TreeNode {0, dim, median->key};
+    *curNd++ = {0, dim, median->key};
     new (curObj++) ElemType (median->value);
     _Tp curValOnDim = curNdPtr->key[dim];
     _Tp *bboxChangePtr = bbox.data() + dim*2+1;
     
     if (begin == median - 1) {
-        new (curNd++) TreeNode {0, N, begin->key};
+        *curNd++ = {0, N, begin->key};
         new (curObj++) ElemType (begin->value);
     } else if (begin != median) {
         auto prevDimHigh = *bboxChangePtr;
@@ -473,7 +473,7 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
     
     if (median + 2 == end) {
         curNdPtr->rightIdx = static_cast<unsigned int>(curNd - _ndVec);
-        new (curNd++) TreeNode {0, N, (median+1)->key};
+        *curNd++ = {0, N, (median+1)->key};
         new (curObj++) ElemType ((median+1)->value);
     } else if (median + 1 != end) {
         curNdPtr->rightIdx = static_cast<unsigned int>(curNd - _ndVec);
@@ -490,7 +490,7 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
 // ----------------------------------------------------------
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::dimension() const {
+constexpr size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::dimension() const {
     return N;
 }
 
@@ -503,6 +503,12 @@ template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::Dis
 size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::size() const {
     return _size;
 }
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::cap() const {
+    return _cap;
+}
+
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 int KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::height() const {

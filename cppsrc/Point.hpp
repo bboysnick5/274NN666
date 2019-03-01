@@ -49,7 +49,7 @@ public:
     // Usage: for (size_t i = 0; i < myPoint.size(); ++i)
     // ------------------------------------------------------------------------
     // Returns N, the dimension of the point.
-    size_t size() const;
+    constexpr size_t size() const;
     
     bool operator == (const Point<_Tp, _N>& rhs) const;
     bool operator != (const Point<_Tp, _N>& rhs) const;
@@ -76,6 +76,9 @@ public:
     // Returns the Euclidean distance between two points.
     template <DistType>
     static value_type dist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+   
+    template <DistType>
+    value_type dist(const Point<_Tp, _N>&) const;
     
     // iterator begin();
     // iterator end();
@@ -105,7 +108,7 @@ private:
 
 
 template <typename _Tp, size_t _N>
-size_t Point<_Tp, _N>::size() const {
+constexpr size_t Point<_Tp, _N>::size() const {
     return _N;
 }
 
@@ -172,6 +175,12 @@ _Tp Point<_Tp, _N>::dist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
         case DistType::HAV:
             return havDist(one, two);
     }
+}
+
+template <typename _Tp, size_t _N>
+template <typename Point<_Tp, _N>::DistType DT>
+_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N> &other) const {
+    return Point<_Tp, _N>::template dist<DT>(*this, other);
 }
 
 template <typename _Tp, size_t _N>

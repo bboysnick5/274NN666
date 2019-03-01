@@ -7,6 +7,7 @@
 //
 
 #include "UnionUniLatLngBKDTGridSBSolver.hpp"
+#include "Utility.hpp"
 #include <memory>
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
@@ -156,7 +157,7 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::printSolverInfo() const
     std::cout << "Total cache locs: " << totalNodeSize
     << "\nAve tree size: " << totalNodeSize/gridCache.size()
     << "\nAve tree height: "
-    << static_cast<size_t>(log2(totalNodeSize/gridCache.size() + 1)) + 1
+    << static_cast<size_t>(log2(totalNodeSize/gridCache.size() + 1.0)) + 1
     << "\nRatio of cache locs over actual num locs: "
     << totalNodeSize/totalLocSize
     << "\nTotal num of loc cells: " << gridCache.size()
@@ -238,11 +239,10 @@ returnNNLocFromCacheVariant(const Point<dist_type, 2>& geoPt, const BitCell& cel
         return cell.getSingleLoc();
     } else if (cell.size() < MAX_CACHE_CELL_VEC_SIZE) {
         const auto p = SBLoc<dist_type>::geoPtToCart3DPt(geoPt);
-        return std::min_element(cell.getLocPairs(), cell.getLocPairs() + cell.size(),
-                                [&](const auto& nh1, const auto& nh2){ return Point<dist_type, 3>::template
-                                    dist<Point<dist_type, 3>::DistType::EUCSQ>(nh1.key, p) <
-                                    Point<dist_type, 3>::template dist<Point<dist_type, 3>::DistType::EUCSQ>(nh2.key, p);
-                                })->value;
+        return custom_min_element(cell.getLocPairs(), cell.getLocPairs() + cell.size(),
+                                  [&p](const auto& nh){ return p.template
+                                      dist<Point<dist_type, 3>::DistType::EUCSQ>(nh.key);},
+                                  std::less())->value;
     } else {
         return cell.getCacheTree()->kNNValue(SBLoc<dist_type>::geoPtToCart3DPt(geoPt), 1);
     }

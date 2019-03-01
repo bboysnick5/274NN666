@@ -8,6 +8,7 @@
 
 #include <algorithm>
 #include "BFSBSolver.hpp"
+#include "Utility.hpp"
 
 template <typename dist_type>
 void BFSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
@@ -16,10 +17,13 @@ void BFSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_t
 
 template <typename dist_type>
 const SBLoc<dist_type>* BFSBSolver<dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
-    return &*std::min_element(locData->cbegin(), locData->cend(),
-                              [=](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
-                                  return SBLoc<dist_type>::havDist(l1.geoPt, geoSearchPt)
-                                  < SBLoc<dist_type>::havDist(l2.geoPt, geoSearchPt);});
+    //return &*std::min_element(locData->cbegin(), locData->cend(),
+      //                        [=](const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
+        //                          return l1.havDist(geoSearchPt) < l2.havDist(geoSearchPt);});
+        
+    return &*custom_min_element(locData->cbegin(), locData->cend(),
+                                [&geoSearchPt](const SBLoc<dist_type>& l) {return l.havDist(geoSearchPt);},
+                                std::less<dist_type>());
 }
 
 template <typename dist_type>

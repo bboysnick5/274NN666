@@ -26,9 +26,7 @@ struct SBLoc {
     
     SBLoc<dist_type>() = default;
     SBLoc<dist_type>(const Point<dist_type, 3>&);
-    SBLoc<dist_type>(dist_type lat, dist_type lng);
     
-    Point<dist_type, 3> locToCart3DPt() const;
     
     bool operator==(const SBLoc<dist_type> &other) const;
     
@@ -40,18 +38,21 @@ struct SBLoc {
     
     static dist_type havDist(const Point<dist_type, 2>&, const Point<dist_type, 2>&);
     
+    dist_type havDist(const SBLoc<dist_type>& other) const;
+    
+    dist_type havDist(const Point<dist_type, 2>& other) const;
+    
     static dist_type latFromHavDist(dist_type dist, dist_type lat1);
     
     static dist_type lngFromHavDist(dist_type dist, dist_type lng1, dist_type lat);
+    
+    Point<dist_type, 3> locToCart3DPt() const;
     
     static Point<dist_type, 3> geoPtToCart3DPt(const Point<dist_type, 2>&);
     
     static dist_type xyzDistFromLngLat(dist_type lat1, dist_type lat2, dist_type lngDiff);
 };
 
-template <typename dist_type>
-inline SBLoc<dist_type>::SBLoc(dist_type lat, dist_type lng) :
-geoPt({lat, lng}), city(""), addr("") {}
 
 template <typename dist_type>
 inline SBLoc<dist_type>::SBLoc(const Point<dist_type, 3> &pt) :
@@ -78,6 +79,16 @@ inline dist_type SBLoc<dist_type>::toDegree(dist_type radians) {
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toRadians(dist_type degree) {
     return degree*M_PI/180.0;
+}
+
+template <typename dist_type>
+dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& other) const {
+    return havDist(geoPt, other.geoPt);
+}
+
+template <typename dist_type>
+dist_type SBLoc<dist_type>::havDist(const Point<dist_type, 2>& otherGeoPt) const {
+    return havDist(geoPt, otherGeoPt);
 }
 
 template <typename dist_type>

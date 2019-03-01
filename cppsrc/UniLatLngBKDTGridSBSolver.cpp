@@ -7,6 +7,7 @@
 //
 
 #include "UniLatLngBKDTGridSBSolver.hpp"
+#include "Utility.hpp"
 //#include <omp.h>
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
@@ -100,10 +101,10 @@ returnNNLocFromCacheVariant(const Point<dist_type, 2>& geoSearchPt,
         case 0: {
             const auto p = SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt);
             const auto &vec = std::get<0>(v);
-            return std::min_element(vec.cbegin(), vec.cend(),
-                [&p](const auto& nh1, const auto& nh2){return Point<dist_type, 3>::template
-                dist<Point<dist_type, 3>::DistType::EUCSQ>(nh1.key, p)< Point<dist_type, 3>::template
-                dist<Point<dist_type, 3>::DistType::EUCSQ>(nh2.key, p);})->value;
+            return custom_min_element(vec.cbegin(), vec.cend(),
+                                      [&p](const auto& nh){return p.template
+                                          dist<Point<dist_type, 3>::DistType::EUCSQ>(nh.key);}, std::less()
+                                      )->value;
         }
         case 1:
             return std::get<1>(v);

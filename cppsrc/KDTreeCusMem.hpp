@@ -101,7 +101,7 @@ public:
     // Usage: size_t dim = kd.dimension();
     // ----------------------------------------------------
     // Returns the dimension of the points stored in this KDTreeCusMem.
-    size_t dimension() const;
+    constexpr size_t dimension() const;
     typename Point<value_type, N>::DistType distType() const;
     
     // size_t size() const;
@@ -492,7 +492,7 @@ KDTreeCusMem<_Tp, N, ElemType, DT>::~KDTreeCusMem<_Tp, N, ElemType, DT>() {
 // ----------------------------------------------------------
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-size_t KDTreeCusMem<_Tp, N, ElemType, DT>::dimension() const {
+constexpr size_t KDTreeCusMem<_Tp, N, ElemType, DT>::dimension() const {
     return N;
 }
 
