@@ -673,7 +673,6 @@ template <class Iter>
 Iter KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, Iter returnIt) const {
     
-    
     struct actRecord {
         _Tp dist;
         const TreeNode* nd;

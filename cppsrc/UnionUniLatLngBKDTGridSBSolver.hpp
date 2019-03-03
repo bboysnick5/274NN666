@@ -26,7 +26,6 @@ public:
     
     
     
-    
 protected:
     
     struct UnionCell {
