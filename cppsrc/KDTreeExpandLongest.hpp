@@ -492,7 +492,7 @@ void KDTreeExpandLongest<_Tp, N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-KDTreeExpandLongest<_Tp, N, ElemType, DT>::~KDTreeExpandLongest<_Tp, N, ElemType, DT>() {
+KDTreeExpandLongest<_Tp, N, ElemType, DT>::~KDTreeExpandLongest() {
     if (pool)
         pool->destroy_and_free_all<TreeNode>();
 }

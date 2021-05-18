@@ -6,7 +6,6 @@
 //  Copyright © 2016 Yunlong Liu. All rights reserved.
 //
 
-#include <algorithm>
 #include "BFSBSolver.hpp"
 #include "Utility.hpp"
 
@@ -22,7 +21,7 @@ const SBLoc<dist_type>* BFSBSolver<dist_type>::findNearest(const Point<dist_type
         //                          return l1.havDist(geoSearchPt) < l2.havDist(geoSearchPt);});
         
     return &*custom_min_element(locData->cbegin(), locData->cend(),
-                                [&geoSearchPt](const SBLoc<dist_type>& l) {return l.havDist(geoSearchPt);},
+                                [&geoSearchPt](const SBLoc<dist_type>& l) {return l.havDistComp(geoSearchPt);},
                                 std::less<dist_type>());
 }
 

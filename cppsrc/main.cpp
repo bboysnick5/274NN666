@@ -19,7 +19,6 @@
 
 
 
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -37,14 +36,16 @@
 
 
 template <typename dist_type>
-std::vector<Point<dist_type, 2>> generateTestLocs(size_t numTrials, std::mt19937_64& mt) {
+std::vector<Point<dist_type, 2>> generateTestLocs(size_t numTests, std::mt19937_64& mt) {
     std::uniform_real_distribution<dist_type> dist(0.0, 1.0);
     std::vector<Point<dist_type, 2>> testLocs;
-    testLocs.reserve(numTrials+4);
-    testLocs.insert(testLocs.cbegin(),{{M_PI/2, M_PI},{-M_PI/2, -M_PI},
-                    {-M_PI/2, M_PI}, {M_PI/2, -M_PI}});
-    
-    std::generate_n(std::back_inserter(testLocs), numTrials, [&]()->Point<dist_type, 2>{
+    testLocs.reserve(numTests + 4);
+    testLocs.insert(testLocs.end(),
+                    {{std::numbers::pi_v<dist_type>*0.5, std::numbers::pi_v<dist_type>},
+                     {-std::numbers::pi_v<dist_type>*0.5, -std::numbers::pi_v<dist_type>},
+                     {-std::numbers::pi_v<dist_type>*0.5, std::numbers::pi_v<dist_type>},
+                     {std::numbers::pi_v<dist_type>*0.5, -std::numbers::pi_v<dist_type>}});
+    std::generate_n(std::back_inserter(testLocs), numTests, [&]()->Point<dist_type, 2> {
         return {SBLoc<dist_type>::toRadians(-90.0 + 180.0*dist(mt)),
                 SBLoc<dist_type>::toRadians(-180.0 + 360.0*dist(mt))};});
     return testLocs;
@@ -54,18 +55,19 @@ template <typename dist_type>
 void accuracyTest(const std::vector<Point<dist_type, 2>> &testLocs,
                   const std::vector<const SBLoc<dist_type>*> &testResults,
                   const std::vector<const SBLoc<dist_type>*> &refResults) {
-    dist_type testTotal = 0.0, refTotal = 0.0;
+    dist_type testErrTotal = 0.0, refTotal = 0.0;
     size_t errorCount = 0, maxTests = std::min(testResults.size(), refResults.size());
     for (size_t i = 0; i < maxTests; ++i) {
         const auto &refResult = refResults[i],
                    &testResult = testResults[i];
         const auto &[testLat, testLng] = testLocs[i].dataArray();
-        dist_type refDist = refResult->havDist(std::forward<Point<dist_type, 2>>({testLat, testLng}));
-        refTotal += refDist;
-        if (*testResult == *refResult) {
-            testTotal += refDist;
-        } else {
-            testTotal += testResult->havDist(std::forward<Point<dist_type, 2>>({testLat, testLng}));
+        dist_type testDist, refDist;
+        if (*testResult != *refResult
+            && (std::fabs((testDist = testResult->havDistComp({testLat, testLng}))
+                          - (refDist = refResult->havDistComp({testLat, testLng})))
+                > static_cast<dist_type>(0.000001))) {
+            testErrTotal += testResult->havDist({testLat, testLng});
+            refTotal += refResult->havDist({testLat, testLng});
             ++errorCount;
             std::cout << "Test Point lng: " << SBLoc<dist_type>::toDegree(testLng)
             << ", lat: " << SBLoc<dist_type>::toDegree(testLat)
@@ -74,11 +76,10 @@ void accuracyTest(const std::vector<Point<dist_type, 2>> &testLocs,
         }
     }
     
-    dist_type error = testTotal/refTotal;
     std::cout << "A total test of " << maxTests << " locations\n"
               << "Error percentage in num diff is: "
               << errorCount*100.0/maxTests << "%\n"
-              << "Error percentage in hav dist is: " << 100.0*(error-1.0) << "%\n";
+              << "Error in hav dist is: " << std::fabs(testErrTotal - refTotal) << "\n";
 }
 
 template <typename dist_type>
@@ -106,11 +107,12 @@ void timeNN(const SBSolver<dist_type> &solver,
         maxResults = 0;
     std::mt19937_64 mt(seed);
     std::chrono::time_point<std::chrono::system_clock> start, end;
-    std::chrono::duration<dist_type> elapsedSeconds;
-    size_t numTrials = 4;
+    std::chrono::duration<dist_type> elapsedSeconds{};
+    size_t numTrials = 4, totalTrials = 0;
     resultLocs.reserve(maxResults);
     do {
         numTrials *= 4;
+        totalTrials += numTrials;
         if (testAccuracy && resultLocs.size() < maxResults) {
             start = std::chrono::system_clock::now();
             std::transform(testLocs.cbegin() + resultLocs.size(),
@@ -125,14 +127,14 @@ void timeNN(const SBSolver<dist_type> &solver,
                             [&](const auto &p){solver.findNearest(p);});
             end = std::chrono::system_clock::now();
         }
-        elapsedSeconds = end - start;
+        elapsedSeconds += end - start;
     } while (elapsedSeconds.count()*1000.0 < 4000.0 && numTrials * 5 < testLocs.size());
     resultLocs.shrink_to_fit();
     //auto &polySolverRef = *solver.get();
     std::cout << std::regex_replace(typeid(solver).name(),
                                     std::regex("[A-Z]?[0-9]+|.$"), "")
-              << "\nSearch Time: " << (elapsedSeconds.count()*1000.0)/numTrials
-              << " ms per search, " << numTrials << " trials\n";
+              << "\nSearch Time: " << (elapsedSeconds.count()*1000.0)/totalTrials
+              << " ms per search, " << totalTrials << " trials\n";
 }
 
 template <typename dist_type>
@@ -151,60 +153,8 @@ void writeResults(const char* argv[],
 }
 
 
-
 int main(int argc, const char * argv[]) {
-    
 
-    /*
-    struct Cell {
-        
-        Cell(size_t, const std::vector<std::pair<Point<3>, const SBLoc<dist_type>*>>&);
-        ~Cell();
-        size_t size() const;
-        
-    private:
-        size_t _size;
-        union {
-            const SBLoc<dist_type> *cacheLoc;
-            std::pair<Point<3>, const SBLoc<dist_type>*>* cacheLocs;
-            //KDT<KDTType>* cacheTree;
-        };
-    };
-    
-    std::cout << std::is_standard_layout<Cell>::value;
-    return 0;
-     */
-    
-    //int *x = new int[20];
-    //std::cout << sizeof(std::pair<dist_type, std::pair<const Point<3>*, const SBLoc<dist_type>*>>);
-    //delete[] x;
-    //return 0; */
-    
-    /*
-    std::ifstream infileLocs(argv[1]);
-    std::ofstream outfileLocs(argv[2]);
-    std::string line;
-    while (std::getline(infileLocs, line)) {
-        std::istringstream iss(line, '\t');
-        std::string id, token, desc;
-        std::getline(iss, id, '\t');
-        std::getline(iss, token, '\t');
-        desc = token;
-        std::getline(iss, token, '\t');
-        desc += " " + token;
-        std::getline(iss, token, '\t');
-        desc += " " + token;
-        dist_type lat, lng;
-        std::getline(iss, token, '\t');
-        lat = std::stod(token);
-        std::getline(iss, token, '\t');
-        lng = std::stod(token);
-        outfileLocs << id + "," + std::to_string(lat) + ","
-                       + std::to_string(lng) + "," + desc + "\r";
-    }
-    return 0;
-    
-    */
     
     using dist_type = double;
     
@@ -213,53 +163,34 @@ int main(int argc, const char * argv[]) {
     std::mt19937_64 mt(seq);
     //mt.seed(686868);
     
-    size_t MAX_TRIALS = 0xFFFFFF;
+    size_t MAX_TRIALS = (1 << 24);
     std::vector<const SBLoc<dist_type>*> testResults, refResults;
     std::vector<Point<dist_type, 2>> testLocs = generateTestLocs<dist_type>(MAX_TRIALS, mt);
+    
+    //std::cout << argv[1] << std::endl;
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
     dist_type aveLocPerCell = argc < 4 ? 0.4 : std::stod(argv[3]);
     size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
-    bool testAccuracy = argc < 6 ? true : std::tolower(argv[5][0]) == 'y';
+    bool testAccuracy = argc < 6 ? false : std::tolower(argv[5][0]) == 'y';
     size_t numOfLocsToWriteToFile = argc < 7 ? false : std::stoi(argv[6]);
+    
+    testAccuracy = true;
+    //MAX_CACHE_CELL_VEC_SIZE = (1 << 16);
+    //aveLocPerCell = 10;
     
     //infileLocs.ignore(256, '\r');
     //infileLocs.ignore(256, '\r');
     
     
     auto locData = std::make_shared<std::vector<SBLoc<dist_type>>>();
-    locData->reserve(0xFFFFFF);
+    locData->reserve(1 << 24);
     locData->assign(std::istream_iterator<SBLoc<dist_type>>(infileLocs),
                     std::istream_iterator<SBLoc<dist_type>>());
     locData->shrink_to_fit();
     std::shuffle(locData->begin(), locData->end(), mt);
     infileLocs.close();
     
-    
-    /*
-    std::stable_sort(locData->begin(), locData->end(), [](const auto &l1,
-        const auto& l2){return l1.lng*100000000+l1.lat<l2.lng*100000000+l2.lat;});
-    locData->erase(locData->begin(),
-                   std::unique(locData->rbegin(), locData->rend()).base());
-    locData->shrink_to_fit();
-    infileLocs.close();
-    
-    //std::random_device rd;
-    std::mt19937 g(rd());
-    std::shuffle(locData->begin(), locData->end(), g);
-    
-    std::for_each(locData->begin(), locData->end(), []( auto& l){
-        l.city = std::regex_replace(l.city, std::regex("\n|\r"), "");
-        l.addr = std::regex_replace(l.addr, std::regex("\n|\r"), "");
-    });
-    
-    std::ofstream outFile(argv[2]);
-    std::transform(locData->begin(), locData->end(),
-                   std::ostream_iterator<std::string>(outFile),
-                   [&](const auto &l){
-                       return l.city + "," +std::to_string(SBLoc<dist_type>::toDegree(l.lat)) + "," + std::to_string(SBLoc<dist_type>::toDegree(l.lng)) + "," + l.addr + "\r";});
-    return 0;
-    */
     
     if (numOfLocsToWriteToFile) {
         auto solver = std::make_unique<BFSBSolver<dist_type>>();
@@ -271,24 +202,24 @@ int main(int argc, const char * argv[]) {
     
 
     std::unique_ptr<SBSolver<dist_type>> solvers[] = {
-        std::make_unique<BFSBSolver<dist_type>>(),
-        std::make_unique<BFEUCPtSBSolver<dist_type>>(),
-        //std::make_unique<KDTSBSolver<dist_type><KDTree>>(),
-        //std::make_unique<BKDTSBSolver<dist_type><KDTree>>(),
+        //std::make_unique<BFSBSolver<dist_type>>(),
+        //std::make_unique<BFEUCPtSBSolver<dist_type>>(),
+        //std::make_unique<KDTSBSolver<KDTree,dist_type>>(),
+        //std::make_unique<BKDTSBSolver<KDTree, dist_type>>(),
         //std::make_unique<BKDTSBSolver<dist_type><KDTreeCusMem>>(),
-        std::make_unique<BKDTSBSolver<KDTreeExpandLongest, dist_type>>(),
+        //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, dist_type>>(),
         std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, dist_type>>(),
         //std::make_unique<GridSBSolver<dist_type>>(),
         //std::make_unique<BKDTGridSBSolver<dist_type>>(aveLocPerCell),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<dist_type><KDTree>>(0.85*aveLocPerCell, maxCacheCellVecSize),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<dist_type><KDTreeCusMem>>(0.85*aveLocPerCell, maxCacheCellVecSize),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongest>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTree, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeCusMem, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec,dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UnionUniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
-        std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };
@@ -299,7 +230,7 @@ int main(int argc, const char * argv[]) {
     
    // std::for_each(solvers.cbegin(), solvers.cend(),
          //         [&](const auto &solver) {timeBuild(locData, solver);});
-    testAccuracy = false;
+   // testAccuracy = false;
     unsigned int timeNNSeed = rd();
     for (size_t i = 0; i < std::size(solvers); ++i) {
         using namespace std::chrono_literals;

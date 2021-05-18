@@ -26,7 +26,7 @@ BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, siz
                                                                   typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator begin) {
     dist_type rowDistCellCtrGridCtr = ((r0+ 0.5 - this->rowSize/2 )*this->sideLen),
            colDistCellCtrGridCtr = ((c0 + 0.5 -this->colSize/2)*this->sideLen);
-    dist_type cellCtrLat = SBLoc<dist_type>::latFromHavDist(rowDistCellCtrGridCtr, this->midLat),
+    dist_type cellCtrLat = this->midLat + SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(rowDistCellCtrGridCtr),
            cellCtrLng = SBLoc<dist_type>::lngFromHavDist(colDistCellCtrGridCtr,
                                               this->midLng, cellCtrLat);
     return sbKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt({cellCtrLat,
@@ -68,7 +68,7 @@ void BKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 dist_type BKDTGridSBSolver<KDTType, dist_type>::xyzDistFromSideLen() {
-    dist_type lat2 = SBLoc<dist_type>::latFromHavDist(this->sideLen*sqrt(2), 0);
+    dist_type lat2 = SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(this->sideLen*sqrt(2));
     return Point<dist_type, 3>::template
     dist<Point<dist_type, 3>::DistType::EUC>(SBLoc<dist_type>::geoPtToCart3DPt({0.0, 0.0}),
                                              SBLoc<dist_type>::geoPtToCart3DPt({lat2, 0.0}));
@@ -85,10 +85,11 @@ void BKDTGridSBSolver<KDTType, dist_type>::build(const std::shared_ptr<std::vect
     this->numLocs = sbKdt.size();
     this->findKeyLngLat(locData);
     this->rowSize = sqrt(locData->size()) / this->AVE_LOC_PER_CELL;
-    this->sideLen = SBLoc<dist_type>::havDist({this->minLat, 0.0}, {this->maxLat, 0.0}) / this->rowSize;
+    this->sideLen = 
+    SBLoc<dist_type>::havDist({this->minLat, 0.0}, {this->maxLat, 0.0}) / this->rowSize;
     dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * cos(this->minLat < 0 ? 0 : this->minLat);
-    dist_type longestColDistSpan = 2 * M_PI * lowestLatCircleRadius *
-                                (std::fabs(this->maxLng - this->minLng)/(2*M_PI));
+    dist_type longestColDistSpan = 2 * std::numbers::pi_v<dist_type> * lowestLatCircleRadius *
+                                (std::fabs(this->maxLng - this->minLng)/(2*std::numbers::pi_v<dist_type>));
     this->colSize = longestColDistSpan/this->sideLen + 1;
     
     fillGridCache();

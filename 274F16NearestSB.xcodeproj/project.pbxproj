@@ -14,24 +14,24 @@
 		013D9B6C221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */; };
 		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
 		82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */; };
+		82717C7D26537BEF00D90DE7 /* libtbb.12.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */; };
 		82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */; };
 		82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */; };
 		82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */; };
 		82A66E371E003B0800D5FAFD /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E311E003B0800D5FAFD /* main.cpp */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXBuildRule section */
-		8290F4FF1EAC071000838B00 /* PBXBuildRule */ = {
-			isa = PBXBuildRule;
-			compilerSpec = com.apple.compilers.proxy.script;
-			fileType = pattern.proxy;
-			isEditable = 1;
-			outputFiles = (
-			);
-		};
-/* End PBXBuildRule section */
-
 /* Begin PBXCopyFilesBuildPhase section */
+		82717C7F26537C5300D90DE7 /* Embed Libraries */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+			);
+			name = "Embed Libraries";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82A66E1C1E00382500D5FAFD /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -67,6 +67,7 @@
 		823641461E00D1AE007AE0FD /* SBLoc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBLoc.hpp; sourceTree = "<group>"; };
 		82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		82405F2C1E0C7FDD00028713 /* BKDTGridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BKDTGridSBSolver.hpp; sourceTree = "<group>"; };
+		82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.12.2.dylib; path = ../../../../../opt/intel/oneapi/tbb/2021.2.0/lib/libtbb.12.2.dylib; sourceTree = "<group>"; };
 		82A66E1E1E00382500D5FAFD /* 274F16NearestSB */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 274F16NearestSB; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BFSBSolver.cpp; sourceTree = "<group>"; };
 		82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BFSBSolver.hpp; sourceTree = "<group>"; };
@@ -87,12 +88,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82717C7D26537BEF00D90DE7 /* libtbb.12.2.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		82717C7A26537A5300D90DE7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		82A66E151E00382500D5FAFD = {
 			isa = PBXGroup;
 			children = (
@@ -102,6 +112,7 @@
 				01AC07D621CB9AA500ECF497 /* cities.csv */,
 				013914F222164BD500A920EE /* countries.csv */,
 				013F20632217DB8A002B556E /* test.csv */,
+				82717C7A26537A5300D90DE7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -161,9 +172,9 @@
 				82A66E1A1E00382500D5FAFD /* Sources */,
 				82A66E1B1E00382500D5FAFD /* Frameworks */,
 				82A66E1C1E00382500D5FAFD /* CopyFiles */,
+				82717C7F26537C5300D90DE7 /* Embed Libraries */,
 			);
 			buildRules = (
-				8290F4FF1EAC071000838B00 /* PBXBuildRule */,
 			);
 			dependencies = (
 			);
@@ -178,7 +189,7 @@
 		82A66E161E00382500D5FAFD /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 1010;
+				LastUpgradeCheck = 1250;
 				ORGANIZATIONNAME = "Yunlong Liu";
 				TargetAttributes = {
 					82A66E1D1E00382500D5FAFD = {
@@ -189,10 +200,11 @@
 			};
 			buildConfigurationList = 82A66E191E00382500D5FAFD /* Build configuration list for PBXProject "274F16NearestSB" */;
 			compatibilityVersion = "Xcode 3.2";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
 				en,
+				Base,
 			);
 			mainGroup = 82A66E151E00382500D5FAFD;
 			productRefGroup = 82A66E1F1E00382500D5FAFD /* Products */;
@@ -230,8 +242,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -250,6 +263,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -260,7 +274,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
@@ -271,10 +285,24 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				HEADER_SEARCH_PATHS = (
+					/opt/oneDPL/include,
+					/usr/local/Cellar/boost/1.75.0_3/include,
+					/opt/intel/oneapi/tbb/latest/include,
+				);
+				ICC_OPT_PARALLEL = YES;
+				ICC_TBB = YES;
+				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/opt/intel/oneapi/tbb/latest/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = "-ltbb";
 				OTHER_LDFLAGS = "-v";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
 			};
 			name = Debug;
@@ -283,8 +311,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_LOCALIZABILITY_NONLOCALIZED = YES;
 				CLANG_ANALYZER_NONNULL = YES;
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -303,6 +332,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -313,7 +343,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_OPTIMIZATION_LEVEL = fast;
 				GCC_PREPROCESSOR_DEFINITIONS = "";
@@ -323,9 +353,23 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				HEADER_SEARCH_PATHS = (
+					/opt/oneDPL/include,
+					/usr/local/Cellar/boost/1.75.0_3/include,
+					/opt/intel/oneapi/tbb/latest/include,
+				);
+				ICC_OPT_PARALLEL = YES;
+				ICC_TBB = YES;
+				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LIBRARY_SEARCH_PATHS = (
+					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/opt/intel/oneapi/tbb/latest/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_CFLAGS = "-ltbb";
 				OTHER_LDFLAGS = "-v";
+				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
 			};
 			name = Release;
@@ -333,8 +377,29 @@
 		82A66E261E00382500D5FAFD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = x86_64;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CODE_SIGN_IDENTITY = "-";
+				GCC_C_LANGUAGE_STANDARD = c11;
+				HEADER_SEARCH_PATHS = (
+					/opt/intel/oneapi/tbb/latest/include,
+					/opt/oneDPL/include,
+					/usr/local/Cellar/boost/1.75.0_3/include,
+				);
+				ICC_CXX_LIBRARY = "libc++";
+				ICC_MKL = threaded;
+				ICC_OPT_PARALLEL = YES;
+				ICC_OTHER_CFLAGS = "$(OTHER_CFLAGS)";
+				ICC_TBB = YES;
+				ICC_TUNE_FOR_INTEL_ARCH = skylake;
+				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LD_RUNPATH_SEARCH_PATHS = /opt/intel/oneapi/tbb/latest/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/opt/intel/oneapi/tbb/latest/lib,
+					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/opt/intel/oneapi/tbb/2021.2.0/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -342,9 +407,31 @@
 		82A66E271E00382500D5FAFD /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
-				GCC_C_LANGUAGE_STANDARD = c99;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = x86_64;
+				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CODE_SIGN_IDENTITY = "-";
+				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_OPTIMIZATION_LEVEL = fast;
+				HEADER_SEARCH_PATHS = (
+					/opt/intel/oneapi/tbb/latest/include,
+					/opt/oneDPL/include,
+					/usr/local/Cellar/boost/1.75.0_3/include,
+				);
+				ICC_CXX_LIBRARY = "libc++";
+				ICC_MKL = threaded;
+				ICC_OPTLEVEL = speedHLO;
+				ICC_OPT_PARALLEL = YES;
+				ICC_OTHER_CFLAGS = "$(OTHER_CFLAGS)";
+				ICC_TBB = YES;
+				ICC_TUNE_FOR_INTEL_ARCH = skylake;
+				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LD_RUNPATH_SEARCH_PATHS = /opt/intel/oneapi/tbb/latest/lib;
+				LIBRARY_SEARCH_PATHS = (
+					/opt/intel/oneapi/tbb/latest/lib,
+					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/opt/intel/oneapi/tbb/2021.2.0/lib,
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;

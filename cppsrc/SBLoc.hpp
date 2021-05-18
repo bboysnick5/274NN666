@@ -24,8 +24,8 @@ struct SBLoc {
     
     static constexpr dist_type EARTH_RADIUS = 6371.0;
     
-    SBLoc<dist_type>() = default;
-    SBLoc<dist_type>(const Point<dist_type, 3>&);
+    SBLoc() = default;
+    SBLoc(const Point<dist_type, 3>&);
     
     
     bool operator==(const SBLoc<dist_type> &other) const;
@@ -36,13 +36,17 @@ struct SBLoc {
     
     static dist_type toDegree(dist_type radians);
     
-    static dist_type havDist(const Point<dist_type, 2>&, const Point<dist_type, 2>&);
+    static dist_type havDist(const SBLoc<dist_type>&, const SBLoc<dist_type>&);
+        
+    static dist_type havDist(const Point<dist_type, 2>& p1, const Point<dist_type, 2>& p2);
     
     dist_type havDist(const SBLoc<dist_type>& other) const;
     
     dist_type havDist(const Point<dist_type, 2>& other) const;
     
-    static dist_type latFromHavDist(dist_type dist, dist_type lat1);
+    dist_type havDistComp(const Point<dist_type, 2>& other) const;
+
+    static dist_type deltaLatOnSameLngFromHavDist(dist_type dist);
     
     static dist_type lngFromHavDist(dist_type dist, dist_type lng1, dist_type lat);
     
@@ -50,7 +54,7 @@ struct SBLoc {
     
     static Point<dist_type, 3> geoPtToCart3DPt(const Point<dist_type, 2>&);
     
-    static dist_type xyzDistFromLngLat(dist_type lat1, dist_type lat2, dist_type lngDiff);
+    static dist_type EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
 };
 
 
@@ -73,12 +77,12 @@ inline bool SBLoc<dist_type>::operator!=(const SBLoc<dist_type> &other) const {
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toDegree(dist_type radians) {
-    return radians*180.0/M_PI;
+    return radians*180.0/std::numbers::pi_v<dist_type>;
 }
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toRadians(dist_type degree) {
-    return degree*M_PI/180.0;
+    return degree*std::numbers::pi_v<dist_type>/180.0;
 }
 
 template <typename dist_type>
@@ -88,23 +92,30 @@ dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& other) const {
 
 template <typename dist_type>
 dist_type SBLoc<dist_type>::havDist(const Point<dist_type, 2>& otherGeoPt) const {
-    return havDist(geoPt, otherGeoPt);
+    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(geoPt, otherGeoPt, EARTH_RADIUS);
+}
+
+template <typename dist_type>
+dist_type SBLoc<dist_type>::havDistComp(const Point<dist_type, 2>& otherGeoPt) const {
+    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAVCOMP>(geoPt, otherGeoPt, EARTH_RADIUS);
+}
+
+template <typename dist_type>
+inline dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
+    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(l1.geoPt, l2.geoPt, EARTH_RADIUS);
 }
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::havDist(const Point<dist_type, 2>& p1, const Point<dist_type, 2>& p2) {
-    dist_type dLat = p1[0] - p2[0], dLon = p1[1] - p2[1];
-    dist_type a = sin(dLat*0.5) * sin(dLat*0.5) +
-                  sin(dLon*0.5) * sin(dLon*0.5) * cos(p1[0]) * cos(p2[0]);
-    return 2.0 * atan2(sqrt(a), sqrt(1.0-a)) * EARTH_RADIUS;
+    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(p1, p2, EARTH_RADIUS);
 }
 
 template <typename dist_type>
-inline dist_type SBLoc<dist_type>::latFromHavDist(dist_type dist, dist_type lat1) {
+inline dist_type SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(dist_type dist) {
     dist_type c = dist/EARTH_RADIUS;
     dist_type sum = sin(c*0.5);
     dist_type dLat = asin(sum)*2.0;
-    return dLat + lat1;
+    return dLat;
 }
 
 template <typename dist_type>
@@ -126,16 +137,16 @@ inline Point<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const Point<dist_ty
 }
 
 template <typename dist_type>
-inline dist_type SBLoc<dist_type>::xyzDistFromLngLat(dist_type lat1, dist_type lat2, dist_type lngDiff) {
-    return sqrt(2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(lngDiff)));
+inline dist_type SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
+    return sqrt(2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(deltaLng)));
 }
 
 namespace std {
     template <typename dist_type>
     struct hash<SBLoc<dist_type>> {
         size_t operator()(const SBLoc<dist_type>& l) const {
-            return (static_cast<size_t>((l.geoPt[0] + 0.5*M_PI) * 1000000.0) << 20) +
-                    static_cast<size_t>((l.geoPt[1] + M_PI) * 1000000.0);
+            return (static_cast<size_t>((l.geoPt[0] + 0.5*std::numbers::pi_v<dist_type>) * 1000000.0) << 20) +
+                    static_cast<size_t>((l.geoPt[1] + std::numbers::pi_v<dist_type>) * 1000000.0);
         }
     };
     

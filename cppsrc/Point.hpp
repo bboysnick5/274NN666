@@ -9,15 +9,23 @@
 #ifndef POINT_INCLUDED
 #define POINT_INCLUDED
 
+//#include <oneapi/dpl/execution>
 #include <cmath>
 #include <stdlib.h>
 #include <array>
+//#include <oneapi/dpl/numeric>
 #include <numeric>
+#include <cstddef>
+#include <numbers>
+#include <utility>
+//#include <execution>
+
+
 
 template <typename _Tp, size_t _N>
 class Point {
 public:
-    
+
     typedef Point                                 __self;
     typedef _Tp                                   value_type;
     typedef value_type&                           reference;
@@ -35,7 +43,8 @@ public:
         EUC = 0,
         EUCSQ,
         MAN,
-        HAV
+        HAV,
+        HAVCOMP
     };
     
     
@@ -74,11 +83,11 @@ public:
     // Usage: _Tp d = Distance(one, two);
     // ----------------------------------------------------------------------------
     // Returns the Euclidean distance between two points.
-    template <DistType>
-    static value_type dist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    template <DistType, typename... VArgs>
+    static value_type dist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2, VArgs... args);
    
-    template <DistType>
-    value_type dist(const Point<_Tp, _N>&) const;
+    template <DistType, typename... VArgs>
+    value_type dist(const Point<_Tp, _N>&, VArgs... args) const;
     
     // iterator begin();
     // iterator end();
@@ -99,8 +108,11 @@ private:
     
     static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
     static value_type eucSqDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
-    static value_type havDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
     static value_type manDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    
+    //template <typename... VArgs>
+    static value_type havDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2, _Tp radius);
+    static value_type havDistCompCalcA(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
 
 };
 
@@ -163,8 +175,8 @@ typename Point<_Tp, _N>::const_iterator Point<_Tp, _N>::cend() const {
 }
 
 template <typename _Tp, size_t _N>
-template <typename Point<_Tp, _N>::DistType DT>
-_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+template <typename Point<_Tp, _N>::DistType DT, typename... VArgs>
+_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two, VArgs... args) {
     switch (DT) {
         case DistType::EUC:
             return eucDist(one, two);
@@ -173,14 +185,17 @@ _Tp Point<_Tp, _N>::dist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
         case DistType::MAN:
             return manDist(one, two);
         case DistType::HAV:
-            return havDist(one, two);
-    }
+            // TODO type-safe
+            return havDist(one, two, {args...});
+        case DistType::HAVCOMP:
+            return havDistCompCalcA(one, two);
+        }
 }
 
 template <typename _Tp, size_t _N>
-template <typename Point<_Tp, _N>::DistType DT>
-_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N> &other) const {
-    return Point<_Tp, _N>::template dist<DT>(*this, other);
+template <typename Point<_Tp, _N>::DistType DT, typename... VArgs>
+_Tp Point<_Tp, _N>::dist(const Point<_Tp, _N> &other, VArgs ...args) const {
+    return Point<_Tp, _N>::template dist<DT>(*this, other, args...);
 }
 
 template <typename _Tp, size_t _N>
@@ -190,30 +205,32 @@ _Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two
 
 template <typename _Tp, size_t _N>
 _Tp Point<_Tp, _N>::eucSqDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
-    //return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<_Tp>(),
-                 //                [](const _Tp a, const _Tp b){return (a-b)*(a-b);});
-    
+    return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<_Tp>(),
+                                 [](const _Tp a, const _Tp b){return (a-b)*(a-b);});
+    /*
     _Tp diff = one[0] - two[0], result = diff*diff;
-    for (size_t i = 1; i < _N; ++i) {
+    for (size_t i = 1; i != _N; ++i) {
         diff = one[i] - two[i];
         result += diff*diff;
     }
-    return result; 
+    return result;  */
 }
 
 
 template <typename _Tp, size_t _N>
-_Tp Point<_Tp, _N>::havDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
-    constexpr static _Tp EARTH_RADIUS = 6371.0;
-    _Tp dLat = (one[1]-two[1])*M_PI/180.0;
-    _Tp dLon = (one[0]-two[0])*M_PI/180.0;
-    _Tp lat1 = one[1]*M_PI/180.0;
-    _Tp lat2 = two[1]*M_PI/180.0;
-    _Tp a = sin(dLat*0.5) * sin(dLat*0.5) +
-               sin(dLon*0.5) * sin(dLon*0.5) * cos(lat1) * cos(lat2);
-    _Tp c = 2.0 * atan2(sqrt(a), sqrt(1.0-a));
-    return EARTH_RADIUS * c;
+//template <typename... VArgs>
+_Tp Point<_Tp, _N>::havDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two, _Tp radius) {
+    return 2.0 * asin(sqrt(havDistCompCalcA(one, two))) * (1.0 * radius);
 }
+
+template <typename _Tp, size_t _N>
+_Tp Point<_Tp, _N>::havDistCompCalcA(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    _Tp dLatOneHalf = 0.5*(one[0] - two[0]);
+    _Tp dLonOneHalf = 0.5*(one[1] - two[1]);
+    return sin(dLatOneHalf) * sin(dLatOneHalf) +
+           sin(dLonOneHalf) * sin(dLonOneHalf) * cos(one[0]) * cos(two[0]);
+}
+
 
 template <typename _Tp, size_t _N>
 _Tp Point<_Tp, _N>::manDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {

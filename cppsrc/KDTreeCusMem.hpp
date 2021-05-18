@@ -482,7 +482,7 @@ void KDTreeCusMem<_Tp, N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-KDTreeCusMem<_Tp, N, ElemType, DT>::~KDTreeCusMem<_Tp, N, ElemType, DT>() {
+KDTreeCusMem<_Tp, N, ElemType, DT>::~KDTreeCusMem() {
     if (pool)
         pool->destroy_and_free_all<TreeNode>();
 }

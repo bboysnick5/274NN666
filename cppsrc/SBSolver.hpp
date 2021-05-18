@@ -13,6 +13,7 @@
 #include "Point.hpp"
 #include <stdio.h>
 #include <vector>
+#include <memory>
 
 template <typename dist_type>
 class SBSolver {

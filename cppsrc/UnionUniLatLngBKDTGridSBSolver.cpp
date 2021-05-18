@@ -169,10 +169,9 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::printSolverInfo() const
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-fillCacheCell(const Point<dist_type, 2>& thisCtrGeoPt, dist_type thisDiff, size_t thisColSize,
+fillCacheCell(const Point<dist_type, 2>& thisCtrGeoPt, dist_type diagonalDist3DEUC, size_t thisColSize,
               std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt(thisCtrGeoPt),
-                                   thisDiff, std::back_inserter(ptLocPairs));
+    this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDist3DEUC, std::back_inserter(ptLocPairs));
     size_t vecSize = ptLocPairs.size();
     this->totalNodeSize += vecSize;
     if (vecSize == 1) {
@@ -195,26 +194,26 @@ fillCacheCell(const Point<dist_type, 2>& thisCtrGeoPt, dist_type thisDiff, size_
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     colSize = rowSize;
-    lngInc = 2.0*M_PI/colSize + 2.0*M_PI/(colSize*colSize*0xFFFF);
+    lngInc = 2.0*std::numbers::pi_v<dist_type>/colSize + 2.0*std::numbers::pi_v<dist_type>/(colSize*65536);
     lngIncInverse = 1.0/lngInc;
     gridCache.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
     std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
     ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
     
-    dist_type thisCtrLat = 0.5 * (latInc - M_PI);
+    dist_type thisCtrLat = 0.5 * (latInc - std::numbers::pi_v<dist_type>);
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
-        dist_type thisCtrLng = 0.5 * lngInc - M_PI;
-        dist_type thisDiff = SBLoc<dist_type>::xyzDistFromLngLat(r*latInc- 0.5*M_PI,
-                                                   (r+1)*latInc-0.5*M_PI, lngInc);
+        dist_type thisCtrLng = 0.5 * lngInc - std::numbers::pi_v<dist_type>;
+        dist_type lat1 = r*latInc- 0.5*std::numbers::pi_v<dist_type>;
+        dist_type diagonalDist3DEUC = SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
         for (size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
-            fillCacheCell({thisCtrLat, thisCtrLng}, thisDiff, colSize, ptLocPairs);
+            fillCacheCell({thisCtrLat, thisCtrLng}, diagonalDist3DEUC, colSize, ptLocPairs);
         }
     }
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::calcSideLenFromAlpc() {
-    dist_type surfaceArea = 4.0*M_PI*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
+    dist_type surfaceArea = 4.0*std::numbers::pi_v<dist_type>*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
     dist_type numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
     sideLen = sqrt(surfaceArea/numCells);
 }
@@ -225,9 +224,9 @@ build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     totalLocSize = locData->size();
     BKDTSBSolver<KDTType, dist_type>::generateKDT(locData);
     calcSideLenFromAlpc();
-    latInc = std::fabs(SBLoc<dist_type>::latFromHavDist(sideLen, 0.0));
+    latInc = std::fabs(SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(sideLen));
     latIncInverse = 1.0/latInc;
-    rowSize = std::ceil(M_PI/(latInc - latInc*latInc/(M_PI*0xFFFF)));
+    rowSize = std::ceil(std::numbers::pi_v<dist_type>/latInc);
     fillGridCache();
     this->locKdt.clear();
 }
@@ -252,8 +251,9 @@ returnNNLocFromCacheVariant(const Point<dist_type, 2>& geoPt, const BitCell& cel
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 const SBLoc<dist_type>* UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 findNearest(const Point<dist_type, 2>& geoSearchPt) const {
-    return returnNNLocFromCacheVariant(geoSearchPt, gridCache[static_cast<size_t>(
-        (geoSearchPt[0]+0.5*M_PI)*latIncInverse)*colSize+ static_cast<size_t>((geoSearchPt[1]+M_PI)*lngIncInverse)]);
+    return returnNNLocFromCacheVariant(geoSearchPt,
+           gridCache[static_cast<size_t>((geoSearchPt[0]+0.5*std::numbers::pi_v<dist_type>)*latIncInverse)*colSize +
+                     static_cast<size_t>((geoSearchPt[1]+std::numbers::pi_v<dist_type>)*lngIncInverse)]);
 }
 
 

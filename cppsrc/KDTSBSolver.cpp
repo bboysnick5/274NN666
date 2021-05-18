@@ -28,8 +28,8 @@ const SBLoc<dist_type>* KDTSBSolver<KDTType, dist_type>::findNearest(const Point
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void KDTSBSolver<KDTType, dist_type>::generateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
-    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc<dist_type> &loc){
-        locKdt.insert(loc.locToCart3DPt(), &loc);});
+    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc<dist_type> &loc) mutable {
+        this->locKdt.insert(loc.locToCart3DPt(), &loc);});
 }
 
 
