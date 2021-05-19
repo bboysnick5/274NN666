@@ -17,6 +17,7 @@
 #include <map>
 #include <utility>
 #include <set>
+#include <new>
 #include <tuple>
 #include <cmath>
 #include <stdio.h>

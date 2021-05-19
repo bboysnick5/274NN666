@@ -287,20 +287,26 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/opt/oneDPL/include,
-					/usr/local/Cellar/boost/1.75.0_3/include,
+					/usr/local/include,
 					/opt/intel/oneapi/tbb/latest/include,
 				);
 				ICC_OPT_PARALLEL = YES;
 				ICC_TBB = YES;
 				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LD_RUNPATH_SEARCH_PATHS = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
-					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/usr/local/lib,
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_CFLAGS = "-ltbb";
+				OTHER_CFLAGS = (
+					"-ltbb",
+					"-Xclang",
+					"-lomp",
+					"-fopenmp",
+				);
 				OTHER_LDFLAGS = "-v";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
@@ -355,19 +361,25 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
 					/opt/oneDPL/include,
-					/usr/local/Cellar/boost/1.75.0_3/include,
+					/usr/local/include,
 					/opt/intel/oneapi/tbb/latest/include,
 				);
 				ICC_OPT_PARALLEL = YES;
 				ICC_TBB = YES;
 				ICC_USE_OPTIMIZED_HEADERS = YES;
+				LD_RUNPATH_SEARCH_PATHS = /usr/local/lib;
 				LIBRARY_SEARCH_PATHS = (
-					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/usr/local/lib,
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
 				MTL_ENABLE_DEBUG_INFO = NO;
-				OTHER_CFLAGS = "-ltbb";
+				OTHER_CFLAGS = (
+					"-ltbb",
+					"-Xclang",
+					"-lomp",
+					"-fopenmp",
+				);
 				OTHER_LDFLAGS = "-v";
 				SCAN_ALL_SOURCE_FILES_FOR_INCLUDES = NO;
 				SDKROOT = macosx;
@@ -385,7 +397,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/intel/oneapi/tbb/latest/include,
 					/opt/oneDPL/include,
-					/usr/local/Cellar/boost/1.75.0_3/include,
+					/usr/local/include,
 				);
 				ICC_CXX_LIBRARY = "libc++";
 				ICC_MKL = threaded;
@@ -394,11 +406,17 @@
 				ICC_TBB = YES;
 				ICC_TUNE_FOR_INTEL_ARCH = skylake;
 				ICC_USE_OPTIMIZED_HEADERS = YES;
-				LD_RUNPATH_SEARCH_PATHS = /opt/intel/oneapi/tbb/latest/lib;
+				LD_RUNPATH_SEARCH_PATHS = "/opt/intel/oneapi/tbb/latest/lib /usr/local/lib";
 				LIBRARY_SEARCH_PATHS = (
 					/opt/intel/oneapi/tbb/latest/lib,
-					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
+				);
+				OTHER_CFLAGS = (
+					"-ltbb",
+					"-Xclang",
+					"-fopenmp",
+					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -416,7 +434,7 @@
 				HEADER_SEARCH_PATHS = (
 					/opt/intel/oneapi/tbb/latest/include,
 					/opt/oneDPL/include,
-					/usr/local/Cellar/boost/1.75.0_3/include,
+					/usr/local/include,
 				);
 				ICC_CXX_LIBRARY = "libc++";
 				ICC_MKL = threaded;
@@ -426,11 +444,17 @@
 				ICC_TBB = YES;
 				ICC_TUNE_FOR_INTEL_ARCH = skylake;
 				ICC_USE_OPTIMIZED_HEADERS = YES;
-				LD_RUNPATH_SEARCH_PATHS = /opt/intel/oneapi/tbb/latest/lib;
+				LD_RUNPATH_SEARCH_PATHS = "/opt/intel/oneapi/tbb/latest/lib /usr/local/lib";
 				LIBRARY_SEARCH_PATHS = (
 					/opt/intel/oneapi/tbb/latest/lib,
-					/usr/local/Cellar/boost/1.75.0_3/lib,
+					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
+				);
+				OTHER_CFLAGS = (
+					"-ltbb",
+					"-Xclang",
+					"-fopenmp",
+					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

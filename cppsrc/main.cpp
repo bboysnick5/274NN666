@@ -219,7 +219,7 @@ int main(int argc, const char * argv[]) {
         //std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
     };

@@ -13,7 +13,6 @@
 #include <stdio.h>
 #include <string>
 #include <iostream>
-#include <math.h>
 
 template <typename dist_type>
 struct SBLoc {

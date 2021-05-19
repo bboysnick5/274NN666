@@ -70,6 +70,10 @@
          </CommandLineArgument>
          <CommandLineArgument
             argument = "/Users/yunlongliu/Downloads/cities.csv ../../../../out.txt"
+            isEnabled = "NO">
+         </CommandLineArgument>
+         <CommandLineArgument
+            argument = "/Users/yunlongliu/Downloads/countries.csv ../../../../out.txt"
             isEnabled = "YES">
          </CommandLineArgument>
       </CommandLineArguments>

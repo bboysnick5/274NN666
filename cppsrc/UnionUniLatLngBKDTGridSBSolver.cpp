@@ -8,7 +8,9 @@
 
 #include "UnionUniLatLngBKDTGridSBSolver.hpp"
 #include "Utility.hpp"
+//#include <omp.h>
 #include <memory>
+#include <thread>
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::UnionCell::
@@ -88,6 +90,37 @@ BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
         ptr = reinterpret_cast<std::uintptr_t>(new KDT<KDTType, dist_type>(bufVec.begin(), bufVec.end())) & MASK;
     }
 }
+
+/*
+ template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+ template <typename... PrevBitCells>
+ UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::BitCell::
+ BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
+         size_t maxCacheVecSize, const PrevBitCells& ...prevCells) {
+     size_t size = bufVec.size();
+     const uintptr_t MASK = ~(1ULL << 48);
+     if (size == 1) {
+         ptr = (reinterpret_cast<std::uintptr_t>(bufVec[0].value) & MASK) | (1ull << 48);
+     } else if (size < maxCacheVecSize) {
+         auto checkPrev = [&bufVec, size, this](const BitCell& cell) {
+             if (size == cell.size() &&
+                 std::equal(bufVec.cbegin(), bufVec.cend(), cell.getLocPairs(),
+                            [](const auto &nh1, const auto &nh2){return nh1.value == nh2.value;})) {
+                 ptr = cell.ptr & (std::numeric_limits<uintptr_t>::max() - 1);
+                 return;
+             }
+         };
+         (checkPrev(prevCells), ...);
+         auto *cacheLocs = new typename KDT<KDTType, dist_type>::node_type[size];
+         std::copy(bufVec.cbegin(), bufVec.cend(), cacheLocs);
+         ptr = (reinterpret_cast<std::uintptr_t>(cacheLocs) & MASK) | (size << 48) | 1ull;
+     } else {
+         ptr = reinterpret_cast<std::uintptr_t>(new KDT<KDTType, dist_type>(bufVec.begin(), bufVec.end())) & MASK;
+     }
+ }
+
+ */
+
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::BitCell::
@@ -201,6 +234,9 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
     
     dist_type thisCtrLat = 0.5 * (latInc - std::numbers::pi_v<dist_type>);
+/*#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
+default(none) schedule(auto) shared(this->gridCache, lngInc, latInc) firstprivate(thisCtrLat, ptLocPairs) \
+reduction(+:totalTreeSize, singleLocs) collapse(2) */
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
         dist_type thisCtrLng = 0.5 * lngInc - std::numbers::pi_v<dist_type>;
         dist_type lat1 = r*latInc- 0.5*std::numbers::pi_v<dist_type>;
@@ -228,6 +264,8 @@ build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     latIncInverse = 1.0/latInc;
     rowSize = std::ceil(std::numbers::pi_v<dist_type>/latInc);
     fillGridCache();
+    //auto t = std::thread(&KDT<KDTType, dist_type>::clear, this->locKdt);
+    //t.detach();
     this->locKdt.clear();
 }
 
