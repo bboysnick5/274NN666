@@ -1,25 +1,28 @@
 //
-//  UnionUnionUniLatLngBKDTGridSBSolver.hpp
+//  ParallelUnionUniLatBKDTGridSBSolver.hpp
 //  274F16NearestSB
 //
-//  Created by nick on 2/19/19.
-//  Copyright © 2019 Yunlong Liu. All rights reserved.
+//  Created by Yunlong Liu on 5/23/21.
+//  Copyright © 2021 Yunlong Liu. All rights reserved.
 //
 
-#ifndef UnionUniLatLngBKDTGridSBSolver_hpp
-#define UnionUniLatLngBKDTGridSBSolver_hpp
+#ifndef ParallelUnionUniLatLngBKDTGridSBSolver_hpp
+#define ParallelUnionUniLatLngBKDTGridSBSolver_hpp
+
+#include <stdio.h>
+
 
 #include "BKDTSBSolver.hpp"
 #include "KDTree.hpp"
 #include <stdio.h>
 #include <vector>
 #include <iterator>
-
+#include <atomic>
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
+class ParallelUnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
 public:
-    UnionUniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+    ParallelUnionUniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     virtual void printSolverInfo() const override final;
@@ -38,8 +41,8 @@ protected:
         BitCell& operator=(BitCell&&)& noexcept;
         BitCell& operator=(const BitCell&)& noexcept;
 
-        BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
-                size_t, const BitCell *left, const BitCell *up);
+        BitCell(std::vector<typename KDT<KDTType, dist_type>::node_type>&,
+                size_t, const BitCell*, const BitCell*);
         ~BitCell();
         
         size_t size() const;
@@ -52,11 +55,9 @@ protected:
         const KDT<KDTType, dist_type>* getCacheTree() const;
         
     private:
-        void destruct();
-        
         constexpr static uintptr_t MASK_OUT_16TH_BIT = ~(1ULL << 48);
         constexpr static uintptr_t MASK_OUT_LEAST_SIG_BIT = ~1ull;
-        uintptr_t ptr;
+        std::atomic<uintptr_t> ptr;
     };
     
     /*
@@ -87,9 +88,9 @@ private:
  
  template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 
- class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
+ class ParallelUnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
  public:
- UnionUniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
+ ParallelUnionUniLatLngBKDTGridSBSolver(dist_type = 1, size_t = 1500);
  void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
  const SBLoc<dist_type>* findNearest(dist_type lng, dist_type lat) const override;
  virtual void printSolverInfo() const override final;
@@ -108,9 +109,10 @@ private:
  static const SBLoc<dist_type>* returnNNLocFromCacheVariant(dist_type, dist_type,
  const std::variant<std::tuple<Point<dist_type, 3>*, const SBLoc<dist_type>**, size_t>,
  const SBLoc<dist_type>*, const KDT<KDTType>>&);
- ~UnionUniLatLngBKDTGridSBSolver();
+ ~ParallelUnionUniLatLngBKDTGridSBSolver();
  private:
  virtual void fillGridCache();
  }; */
 
-#endif /* UnionUniLatLngBKDTGridSBSolver_hpp */
+
+#endif /* ParallelUnionUniLatLngBKDTGridSBSolver_hpp */

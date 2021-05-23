@@ -41,7 +41,7 @@ void UnionUniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
         for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
              ++idx, thisCtrLng += thisLngInc) {
             UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillCacheCell
-            ({thisCtrLat, thisCtrLng}, diagonalDist3DEUC, thisColSize, ptLocPairs);
+            (this->gridCache.begin(), {thisCtrLat, thisCtrLng}, diagonalDist3DEUC, thisColSize, ptLocPairs);
         }
     }
 }

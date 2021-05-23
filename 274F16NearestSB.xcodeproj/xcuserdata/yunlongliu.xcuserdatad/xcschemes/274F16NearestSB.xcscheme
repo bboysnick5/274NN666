@@ -83,6 +83,7 @@
       shouldUseLaunchSchemeArgsEnv = "YES"
       savedToolIdentifier = "Time Profiler"
       useCustomWorkingDirectory = "NO"
+      customWorkingDirectory = "/tmp/iNode"
       debugDocumentVersioning = "YES">
       <BuildableProductRunnable
          runnableDebuggingMode = "0">
