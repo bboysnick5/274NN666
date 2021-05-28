@@ -91,7 +91,7 @@ public:
     // -----------------------------------------------------
     // Copy constructor and copy assignment operator.
     KDTreeExpandLongestVec(const KDTreeExpandLongestVec&);
-    KDTreeExpandLongestVec& operator=(const KDTreeExpandLongestVec&)&;
+    KDTreeExpandLongestVec& operator=(const KDTreeExpandLongestVec&) noexcept;
     
     // KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs);
     // KDTreeExpandLongestVec& operator=(const KDTreeExpandLongestVec& rhs);
@@ -100,7 +100,7 @@ public:
     // -----------------------------------------------------
     // Move constructor and move assignment operator.
     KDTreeExpandLongestVec(KDTreeExpandLongestVec&&) noexcept;
-    KDTreeExpandLongestVec& operator=(KDTreeExpandLongestVec&&)& noexcept;
+    KDTreeExpandLongestVec& operator=(KDTreeExpandLongestVec&&) noexcept;
     
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
@@ -194,6 +194,8 @@ private:
     // Helper method for finding the height of a tree
     int heightHelper(const TreeNode *n) const;
     
+    void deAlloc();
+    
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
@@ -266,15 +268,13 @@ KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : _size(rhs._size), _c
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>&
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLongestVec& rhs) & {
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLongestVec& rhs) noexcept {
     if (this != &rhs) {
-        delete[] _ndVec;
-        std::destroy_n(_objVec, _size);
-        ::operator delete(_objVec);
-        _size = rhs._size;
+        deAlloc();
+        _size = _cap = rhs._size;
         _ndVec = new TreeNode[_size];
         std::copy_n(rhs._ndVec, _size, _ndVec);
-        _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType), std::nothrow));
+        _objVec = static_cast<ElemType*>(::operator new(_size * sizeof(ElemType)));
         std::uninitialized_copy_n(rhs._objVec, _size, _objVec);
     }
     return *this;
@@ -283,34 +283,38 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLonges
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 KDTreeExpandLongestVec(KDTreeExpandLongestVec&& rhs) noexcept
-: _ndVec(rhs._ndVec), _objVec(rhs._objVec), _size(rhs._size) {
+: _ndVec(rhs._ndVec), _objVec(rhs._objVec), _size(rhs._size), _cap(rhs._cap) {
     rhs._ndVec = nullptr;
     rhs._objVec = nullptr;
-    rhs._size = 0;
+    rhs._size = rhs._cap = 0;
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-operator=(KDTreeExpandLongestVec&& rhs) & noexcept {
+operator=(KDTreeExpandLongestVec&& rhs) noexcept {
     if (this != &rhs) {
-        delete[] _ndVec;
-        std::destroy_n(_objVec, _size);
-        ::operator delete(_objVec);
+        deAlloc();
         _ndVec = rhs._ndVec;
         rhs._ndVec = nullptr;
         _objVec = rhs._objVec;
         rhs._objVec = nullptr;
         _size = rhs._size;
-        rhs._size = 0;
+        _cap = rhs._cap;
+        rhs._size = rhs._cap = 0;
     }
     return *this;
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::~KDTreeExpandLongestVec() {
+    deAlloc();
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::deAlloc() {
     delete[] _ndVec;
     std::destroy_n(_objVec, _size);
-    ::operator delete(_objVec);
+    ::operator delete(static_cast<void*>(_objVec));
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
@@ -443,25 +447,6 @@ template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::Dis
 template <class RAI>
 std::tuple<std::array<_Tp, N>, std::array<_Tp, N>, std::array<_Tp, N>> KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 computeInitBBoxSpans(RAI begin, RAI end) {
-    /*
-    std::array<_Tp, N*2> bbox;
-    std::generate(bbox.begin(), bbox.end(),
-                  [lowHighToggle = 0lu, lowHigh = std::array<_Tp, 2>{
-                   std::numeric_limits<_Tp>::max(),
-                   std::numeric_limits<_Tp>::min()}]() mutable {
-                       return lowHigh[lowHighToggle++%2];});
-    std::for_each(begin, end, [&](const auto &nh) mutable {
-        for (size_t i = 0; i < N; ++i) {
-            _Tp ptValOnithDim = nh.key[i];
-            auto &bboxLow = bbox[i*2], &bboxHigh = bbox[i*2+1];
-            bboxLow = std::min(bboxLow, ptValOnithDim);
-            bboxHigh = std::max(bboxHigh, ptValOnithDim);
-        }
-    });
-    std::array<_Tp, N> spans;
-    std::transform(bbox.cbegin(), bbox.cend(), std::back_inserter(spans), [](){return });
-    return {bbox, spans};
-     */
     std::array<_Tp, N> lows, highs, spans;
     lows.fill(std::numeric_limits<_Tp>::max());
     highs.fill(std::numeric_limits<_Tp>::min());
@@ -727,7 +712,7 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, Iter returnIt) const {
         bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
     const TreeNode *cur = _ndVec;
     
-    const size_t MAX_DISTPTELEMS_ON_STACK = 65536;
+    const size_t MAX_DISTPTELEMS_ON_STACK = 8192;
     struct distPtElem {
         _Tp dist;
         const Point<_Tp, N>* pt;

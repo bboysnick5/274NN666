@@ -88,8 +88,8 @@ void BKDTGridSBSolver<KDTType, dist_type>::build(const std::shared_ptr<std::vect
     this->sideLen = 
     SBLoc<dist_type>::havDist({this->minLat, 0.0}, {this->maxLat, 0.0}) / this->rowSize;
     dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * cos(this->minLat < 0 ? 0 : this->minLat);
-    dist_type longestColDistSpan = 2 * std::numbers::pi_v<dist_type> * lowestLatCircleRadius *
-                                (std::fabs(this->maxLng - this->minLng)/(2*std::numbers::pi_v<dist_type>));
+    dist_type longestColDistSpan = 2 * Def::PI<dist_type> * lowestLatCircleRadius *
+                                (std::fabs(this->maxLng - this->minLng)/(2*Def::PI<dist_type>));
     this->colSize = longestColDistSpan/this->sideLen + 1;
     
     fillGridCache();

@@ -9,6 +9,7 @@
 #ifndef SBLoc_hpp
 #define SBLoc_hpp
 
+#include "Definition.hpp"
 #include "Point.hpp"
 #include <stdio.h>
 #include <string>
@@ -76,12 +77,12 @@ inline bool SBLoc<dist_type>::operator!=(const SBLoc<dist_type> &other) const {
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toDegree(dist_type radians) {
-    return radians*180.0/std::numbers::pi_v<dist_type>;
+    return radians*180.0/Def::PI<dist_type>;
 }
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toRadians(dist_type degree) {
-    return degree*std::numbers::pi_v<dist_type>/180.0;
+    return degree*Def::PI<dist_type>/180.0;
 }
 
 template <typename dist_type>
@@ -144,8 +145,8 @@ namespace std {
     template <typename dist_type>
     struct hash<SBLoc<dist_type>> {
         size_t operator()(const SBLoc<dist_type>& l) const {
-            return (static_cast<size_t>((l.geoPt[0] + 0.5*std::numbers::pi_v<dist_type>) * 1000000.0) << 20) +
-                    static_cast<size_t>((l.geoPt[1] + std::numbers::pi_v<dist_type>) * 1000000.0);
+            return (static_cast<size_t>((l.geoPt[0] + 0.5*Def::PI<dist_type>) * 1000000.0) << 20) +
+                    static_cast<size_t>((l.geoPt[1] + Def::PI<dist_type>) * 1000000.0);
         }
     };
     

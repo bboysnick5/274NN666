@@ -16,7 +16,6 @@
 #include "UniCellBKDTGridSBSolver.hpp"
 #include "UnionUniLatLngBKDTGridSBSolver.hpp"
 #include "UnionUniCellBKDTGridSBSolver.hpp"
-#include "ParallelUnionUniLatLngBKDTGridSBSolver.hpp"
 
 
 
@@ -42,10 +41,10 @@ std::vector<Point<dist_type, 2>> generateTestLocs(size_t numTests, std::mt19937_
     std::vector<Point<dist_type, 2>> testLocs;
     testLocs.reserve(numTests + 4);
     testLocs.insert(testLocs.end(),
-                    {{std::numbers::pi_v<dist_type>*0.5, std::numbers::pi_v<dist_type>},
-                     {-std::numbers::pi_v<dist_type>*0.5, -std::numbers::pi_v<dist_type>},
-                     {-std::numbers::pi_v<dist_type>*0.5, std::numbers::pi_v<dist_type>},
-                     {std::numbers::pi_v<dist_type>*0.5, -std::numbers::pi_v<dist_type>}});
+                    {{Def::PI<dist_type>*0.5, Def::PI<dist_type>},
+                     {-Def::PI<dist_type>*0.5, -Def::PI<dist_type>},
+                     {-Def::PI<dist_type>*0.5, Def::PI<dist_type>},
+                     {Def::PI<dist_type>*0.5, -Def::PI<dist_type>}});
     std::generate_n(std::back_inserter(testLocs), numTests, [&]()->Point<dist_type, 2> {
         return {SBLoc<dist_type>::toRadians(-90.0 + 180.0*dist(mt)),
                 SBLoc<dist_type>::toRadians(-180.0 + 360.0*dist(mt))};});
@@ -78,6 +77,7 @@ void accuracyTest(const std::vector<Point<dist_type, 2>> &testLocs,
     }
     
     std::cout << "A total test of " << maxTests << " locations\n"
+              << "Num of errors: " << errorCount << std::endl
               << "Error percentage in num diff is: "
               << errorCount*100.0/maxTests << "%\n"
               << "Error in hav dist is: " << std::fabs(testErrTotal - refTotal) << "\n";
@@ -210,21 +210,22 @@ int main(int argc, const char * argv[]) {
         //std::make_unique<BKDTSBSolver<KDTree, dist_type>>(),
         //std::make_unique<BKDTSBSolver<dist_type><KDTreeCusMem>>(),
         //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, dist_type>>(),
-        //std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, dist_type>>(),
+        std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, dist_type>>(),
         //std::make_unique<GridSBSolver<dist_type>>(),
         //std::make_unique<BKDTGridSBSolver<dist_type>>(aveLocPerCell),
         //std::make_unique<UniLatLngBKDTGridSBSolver<KDTree, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeCusMem, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec,dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec,dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UnionUniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
         // std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_unique<ParallelUnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, Def::Threading_Policy::SINGLE>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, Def::Threading_Policy::SINGLE>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, Def::Threading_Policy::MULTI_OMP>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, Def::Threading_Policy::MULTI_OMP>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
 
     };
     

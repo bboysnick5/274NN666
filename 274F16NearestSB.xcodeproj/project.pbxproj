@@ -16,7 +16,6 @@
 		82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */; };
 		825CD4D1265516FE0069BBD1 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 825CD4D0265516FE0069BBD1 /* libomp.dylib */; };
 		82717C7D26537BEF00D90DE7 /* libtbb.12.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */; };
-		827F40B92659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 827F40B72659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.cpp */; };
 		82A66E341E003B0800D5FAFD /* BFSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */; };
 		82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2B1E003B0800D5FAFD /* BKDTSBSolver.cpp */; };
 		82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82A66E2F1E003B0800D5FAFD /* KDTSBSolver.cpp */; };
@@ -64,6 +63,7 @@
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
+		8200D42B265CD1E2001A60C5 /* Definition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
 		823641461E00D1AE007AE0FD /* SBLoc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBLoc.hpp; sourceTree = "<group>"; };
@@ -71,8 +71,6 @@
 		82405F2C1E0C7FDD00028713 /* BKDTGridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		825CD4D0265516FE0069BBD1 /* libomp.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libomp.dylib; path = ../../../../../usr/local/lib/libomp.dylib; sourceTree = "<group>"; };
 		82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libtbb.12.2.dylib; path = ../../../../../opt/intel/oneapi/tbb/2021.2.0/lib/libtbb.12.2.dylib; sourceTree = "<group>"; };
-		827F40B72659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelUnionUniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
-		827F40B82659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = ParallelUnionUniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		82A66E1E1E00382500D5FAFD /* 274F16NearestSB */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 274F16NearestSB; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BFSBSolver.cpp; sourceTree = "<group>"; };
 		82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BFSBSolver.hpp; sourceTree = "<group>"; };
@@ -135,6 +133,8 @@
 			isa = PBXGroup;
 			children = (
 				82A66E311E003B0800D5FAFD /* main.cpp */,
+				8200D42B265CD1E2001A60C5 /* Definition.hpp */,
+				014C5C3E222958A4002406C4 /* Utility.hpp */,
 				82A66E321E003B0800D5FAFD /* Point.hpp */,
 				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
@@ -144,7 +144,6 @@
 				016197E921E8F94C009F8E48 /* PoolAllocator.hpp */,
 				823641461E00D1AE007AE0FD /* SBLoc.hpp */,
 				82A66E331E003B0800D5FAFD /* SBSolver.hpp */,
-				014C5C3E222958A4002406C4 /* Utility.hpp */,
 				82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */,
 				82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */,
 				01183DA221EEE5240002C03A /* BFEUCPtSolver.cpp */,
@@ -165,8 +164,6 @@
 				013D9B68221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.hpp */,
 				013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */,
 				013D9B6B221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.hpp */,
-				827F40B72659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.cpp */,
-				827F40B82659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.hpp */,
 			);
 			path = cppsrc;
 			sourceTree = "<group>";
@@ -232,7 +229,6 @@
 			files = (
 				82A66E361E003B0800D5FAFD /* KDTSBSolver.cpp in Sources */,
 				013D9B69221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp in Sources */,
-				827F40B92659DE7A0089AD8E /* ParallelUnionUniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82A66E351E003B0800D5FAFD /* BKDTSBSolver.cpp in Sources */,
 				011CF6BA21D711EE0052024D /* UniLatLngBKDTGridSBSolver.cpp in Sources */,
 				82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */,
