@@ -1,36 +1,3 @@
-//
-//  KDTSBSolver.hpp
-//  274F16NearestSB
-//
-//  Created by Yunlong Liu on 12/10/16.
-//  Copyright © 2016 Yunlong Liu. All rights reserved.
-//
-
-#ifndef KDTSBSolver_hpp
-#define KDTSBSolver_hpp
-
-#include "SBSolver.hpp"
-#include "KDTree.hpp"
-#include "KDTreeCusMem.hpp"
-#include "KDTreeExpandLongest.hpp"
-#include "KDTreeExpandLongestVec.hpp"
-#include <stdio.h>
-
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-using KDT = KDTType<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>;
-
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-class KDTSBSolver : public SBSolver<dist_type> {
-public:
-    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
-    virtual void printSolverInfo() const override;
-    
-protected:
-    KDT<KDTType, dist_type> locKdt;
-    virtual void generateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
-};
-
-
-
-#endif /* KDTSBSolver_hpp */
+version https://git-lfs.github.com/spec/v1
+oid sha256:a0a63684ee1f96827a421b12753d4a1a4453b8854bfd0ef88b622b6d99dffa0d
+size 1123

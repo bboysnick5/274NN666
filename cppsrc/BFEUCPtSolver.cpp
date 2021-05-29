@@ -1,28 +1,3 @@
-//
-//  BFEUCPtSolver.cpp
-//  274F16NearestSB
-//
-//  Created by nick on 1/16/19.
-//  Copyright © 2019 Yunlong Liu. All rights reserved.
-//
-
-#include "BFEUCPtSolver.hpp"
-#include "Utility.hpp"
-#include <algorithm>
-
-template <typename dist_type>
-const SBLoc<dist_type>* BFEUCPtSBSolver<dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
-    const auto testPt = SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt);
-    return &*Utility::custom_min_element(this->locData->cbegin(), this->locData->cend(),
-                                         [&testPt](const SBLoc<dist_type>& l) {
-                                            return testPt.template dist<Point<dist_type, 3>::DistType::EUCSQ>(l.locToCart3DPt());},
-                                         std::less<dist_type>());
-}
-
-template <typename dist_type>
-void BFEUCPtSBSolver<dist_type>::printSolverInfo() const {
-    std::cout << "This is brute force solver using converted euclidean distance metric.\n";
-}
-
-template class BFEUCPtSBSolver<double>;
-template class BFEUCPtSBSolver<float>;
+version https://git-lfs.github.com/spec/v1
+oid sha256:4081596fa171c6923acba414ccf504872cad74a51ecad0e3dae961e7cefbebbc
+size 1061
