@@ -112,12 +112,6 @@ public:
     constexpr size_t dimension() const;
     typename Point<value_type, N>::DistType distType() const;
     
-    value_iterator value_begin();
-    value_iterator value_end();
-    
-    const_value_iterator c_value_begin() const;
-    const_value_iterator c_value_end() const;
-    
     // size_t size() const;
     // size_t height() const;
     // bool empty() const;
@@ -521,31 +515,6 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
 // ----------------------------------------------------------
 // ----------------- TREE INFORMATION  ----------------------
 // ----------------------------------------------------------
-
-template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_iterator
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_begin() {
-    return _objVec;
-}
-
-template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_iterator
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_end() {
-    return _objVec + _size;
-}
-
-
-template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::const_value_iterator
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::c_value_begin() const {
-    return value_begin();
-}
-
-template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::const_value_iterator
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::c_value_end() const {
-    return value_end();
-}
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 constexpr size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::dimension() const {
