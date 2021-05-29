@@ -53,16 +53,13 @@
 		011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		011CF6BF21D91E070052024D /* UniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		0131C9882213136D00F073C9 /* KDTreeExpandLongestVec.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeExpandLongestVec.hpp; sourceTree = "<group>"; };
-		013914F222164BD500A920EE /* countries.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = countries.csv; sourceTree = "<group>"; };
 		013D9B67221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnionUniLatLngBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		013D9B68221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnionUniLatLngBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
 		013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = UnionUniCellBKDTGridSBSolver.cpp; sourceTree = "<group>"; };
 		013D9B6B221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = UnionUniCellBKDTGridSBSolver.hpp; sourceTree = "<group>"; };
-		013F20632217DB8A002B556E /* test.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = test.csv; sourceTree = "<group>"; };
 		014C5C3E222958A4002406C4 /* Utility.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Utility.hpp; sourceTree = "<group>"; };
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
-		01AC07D621CB9AA500ECF497 /* cities.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = cities.csv; sourceTree = "<group>"; };
 		8200D42B265CD1E2001A60C5 /* Definition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
@@ -83,7 +80,6 @@
 		82A66E311E003B0800D5FAFD /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		82A66E321E003B0800D5FAFD /* Point.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Point.hpp; sourceTree = "<group>"; };
 		82A66E331E003B0800D5FAFD /* SBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBSolver.hpp; sourceTree = "<group>"; };
-		82A66E381E003B5400D5FAFD /* starbucks.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = starbucks.csv; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,13 +107,9 @@
 		82A66E151E00382500D5FAFD = {
 			isa = PBXGroup;
 			children = (
-				01AC07D621CB9AA500ECF497 /* cities.csv */,
-				013914F222164BD500A920EE /* countries.csv */,
 				82A66E281E00383F00D5FAFD /* cppsrc */,
 				82717C7A26537A5300D90DE7 /* Frameworks */,
 				82A66E1F1E00382500D5FAFD /* Products */,
-				82A66E381E003B5400D5FAFD /* starbucks.csv */,
-				013F20632217DB8A002B556E /* test.csv */,
 			);
 			sourceTree = "<group>";
 		};
