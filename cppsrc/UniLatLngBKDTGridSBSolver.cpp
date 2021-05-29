@@ -34,10 +34,10 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::printSolverInfo() const {
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-fillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDist3DEUC,
+fillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDistSq3DEUC,
               std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
     this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
-                                   diagonalDist3DEUC, std::back_inserter(ptLocPairs));
+                                   diagonalDistSq3DEUC, std::back_inserter(ptLocPairs));
     size_t locsSize = ptLocPairs.size();
     this->totalNodeSize += locsSize;
     if (locsSize == 1) {
@@ -66,9 +66,9 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
         dist_type thisCtrLng = 0.5 * lngInc - Def::PI<dist_type>;
         dist_type lat1 = r*this->latInc - 0.5*Def::PI<dist_type>;
-        dist_type diagonalDist3DEUC = SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
         for (size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
-            fillCacheCell(thisCtrLng, thisCtrLat, diagonalDist3DEUC, ptLocPairs);
+            fillCacheCell(thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, ptLocPairs);
         }
     }
 }

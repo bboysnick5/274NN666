@@ -43,6 +43,7 @@ protected:
     struct Policy_Tag<Def::Threading_Policy::MULTI_HAND> {};
     
     
+    inline static dist_type EUC3DDistSqFromLatCosDeltaLng(dist_type lat1, dist_type lat2, dist_type cosDeltaLng);
     
     void calcSideLenFromAlpc();
     
@@ -105,7 +106,7 @@ protected:
         BitCell& operator=(const BitCell&) noexcept;
 
         inline BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
-                       size_t, const BitCell *left, const BitCell *up);
+                       size_t, std::initializer_list<const BitCell*> prevCells);
         ~BitCell();
         
         template <typename T = DataPtr,
@@ -186,24 +187,21 @@ UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::BitCell::operator=(c
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type, Def::Threading_Policy policy>
 inline UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::BitCell::
 BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
-        size_t maxCacheVecSize, const BitCell* left, const BitCell* up) {
+        size_t maxCacheVecSize, std::initializer_list<const BitCell*> prevCells) {
     if (size_t size = bufVec.size(); size == 1) {
         setPtr((reinterpret_cast<std::uintptr_t>(bufVec[0].value) & MASK_OUT_16TH_BIT) | (1ull << 48));
     } else if (size < maxCacheVecSize) {
-        auto checkPrevCell = [size, &bufVec, this](const BitCell* cell) ->bool {
-            if (uintptr_t cellPtrVal = cell->getPtr();
-                cellPtrVal && size == (cellPtrVal >> 48)
-                && std::equal(bufVec.cbegin(), bufVec.cend(), reinterpret_cast<typename KDT<KDTType, dist_type>::node_type*>((static_cast<intptr_t>(cellPtrVal << 16) >> 16) & MASK_OUT_LEAST_SIG_BIT),
+        for (const BitCell* prevCell : prevCells) {
+            if (prevCell) {
+                if (uintptr_t cellPtrVal = prevCell->getPtr();
+                    cellPtrVal && size == (cellPtrVal >> 48)
+                    && std::is_permutation(bufVec.cbegin(), bufVec.cend(), reinterpret_cast<typename KDT<KDTType, dist_type>::node_type*>((static_cast<intptr_t>(cellPtrVal << 16) >> 16) & MASK_OUT_LEAST_SIG_BIT),
                               [](const auto &nh1, const auto &nh2){return nh1.value == nh2.value;})) {
-                setPtr(cellPtrVal & MASK_OUT_LEAST_SIG_BIT);
-                return true;
+                    setPtr(cellPtrVal & MASK_OUT_LEAST_SIG_BIT);
+                    return;
+                }
             }
-            return false;
-        };
-        if (left && checkPrevCell(left))
-            return;
-        if (up && checkPrevCell(up))
-            return;
+        }
         auto *cacheLocs = static_cast<typename KDT<KDTType, dist_type>::node_type*>(
                           ::operator new(size*sizeof(typename KDT<KDTType, dist_type>::node_type), std::nothrow));
         std::uninitialized_move(bufVec.begin(), bufVec.end(), cacheLocs);
@@ -298,30 +296,38 @@ template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> cl
           class dist_type, Def::Threading_Policy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
 fillCacheCell(std::size_t idxToFill,
-              const Point<dist_type, 2>& thisCtrGeoPt, dist_type diagonalDist3DEUC, size_t thisColSize,
+              const Point<dist_type, 2>& thisCtrGeoPt, dist_type diagonalDistSq3DEUC, size_t thisColSize,
               std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
     this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt(thisCtrGeoPt),
-        diagonalDist3DEUC, std::back_inserter(ptLocPairs));
+        diagonalDistSq3DEUC, std::back_inserter(ptLocPairs));
     gridCache[idxToFill] = {ptLocPairs, MAX_CACHE_CELL_VEC_SIZE,
-                            idxToFill > 0 ? &gridCache[idxToFill - 1] : nullptr,
-                            idxToFill >= colSize ? &gridCache[idxToFill - colSize] : nullptr};
+                            {idxToFill > 0 ? &gridCache[idxToFill - 1] : nullptr,
+                             idxToFill >= colSize ? &gridCache[idxToFill - colSize] : nullptr,
+                             idxToFill > colSize ? &gridCache[idxToFill - colSize - 1] : nullptr}};
     ptLocPairs.clear();
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
           class dist_type, Def::Threading_Policy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
-fillCacheCell(const Point<dist_type, 2>& thisCtrGeoPt, dist_type diagonalDist3DEUC, size_t thisColSize,
+fillCacheCell(const Point<dist_type, 2>& thisCtrGeoPt, dist_type diagonalDistSq3DEUC, size_t thisColSize,
               std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDist3DEUC, std::back_inserter(ptLocPairs));
+    this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDistSq3DEUC, std::back_inserter(ptLocPairs));
     auto size = this->gridCache.size();
     this->gridCache.emplace_back(ptLocPairs, MAX_CACHE_CELL_VEC_SIZE,
-                                 size > 0 ? &this->gridCache.back() : nullptr,
-                                 size >= thisColSize ? &this->gridCache[size - thisColSize] : nullptr);
+                                 std::initializer_list<const BitCell*>{
+                                    size > 0 ? &this->gridCache.back() : nullptr,
+                                    size >= thisColSize ? &this->gridCache[size - thisColSize] : nullptr,
+                                    size > thisColSize ? &this->gridCache[size - thisColSize - 1] : nullptr});
     ptLocPairs.clear();
 }
 
-
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
+          class dist_type, Def::Threading_Policy policy>
+inline dist_type UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
+EUC3DDistSqFromLatCosDeltaLng(dist_type lat1, dist_type lat2, dist_type cosDeltaLng) {
+    return 2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cosDeltaLng);
+}
 /*
  
  template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>

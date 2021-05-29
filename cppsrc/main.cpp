@@ -33,6 +33,7 @@
 #include <regex>
 #include <thread>
 #include <cstdlib>
+#include <map>
 
 
 template <typename dist_type>
@@ -174,13 +175,14 @@ int main(int argc, const char * argv[]) {
     
     std::ifstream infileLocs(argv[1]), inRefResults(argv[2]);
     dist_type aveLocPerCell = argc < 4 ? 0.4 : std::stod(argv[3]);
-    size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
+    std::size_t MAX_CACHE_CELL_VEC_SIZE = argc < 5 ? 1200 : std::stoi(argv[4]);
     bool testAccuracy = argc < 6 ? false : std::tolower(argv[5][0]) == 'y';
-    size_t numOfLocsToWriteToFile = argc < 7 ? false : std::stoi(argv[6]);
+    std::size_t numOfLocsToWriteToFile = argc < 7 ? false : std::stoi(argv[6]);
     
     testAccuracy = true;
-    //MAX_CACHE_CELL_VEC_SIZE = (1 << 16);
-    //aveLocPerCell = 10;
+    //MAX_CACHE_CELL_VEC_SIZE = (1 << 16ull);
+    //MAX_CACHE_CELL_VEC_SIZE = (1 << 9ull);
+    aveLocPerCell = 10;
     
     //infileLocs.ignore(256, '\r');
     //infileLocs.ignore(256, '\r');

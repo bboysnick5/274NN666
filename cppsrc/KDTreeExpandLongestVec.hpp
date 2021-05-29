@@ -36,7 +36,10 @@ class KDTreeExpandLongestVec {
 public:
     
     typedef _Tp                                   value_type;
+    typedef ElemType*                             value_iterator;
+    typedef const ElemType*                       const_value_iterator;
 
+    
     struct node_type {
         Point<value_type, N> key;
         ElemType value;
@@ -109,6 +112,12 @@ public:
     constexpr size_t dimension() const;
     typename Point<value_type, N>::DistType distType() const;
     
+    value_iterator value_begin();
+    value_iterator value_end();
+    
+    const_value_iterator c_value_begin() const;
+    const_value_iterator c_value_end() const;
+    
     // size_t size() const;
     // size_t height() const;
     // bool empty() const;
@@ -120,6 +129,7 @@ public:
     size_t cap() const;
     int height() const;
     bool empty() const;
+    bool equal(const KDTreeExpandLongestVec&) const;
     
     void clear();
     void shrink_to_fit();
@@ -169,12 +179,13 @@ public:
     // Iter rangeDiffKNNPairs(const Point<_Tp, N>&, _Tp, Iter) const
     // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
     // ----------------------------------------------------
-    // Given a point p and a value_type fence, return a set of all the points
-    // such that every point in the set is at least fence distance closer to p
-    // than the rest of the points in the tree.
+    // Given a point p and a value_type fence IN SQUARE, fill the container iterator result
+    // with a list of all points such that every point in the list is at least
+    // fence distance closer to p than the rest of the points in the tree,
+    // and return the iterator with final value +1 position.
     // The forward iterator is passed in and filled and the end will be returned.
     template <class Forward_Iter>
-    Forward_Iter rangeDiffKNNPairs(const Point<value_type, N>&, value_type, Forward_Iter) const;
+    Forward_Iter rangeDiffKNNPairs(const Point<value_type, N>& p, value_type fenseSq, Forward_Iter result) const;
     
 private:
     
@@ -193,6 +204,8 @@ private:
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
     int heightHelper(const TreeNode *n) const;
+    
+    bool equalHelper(const TreeNode*) const;
     
     void deAlloc();
     
@@ -510,6 +523,31 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
 // ----------------------------------------------------------
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_iterator
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_begin() {
+    return _objVec;
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_iterator
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::value_end() {
+    return _objVec + _size;
+}
+
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::const_value_iterator
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::c_value_begin() const {
+    return value_begin();
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::const_value_iterator
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::c_value_end() const {
+    return value_end();
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 constexpr size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::dimension() const {
     return N;
 }
@@ -546,6 +584,21 @@ int KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::heightHelper(const TreeNode *n
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::empty() const {
     return _size == 0;
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::equal(const KDTreeExpandLongestVec& other) const {
+    if (_size != other._size)
+        return false;
+    return std::is_permutation(_objVec, _objVec+_size, other._objVec, other._objVec);
+}
+
+template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::equalHelper(const TreeNode* other) const {
+    
+    // TODO
+    
+    return true;
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
@@ -702,14 +755,14 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::kNNValueHelper(TreeNode *cur,
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 template <class Iter>
 Iter KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, Iter returnIt) const {
+rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fenceSq, Iter returnIt) const {
     
     struct actRecord {
         _Tp dist;
         const TreeNode* nd;
     } st[static_cast<size_t>(log2(_size+1))], *it = st;
     _Tp bestDistSq = std::numeric_limits<_Tp>::max(),
-        bestDistDiffSq = bestDistSq, fenceSq = fence*fence;
+        bestDistDiffSq = bestDistSq;
     const TreeNode *cur = _ndVec;
     
     const size_t MAX_DISTPTELEMS_ON_STACK = 8192;
@@ -722,12 +775,11 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, Iter returnIt) const {
     std::vector<distPtElem> distPtElemVec;
    
     while (true) {
-        _Tp curDistSq = Point<_Tp, N>::template
-        dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+        _Tp curDistSq = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
-                bestDistDiffSq = bestDistSq + fenceSq + 2*fence*sqrt(bestDistSq);
+                bestDistDiffSq = bestDistSq + fenceSq + 2.0*sqrt(fenceSq*bestDistSq);
             }
             *distPtElemsIt++ = {curDistSq, &cur->key, &_objVec[cur-_ndVec]};
             if (distPtElemsIt == distPtElemsEnd) {

@@ -30,7 +30,7 @@ private:
         cacheAllPossibleLocsOneCell(size_t, size_t, dist_type,
                                     typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator);
     void fillGridCache();
-    dist_type xyzDistFromSideLen();
+    dist_type xyzDistSqFromSideLen();
     
     KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC> sbKdt;
 };

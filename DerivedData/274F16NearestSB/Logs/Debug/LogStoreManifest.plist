@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>logFormatVersion</key>
+	<integer>10</integer>
+	<key>logs</key>
+	<dict>
+		<key>06FB4000-D015-44D4-A5B0-9B10D754F39D</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>06FB4000-D015-44D4-A5B0-9B10D754F39D.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581586017.04669905</real>
+			<key>timeStoppedRecording</key>
+			<real>581586027.31276202</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>06FB4000-D015-44D4-A5B0-9B10D754F39D</string>
+		</dict>
+		<key>26D91962-9DB7-4731-B82D-75BF944D1451</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>26D91962-9DB7-4731-B82D-75BF944D1451.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581653433.69653106</real>
+			<key>timeStoppedRecording</key>
+			<real>581653443.38905895</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>26D91962-9DB7-4731-B82D-75BF944D1451</string>
+		</dict>
+		<key>54C327F7-2ABC-426F-BC8A-63E6D34D85DA</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>54C327F7-2ABC-426F-BC8A-63E6D34D85DA.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581585951.40142798</real>
+			<key>timeStoppedRecording</key>
+			<real>581586013.96631396</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>54C327F7-2ABC-426F-BC8A-63E6D34D85DA</string>
+		</dict>
+		<key>5FD072D8-AB07-454B-9158-DE9D0179F3CE</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>5FD072D8-AB07-454B-9158-DE9D0179F3CE.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581443628.30969596</real>
+			<key>timeStoppedRecording</key>
+			<real>581443641.41941094</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>5FD072D8-AB07-454B-9158-DE9D0179F3CE</string>
+		</dict>
+		<key>638BE06C-7AB2-495B-AC12-58C578A46B52</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>638BE06C-7AB2-495B-AC12-58C578A46B52.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581586411.40695798</real>
+			<key>timeStoppedRecording</key>
+			<real>581586420.16893697</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>638BE06C-7AB2-495B-AC12-58C578A46B52</string>
+		</dict>
+		<key>85FFB9ED-0141-40DC-B0F2-DDEE7EAE36FB</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>85FFB9ED-0141-40DC-B0F2-DDEE7EAE36FB.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581586297.97455704</real>
+			<key>timeStoppedRecording</key>
+			<real>581586323.78967905</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>85FFB9ED-0141-40DC-B0F2-DDEE7EAE36FB</string>
+		</dict>
+		<key>9453E871-FCA3-411D-840C-2F02EC766E10</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>9453E871-FCA3-411D-840C-2F02EC766E10.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581585837.94465005</real>
+			<key>timeStoppedRecording</key>
+			<real>581585862.17102003</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>9453E871-FCA3-411D-840C-2F02EC766E10</string>
+		</dict>
+		<key>B851890B-AAB8-400F-98C6-D16E8F5A0610</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>B851890B-AAB8-400F-98C6-D16E8F5A0610.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581585901.01469398</real>
+			<key>timeStoppedRecording</key>
+			<real>581585935.86748695</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>B851890B-AAB8-400F-98C6-D16E8F5A0610</string>
+		</dict>
+		<key>BCD5BC63-BF6D-4DBB-85C7-DBEBB890C5B2</key>
+		<dict>
+			<key>className</key>
+			<string>DBGConsoleLog</string>
+			<key>documentTypeString</key>
+			<string>com.apple.dt.IDE.DebuggerLogContentType</string>
+			<key>domainType</key>
+			<string>Xcode.IDEActivityLogDomainType.DebugLog</string>
+			<key>fileName</key>
+			<string>BCD5BC63-BF6D-4DBB-85C7-DBEBB890C5B2.xcactivitylog</string>
+			<key>primaryObservable</key>
+			<dict>
+				<key>highLevelStatus</key>
+				<string>S</string>
+			</dict>
+			<key>schemeIdentifier-containerName</key>
+			<string>274F16NearestSB project</string>
+			<key>schemeIdentifier-schemeName</key>
+			<string>274F16NearestSB</string>
+			<key>schemeIdentifier-sharedScheme</key>
+			<integer>0</integer>
+			<key>signature</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>timeStartedRecording</key>
+			<real>581586051.54216504</real>
+			<key>timeStoppedRecording</key>
+			<real>581586099.08088601</real>
+			<key>title</key>
+			<string>Debug 274F16NearestSB</string>
+			<key>uniqueIdentifier</key>
+			<string>BCD5BC63-BF6D-4DBB-85C7-DBEBB890C5B2</string>
+		</dict>
+	</dict>
+</dict>
+</plist>

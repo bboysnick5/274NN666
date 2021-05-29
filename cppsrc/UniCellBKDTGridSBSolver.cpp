@@ -35,12 +35,12 @@ void UniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
         dist_type thisLngInc = 2*Def::PI<dist_type>/thisColSize + 2*Def::PI<dist_type>/(thisColSize*thisColSize*65536);
         thisRowStartIdx.emplace_back(idx, 1.0/thisLngInc);
         dist_type lat1 = r*this->latInc - 0.5*Def::PI<dist_type>;
-        dist_type diagonalDist3DEUC = SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(lat1, lat1 + this->latInc, thisLngInc),
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + this->latInc, thisLngInc),
                thisCtrLng = 0.5 * thisLngInc - Def::PI<dist_type>;
         for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
              ++idx, thisCtrLng += thisLngInc) {
             UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillCacheCell
-            (thisCtrLng, thisCtrLat, diagonalDist3DEUC, ptLocPairs);
+            (thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, ptLocPairs);
         }
     }
 }

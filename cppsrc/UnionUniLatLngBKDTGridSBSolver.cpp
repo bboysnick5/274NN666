@@ -65,9 +65,9 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, P
     dist_type thisCtrLat = 0.5 * (latInc - Def::PI<dist_type>);
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc, lat1 += latInc) {
         dist_type thisCtrLng = 0.5 * lngInc - Def::PI<dist_type>;
-        dist_type diagonalDist3DEUC = SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
         for (size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
-            fillCacheCell({thisCtrLat, thisCtrLng}, diagonalDist3DEUC, colSize, ptLocPairs);
+            fillCacheCell({thisCtrLat, thisCtrLng}, diagonalDistSq3DEUC, colSize, ptLocPairs);
         }
     }
 }
@@ -86,12 +86,12 @@ firstprivate(ptLocPairs) default(none) schedule(static, 1) collapse(2) \
 ordered
     for (size_t r = 0; r < rowSize; ++r) {
         dist_type lat1 = r*latInc + initLat1;
-        dist_type diagonalDist3DEUC = SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
         dist_type thisCtrLat = initCtrLat + r*latInc;
         std::size_t startIdxThisRow = r*colSize;
         for (size_t c = 0; c < colSize; ++c) {
             fillCacheCell(startIdxThisRow + c, {thisCtrLat, initCtrLng + c*lngInc},
-                          diagonalDist3DEUC, colSize, ptLocPairs);
+                          diagonalDistSq3DEUC, colSize, ptLocPairs);
         }
     }
 }

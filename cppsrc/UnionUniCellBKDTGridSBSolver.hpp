@@ -26,8 +26,8 @@ public:
     
     
 private:
-    std::vector<std::pair<size_t, dist_type>> thisRowStartIdxThisLngIncInverseVec;
-    std::vector<std::size_t> colSizeInEachRowVec;
+    std::vector<std::pair<std::size_t, dist_type>> thisRowStartIdxThisLngIncInverseVec;
+    std::vector<std::pair<std::size_t, dist_type>> colSizeCosLngIncEachRowVec;
     std::size_t totalCacheCells;
     virtual void fillGridCache() override final;
     virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,

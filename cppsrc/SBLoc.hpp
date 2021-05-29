@@ -55,6 +55,9 @@ struct SBLoc {
     static Point<dist_type, 3> geoPtToCart3DPt(const Point<dist_type, 2>&);
     
     static dist_type EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
+    
+    static dist_type EUC3DDistSqFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
+
 };
 
 
@@ -139,6 +142,11 @@ inline Point<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const Point<dist_ty
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
     return sqrt(2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(deltaLng)));
+}
+
+template <typename dist_type>
+inline dist_type SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
+    return 2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(deltaLng));
 }
 
 namespace std {

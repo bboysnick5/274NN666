@@ -22,7 +22,7 @@ BKDTGridSBSolver<KDTType, dist_type>::BKDTGridSBSolver(dist_type alpc) : GridSBS
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator
-BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, dist_type diff,
+BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, dist_type diffSq,
                                                                   typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator begin) {
     dist_type rowDistCellCtrGridCtr = ((r0+ 0.5 - this->rowSize/2 )*this->sideLen),
            colDistCellCtrGridCtr = ((c0 + 0.5 -this->colSize/2)*this->sideLen);
@@ -30,7 +30,7 @@ BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, siz
            cellCtrLng = SBLoc<dist_type>::lngFromHavDist(colDistCellCtrGridCtr,
                                               this->midLng, cellCtrLat);
     return sbKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt({cellCtrLat,
-        cellCtrLng}), diff, begin);
+        cellCtrLng}), diffSq, begin);
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
@@ -40,14 +40,14 @@ void BKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     gridSingleCache = std::vector<const SBLoc<dist_type>*>(this->rowSize*this->colSize);
     std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type> ptLocPairs(this->numLocs);
     size_t totalTreeSize = 0, singleLocs = 0;
-    dist_type diff = xyzDistFromSideLen();
+    dist_type diffSq = xyzDistSqFromSideLen();
 //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
-//default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
+//default(none) schedule(guided) shared(diffSq) firstprivate(ptLocPairs) \
 //reduction(+:totalTreeSize, singleLocs) collapse(2)
     for (size_t r = 0; r < this->rowSize; ++r) {
         for (size_t c = 0; c < this->colSize; ++c) {
             size_t idx = r*this->colSize+c;
-            auto locsEnd = cacheAllPossibleLocsOneCell(r, c, diff,
+            auto locsEnd = cacheAllPossibleLocsOneCell(r, c, diffSq,
                                                        ptLocPairs.begin());
             size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
@@ -67,10 +67,10 @@ void BKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-dist_type BKDTGridSBSolver<KDTType, dist_type>::xyzDistFromSideLen() {
+dist_type BKDTGridSBSolver<KDTType, dist_type>::xyzDistSqFromSideLen() {
     dist_type lat2 = SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(this->sideLen*sqrt(2));
     return Point<dist_type, 3>::template
-    dist<Point<dist_type, 3>::DistType::EUC>(SBLoc<dist_type>::geoPtToCart3DPt({0.0, 0.0}),
+    dist<Point<dist_type, 3>::DistType::EUCSQ>(SBLoc<dist_type>::geoPtToCart3DPt({0.0, 0.0}),
                                              SBLoc<dist_type>::geoPtToCart3DPt({lat2, 0.0}));
 }
  
