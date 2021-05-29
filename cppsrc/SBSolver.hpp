@@ -1,3 +1,28 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1d472fdd3b597df3bd3ffb61053afe04a811587ba19f4c55a6ad56bc5afc4d2c
-size 613
+//
+//  SBSolver.hpp
+//  274F16NearestSB
+//
+//  Created by Yunlong Liu on 12/10/16.
+//  Copyright © 2016 Yunlong Liu. All rights reserved.
+//
+
+#ifndef SBSolver_hpp
+#define SBSolver_hpp
+
+#include "SBLoc.hpp"
+#include "Point.hpp"
+#include <stdio.h>
+#include <vector>
+#include <memory>
+
+template <typename dist_type>
+class SBSolver {
+public:
+    virtual void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) = 0;
+    virtual const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const = 0;
+    virtual void printSolverInfo() const = 0;
+    virtual ~SBSolver() {}
+};
+
+
+#endif /* SBSolver_hpp */

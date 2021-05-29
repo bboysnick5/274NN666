@@ -1,3 +1,79 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:1402ae5256d89255d84ec59376739bed9707fe64048c3ea0dc2cff70b5bb8126
-size 3599
+//
+//  UniCellBKDTGridSBSolver.cpp
+//  274F16NearestSB
+//
+//  Created by nick on 12/30/18.
+//  Copyright © 2018 Yunlong Liu. All rights reserved.
+//
+
+#include "UniCellBKDTGridSBSolver.hpp"
+
+//#include <omp.h>
+
+
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+UniCellBKDTGridSBSolver<KDTType, dist_type>::
+UniCellBKDTGridSBSolver(dist_type alpc, size_t maxCacheCellVecSize)
+: UniLatLngBKDTGridSBSolver<KDTType, dist_type>(alpc, maxCacheCellVecSize) {}
+
+
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void UniCellBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
+    thisRowStartIdx.reserve(this->rowSize);
+    this->gridCache.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
+    std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
+    ptLocPairs.reserve(this->MAX_CACHE_CELL_VEC_SIZE);
+    //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\
+    //default(none) schedule(guided) shared(diff) firstprivate(ptLocPairs) \
+    //reduction(+:totalTreeSize, singleLocs) collapse(2)
+    dist_type thisLat = -0.5 * Def::PI<dist_type>, thisCtrLat = thisLat + 0.5 * this->latInc;
+    for (size_t r = 0, idx = 0; r < this->rowSize;
+         ++r, thisCtrLat += this->latInc, thisLat += this->latInc) {
+        size_t thisColSize = static_cast<size_t>(2*Def::PI<dist_type> * SBLoc<dist_type>::EARTH_RADIUS *
+                             cos(thisLat > 0 ? thisLat-this->latInc : thisLat)/
+                             this->sideLen) + 2;
+        dist_type thisLngInc = 2*Def::PI<dist_type>/thisColSize + 2*Def::PI<dist_type>/(thisColSize*thisColSize*65536);
+        thisRowStartIdx.emplace_back(idx, 1.0/thisLngInc);
+        dist_type lat1 = r*this->latInc - 0.5*Def::PI<dist_type>;
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + this->latInc, thisLngInc),
+               thisCtrLng = 0.5 * thisLngInc - Def::PI<dist_type>;
+        for (size_t thisEndIdx = idx + thisColSize; idx < thisEndIdx;
+             ++idx, thisCtrLng += thisLngInc) {
+            UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillCacheCell
+            (thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, ptLocPairs);
+        }
+    }
+}
+
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+const SBLoc<dist_type>* UniCellBKDTGridSBSolver<KDTType, dist_type>::
+findNearest(const Point<dist_type, 2>& geoSearchPt) const {
+    const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(geoSearchPt[0]+0.5*Def::PI<dist_type>)*this->latIncInverse];
+    return UniLatLngBKDTGridSBSolver<KDTType, dist_type>::returnNNLocFromCacheVariant(geoSearchPt,
+        this->gridCache[startIdx + static_cast<size_t>((geoSearchPt[1]+Def::PI<dist_type>)*thisLngIncInverse)]);
+}
+
+
+
+template class UniCellBKDTGridSBSolver<KDTree, double>;
+template class UniCellBKDTGridSBSolver<KDTree, float>;
+
+template class UniCellBKDTGridSBSolver<KDTreeCusMem, double>;
+template class UniCellBKDTGridSBSolver<KDTreeCusMem, float>;
+
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongest, double>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongest, float>;
+
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, double>;
+template class UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, float>;
+
+
+
+
+/* TO DO
+ 
+ 
+ Instead of using vector of pair of Point loc* cache,
+ use a more compact pointer to pair pool cache, will likely reduce build time
+ but not search time.
+ */

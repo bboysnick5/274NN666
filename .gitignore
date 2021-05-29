@@ -25,6 +25,8 @@ DerivedData/
 ## Gcc Patch
 /*.gcno
 
+## optimization
+*.optrpt
 
 ## Data
 *.csv

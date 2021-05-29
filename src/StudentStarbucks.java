@@ -1,3 +1,33 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:c54ebc1690fd12205a4fe31e30d1fee7527243759e7fb08b8d5d6ed5bb73cc4e
-size 841
+
+public class StudentStarbucks extends Starbucks {
+
+	
+	private KDTree.Point transLatLngToXYZPt(double lng, double lat) {
+		return new KDTree.Point(new double[]{
+				Math.cos(Math.toRadians(lat)) * Math.cos(Math.toRadians(lng)),
+				Math.cos(Math.toRadians(lat)) * Math.sin(Math.toRadians(lng)),
+				Math.sin(Math.toRadians(lat))});
+	}
+	
+	@Override
+	public void build(StarbucksLocation[] allLocations) {
+		for (StarbucksLocation loc : allLocations) {
+			tree.insert(transLatLngToXYZPt(loc.lng, loc.lat), loc);
+		}
+		System.out.println("size " + allLocations.length);
+	}
+
+	@Override
+	public StarbucksLocation getNearest(double lng, double lat) {
+		return tree.nearestValue(transLatLngToXYZPt(lng, lat));
+	}
+
+	
+	public StudentStarbucks() {
+		super();
+		tree = new KDTree<StarbucksLocation>(3);
+	}
+
+	private KDTree<StarbucksLocation> tree;	
+	
+}
