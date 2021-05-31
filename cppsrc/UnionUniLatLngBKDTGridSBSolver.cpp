@@ -46,7 +46,7 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::printSolverInfo
     std::cout << "Total cached locs: " << totalCacheLocs << std::endl
     << "Ratio of cache locs over actual num locs: " << static_cast<double>(totalCacheLocs)/numGivenLocs << std::endl
     << "Total num of loc cells: " << gridCache.size() << std::endl
-    << "Ave cell size: " << static_cast<double>(totalCacheLocs)/gridCache.size() << std::endl
+    << "Ave cached locs per cell: " << static_cast<double>(totalCacheLocs)/gridCache.size() << std::endl
     << "Single loc cells: " << numSingleLocs << std::endl
     << "Vector loc cells: " << numVecLocs << std::endl
     << "Unique Vector loc cells: " << numUniqueVecLocs << std::endl

@@ -218,9 +218,8 @@ _Tp Point<_Tp, _N>::eucSqDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& t
 
 
 template <typename _Tp, size_t _N>
-//template <typename... VArgs>
 _Tp Point<_Tp, _N>::havDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two, _Tp radius) {
-    return 2.0 * asin(sqrt(havDistCompCalcA(one, two))) * (1.0 * radius);
+    return 2.0 * std::asin(std::sqrt(havDistCompCalcA(one, two))) * radius;
 }
 
 template <typename _Tp, size_t _N>
