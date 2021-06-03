@@ -106,7 +106,15 @@ private:
     // The point's actual coordinates are stored in an array.
     std::array<value_type, _N> coords;
     
+    template <std::size_t Dimension = _N, std::enable_if_t<Dimension == 2, bool> = true>
     static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    
+    template <std::size_t Dimension = _N, std::enable_if_t<Dimension == 3, bool> = true>
+    static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+    
+    template <std::size_t Dimension = _N, std::enable_if_t<Dimension != 2 && Dimension != 3, bool> = true>
+    static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
+
     static value_type eucSqDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
     static value_type manDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
     
@@ -198,7 +206,22 @@ _Tp Point<_Tp, _N>::dist(const Point<_Tp, _N> &other, VArgs ...args) const {
     return Point<_Tp, _N>::template dist<DT>(*this, other, args...);
 }
 
+
+
 template <typename _Tp, size_t _N>
+template <std::size_t Dimension, std::enable_if_t<Dimension == 2, bool>>
+_Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    return std::hypot(one[0] - two[0], one[1] - two[1]);
+}
+
+template <typename _Tp, size_t _N>
+template <std::size_t Dimension, std::enable_if_t<Dimension == 3, bool>>
+_Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
+    return std::hypot(one[0] - two[0], one[1] - two[1], one[2] - two[2]);
+}
+
+template <typename _Tp, size_t _N>
+template <std::size_t Dimension, std::enable_if_t<Dimension != 2 && Dimension != 3, bool>>
 _Tp Point<_Tp, _N>::eucDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two) {
     return sqrt(eucSqDist(one, two));
 }

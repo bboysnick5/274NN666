@@ -44,16 +44,16 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::printSolverInfo
     std::size_t totalCacheLocs = numSingleLocs + totalVecLocSize + totalTreeNodeSize;
     
     std::cout << "Total cached locs: " << totalCacheLocs << std::endl
-    << "Ratio of cache locs over actual num locs: " << static_cast<double>(totalCacheLocs)/numGivenLocs << std::endl
+    << "Ratio of cache locs over actual num locs: " << static_cast<dist_type>(totalCacheLocs)/numGivenLocs << std::endl
     << "Total num of loc cells: " << gridCache.size() << std::endl
-    << "Ave cached locs per cell: " << static_cast<double>(totalCacheLocs)/gridCache.size() << std::endl
+    << "Ave cached locs per cell: " << static_cast<dist_type>(totalCacheLocs)/gridCache.size() << std::endl
     << "Single loc cells: " << numSingleLocs << std::endl
     << "Vector loc cells: " << numVecLocs << std::endl
     << "Unique Vector loc cells: " << numUniqueVecLocs << std::endl
-    << "Ave vec loc size: " << static_cast<double>(totalVecLocSize)/numVecLocs << std::endl
+    << "Ave vec loc size: " << static_cast<dist_type>(totalVecLocSize)/numVecLocs << std::endl
     << "Kd-tree loc cells: " << numTreeLocs << std::endl
-    << "Ave tree size : " << static_cast<double>(totalTreeNodeSize)/numTreeLocs << std::endl
-    << "Ave tree height: " << log2(static_cast<double>(totalTreeNodeSize)/numTreeLocs + 1.0) + 1.0 << std::endl;
+    << "Ave tree size : " << static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs << std::endl
+    << "Ave tree height: " << log2(static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs + 1.0) + 1.0 << std::endl;
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
@@ -133,7 +133,7 @@ build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     calcSideLenFromAlpc();
     latInc = std::fabs(SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(sideLen));
     latIncInverse = 1.0/latInc;
-    rowSize = std::ceil(Def::PI<dist_type>/latInc);
+    rowSize = static_cast<std::size_t>(Def::PI<dist_type>/latInc) + 1; // equals std::ceil()
     fillGridCache();
     //auto t = std::thread(&KDT<KDTType, dist_type>::clear, this->locKdt);
     //t.detach();

@@ -27,7 +27,7 @@ BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, siz
     dist_type rowDistCellCtrGridCtr = ((r0+ 0.5 - this->rowSize/2 )*this->sideLen),
            colDistCellCtrGridCtr = ((c0 + 0.5 -this->colSize/2)*this->sideLen);
     dist_type cellCtrLat = this->midLat + SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(rowDistCellCtrGridCtr),
-           cellCtrLng = SBLoc<dist_type>::lngFromHavDist(colDistCellCtrGridCtr,
+           cellCtrLng = SBLoc<dist_type>::lngFromSameLatHavDist(colDistCellCtrGridCtr,
                                               this->midLng, cellCtrLat);
     return sbKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt({cellCtrLat,
         cellCtrLng}), diffSq, begin);

@@ -15,7 +15,8 @@
 namespace Def {
 
 using DEFAULT_DIST_TYPE = double;
-inline constexpr std::size_t DEFAULT_MAX_CACHE_CELL_VEC_SIZE = 1200;
+inline constexpr std::size_t DEFAULT_MAX_CACHE_CELL_VEC_SIZE = 896;
+// to better fit into 32kb L1 with each vec element being 3*sizeof(double) + pointer
 
 inline constexpr double DEFAULT_AVE_ACTUAL_LOCS_PER_CELL = 0.4;
 
@@ -35,5 +36,10 @@ enum class Threading_Policy {
     MULTI_HAND
 };
 }
+
+namespace Debug {
+inline static bool misMatch = false;
+}
+
 
 #endif /* Definition_hpp */

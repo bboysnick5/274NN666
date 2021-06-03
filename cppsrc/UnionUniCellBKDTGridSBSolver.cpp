@@ -29,7 +29,7 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
     for (size_t r = 0; r < this->rowSize; ++r, thisCtrLat += this->latInc, lat1 += this->latInc) {
         auto &[thisColSize, cosThisLngInc] = colSizeCosLngIncEachRowVec[r];
         dist_type thisLngInc = 1.0/thisRowStartIdxThisLngIncInverseVec[r].second;
-        dist_type diagonalDistSq3DEUC = UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::EUC3DDistSqFromLatCosDeltaLng(lat1, lat1 + this->latInc, cosThisLngInc);
+        dist_type diagonalDistSq3DEUC = UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::EUC3DDistSqFromLatCosDeltaLng(0, this->latInc, cosThisLngInc);
         dist_type thisCtrLng = 0.5 * thisLngInc - Def::PI<dist_type>;
         for (std::size_t c = 0; c < thisColSize; ++c, thisCtrLng += thisLngInc) {
             this->fillCacheCell({thisCtrLat, thisCtrLng}, diagonalDistSq3DEUC, thisColSize, ptLocPairs);

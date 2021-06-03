@@ -123,7 +123,10 @@ public:
     size_t cap() const;
     int height() const;
     bool empty() const;
-    bool equal(const KDTreeExpandLongestVec&) const;
+    
+    bool operator==(const KDTreeExpandLongestVec& rhs) const;
+    bool operator!=(const KDTreeExpandLongestVec& rhs) const;
+
     
     void clear();
     void shrink_to_fit();
@@ -188,6 +191,8 @@ private:
         unsigned int rightIdx;
         unsigned int dimToExpand;
         Point<value_type, N> key;
+        bool operator==(const TreeNode&) const = default;
+        bool operator!=(const TreeNode&) const = default;
     };
     
     TreeNode *_ndVec;
@@ -556,18 +561,15 @@ bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::empty() const {
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::equal(const KDTreeExpandLongestVec& other) const {
-    if (_size != other._size)
+bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator==(const KDTreeExpandLongestVec& rhs) const {
+    if (_size != rhs._size)
         return false;
-    return std::is_permutation(_objVec, _objVec+_size, other._objVec, other._objVec);
+    return std::equal(_objVec, _objVec + _size, rhs._objVec) && std::equal(_ndVec, _ndVec + _size, rhs._ndVec);
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::equalHelper(const TreeNode* other) const {
-    
-    // TODO
-    
-    return true;
+bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator!=(const KDTreeExpandLongestVec& rhs) const {
+    return !(*this == rhs);
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
@@ -777,11 +779,11 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fenceSq, Iter returnIt) const {
     }
     
 FINAL:
-    std::for_each(distPtElemVec.begin(), distPtElemVec.end(), [&returnIt, bestDistDiffSq](const auto& dpe){
+    std::for_each(distPtElemVec.begin(), distPtElemVec.end(), [&returnIt, bestDistDiffSq](const auto& dpe) mutable {
         if (dpe.dist < bestDistDiffSq)
             *returnIt++ = {*dpe.pt, *dpe.elem};
     });
-    std::for_each(distPtElems, distPtElemsIt, [&returnIt, bestDistDiffSq](const auto& dpe){
+    std::for_each(distPtElems, distPtElemsIt, [&returnIt, bestDistDiffSq](const auto& dpe) mutable {
         if (dpe.dist < bestDistDiffSq)
             *returnIt++ = {*dpe.pt, *dpe.elem};
     });
@@ -795,27 +797,12 @@ ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, 
         _Tp dist;
         const TreeNode* nd;
     } st[static_cast<size_t>(log2(_size+1))], *it = st;
+    // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
+    // used cast not std::floor for speed
     const TreeNode *cur = _ndVec, *best = _ndVec;
     _Tp curDist, bestDist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
-
-    // LOGGGGGGGGGGGGGGG
-    
-    /*
-     static size_t totalNumNodesSearches = 0, numNNSearches = 0, totalTreeSize = 0;
-     static size_t numOfFullSearch = 0;
-     size_t thisNumNodesSearches = 0;
-     static bool logCondition;
-     static constexpr size_t TREE_SIZE_LOWER_BOUND = 1200, TREE_SIZE_UPPER_BOUND = 60000000;
-     logCondition = treeSize <= TREE_SIZE_UPPER_BOUND && treeSize >= TREE_SIZE_LOWER_BOUND;
-     
-     */
     
     while (true) {
-        
-        // LOGGGGGGGGGGGGGGG
-        //if (logCondition)
-        // thisNumNodesSearches++;
-        
         if (unsigned int rightIdx = cur->rightIdx) {
             unsigned int dim = cur->dimToExpand;
             _Tp diff = pt[dim] - cur->key[dim];
@@ -839,36 +826,7 @@ ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, 
             best = cur;
         }
     }
-    
-    // LOGGGGGGGGGGGGGGG
-    /*
-     if (logCondition) {
-     numNNSearches++;
-     totalTreeSize += treeSize;
-     totalNumNodesSearches += thisNumNodesSearches;
-     if (thisNumNodesSearches == treeSize)
-     numOfFullSearch++;
-     std::cout << "***** Log of treesize from " << TREE_SIZE_LOWER_BOUND
-     << " to " << TREE_SIZE_UPPER_BOUND << " *****"
-     << "\nTotal num of NN searches with this criteria: " << numNNSearches
-     << "\n\nTreesize: " << treeSize
-     << "\nNum of nodes searched in this NN search: " << thisNumNodesSearches
-     << "\n\nAve treesize: " << totalTreeSize/numNNSearches
-     << "\nAve num of nodes searched in each NN search: " << totalNumNodesSearches/numNNSearches
-     << "\n\nnum of full searches percentage: " << numOfFullSearch*100.0/numNNSearches
-     << "%\nSearched nodes over total num of nodes percentage: " << totalNumNodesSearches*100.0/totalTreeSize << "%\n\n\n\n";
-     
-     }
-     */
-    
-    /*
-     _Tp bestDist = std::numeric_limits<_Tp>::max();
-     const ElemType *bestValue = nullptr;
-     NNValueHelper(root, 0, pt, bestValue, bestDist);
-     */
-    
     return _objVec[best - _ndVec];
-    
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
