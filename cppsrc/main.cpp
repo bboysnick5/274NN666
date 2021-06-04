@@ -186,7 +186,7 @@ void mainContent(int argc, const char * argv[]) {
     std::ofstream outRefLatLngPtLocPairVec(argv[8]);
     
     
-    secondsToTimeAccuracyTest += std::chrono::seconds(10);
+    //secondsToTimeAccuracyTest += std::chrono::seconds(10);
     
     std::random_device rd;
     std::seed_seq seq{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};

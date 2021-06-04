@@ -86,7 +86,7 @@ private:
     
     virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<Def::Threading_Policy::MULTI_OMP>);
     
-    //virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<Def::Threading_Policy::MULTI_HAND>);
+    virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<Def::Threading_Policy::MULTI_HAND>);
     
     
     

@@ -44,16 +44,16 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::printSolverInfo
     std::size_t totalCacheLocs = numSingleLocs + totalVecLocSize + totalTreeNodeSize;
     
     std::cout << "Total cached locs: " << totalCacheLocs << std::endl
-    << "Ratio of cache locs over actual num locs: " << static_cast<dist_type>(totalCacheLocs)/numGivenLocs << std::endl
-    << "Total num of loc cells: " << gridCache.size() << std::endl
-    << "Ave cached locs per cell: " << static_cast<dist_type>(totalCacheLocs)/gridCache.size() << std::endl
-    << "Single loc cells: " << numSingleLocs << std::endl
-    << "Vector loc cells: " << numVecLocs << std::endl
-    << "Unique Vector loc cells: " << numUniqueVecLocs << std::endl
-    << "Ave vec loc size: " << static_cast<dist_type>(totalVecLocSize)/numVecLocs << std::endl
-    << "Kd-tree loc cells: " << numTreeLocs << std::endl
-    << "Ave tree size : " << static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs << std::endl
-    << "Ave tree height: " << log2(static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs + 1.0) + 1.0 << std::endl;
+              << "Ratio of cache locs over actual num locs: " << static_cast<dist_type>(totalCacheLocs)/numGivenLocs << std::endl
+              << "Total num of loc cells: " << gridCache.size() << std::endl
+              << "Ave cached locs per cell: " << static_cast<dist_type>(totalCacheLocs)/gridCache.size() << std::endl
+              << "Single loc cells: " << numSingleLocs << std::endl
+              << "Vector loc cells: " << numVecLocs << std::endl
+              << "Unique Vector loc cells: " << numUniqueVecLocs << std::endl
+              << "Ave vec loc size: " << static_cast<dist_type>(totalVecLocSize)/numVecLocs << std::endl
+              << "Kd-tree loc cells: " << numTreeLocs << std::endl
+              << "Ave tree size : " << static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs << std::endl
+              << "Ave tree height: " << log2(static_cast<dist_type>(totalTreeNodeSize)/numTreeLocs + 1.0) + 1.0 << std::endl;
 }
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
@@ -80,10 +80,38 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, P
     dist_type initCtrLat = 0.5*latInc - 0.5*Def::PI<dist_type>;
     dist_type initCtrLng = 0.5*lngInc - Def::PI<dist_type>;
     dist_type initLat1 = - 0.5*Def::PI<dist_type>;
+    
+//#pragma ompdeclare reduction (merge : std::vector<BitCell> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end())) initializer(omp_priv = omp_orig) //only one thread is used
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
 shared(this->gridCache, lngInc, latInc, initCtrLat, initCtrLng, initLat1) \
-firstprivate(ptLocPairs) default(none) schedule(static, 1) collapse(2) \
+firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) collapse(2) \
 ordered
+    for (size_t r = 0; r < rowSize; ++r) {
+        dist_type lat1 = r*latInc + initLat1;
+        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
+        dist_type thisCtrLat = initCtrLat + r*latInc;
+        std::size_t startIdxThisRow = r*colSize;
+        for (size_t c = 0; c < colSize; ++c) {
+            fillCacheCell(startIdxThisRow + c, {thisCtrLat, initCtrLng + c*lngInc},
+                          diagonalDistSq3DEUC, colSize, ptLocPairs);
+        }
+    }
+}
+
+template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
+          class dist_type, Def::Threading_Policy policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
+loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<Def::Threading_Policy::MULTI_HAND>) {
+    std::size_t totalCacheCells = rowSize*colSize;
+    gridCache.resize(totalCacheCells, 0);
+    dist_type initCtrLat = 0.5*latInc - 0.5*Def::PI<dist_type>;
+    dist_type initCtrLng = 0.5*lngInc - Def::PI<dist_type>;
+    dist_type initLat1 = - 0.5*Def::PI<dist_type>;
+    
+    std::size_t numThreads = std::thread::hardware_concurrency();
+    std::size_t chunkSize = totalCacheCells/numThreads;
+
+    
     for (size_t r = 0; r < rowSize; ++r) {
         dist_type lat1 = r*latInc + initLat1;
         dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);

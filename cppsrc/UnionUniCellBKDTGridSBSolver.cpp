@@ -29,7 +29,7 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
     for (size_t r = 0; r < this->rowSize; ++r, thisCtrLat += this->latInc, lat1 += this->latInc) {
         auto &[thisColSize, cosThisLngInc] = colSizeCosLngIncEachRowVec[r];
         dist_type thisLngInc = 1.0/thisRowStartIdxThisLngIncInverseVec[r].second;
-        dist_type diagonalDistSq3DEUC = UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::EUC3DDistSqFromLatCosDeltaLng(0, this->latInc, cosThisLngInc);
+        dist_type diagonalDistSq3DEUC = UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::EUC3DDistSqFromLatCosDeltaLng(lat1, lat1 + this->latInc, cosThisLngInc);
         dist_type thisCtrLng = 0.5 * thisLngInc - Def::PI<dist_type>;
         for (std::size_t c = 0; c < thisColSize; ++c, thisCtrLng += thisLngInc) {
             this->fillCacheCell({thisCtrLat, thisCtrLng}, diagonalDistSq3DEUC, thisColSize, ptLocPairs);
@@ -55,7 +55,7 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
 shared(this->gridCache, thisRowStartIdxThisLngIncInverseVec, colSizeCosLngIncEachRowVec, \
        this->latInc, initCtrLat, initLat1) \
-firstprivate(ptLocPairs) default(none) schedule(static, 1) \
+firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) \
 ordered
     for (std::size_t idx = 0; idx < totalCacheCells; ++idx) {
         const auto it = std::upper_bound(thisRowStartIdxThisLngIncInverseVec.cbegin(), thisRowStartIdxThisLngIncInverseVec.cend(), idx, [](const std::size_t &idx, const std::pair<std::size_t, dist_type> &p){return idx < p.first;}) - 1;

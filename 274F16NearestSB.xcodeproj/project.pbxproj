@@ -417,6 +417,7 @@
 					"-ltbb",
 					"-Xclang",
 					"-fopenmp",
+					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -455,6 +456,7 @@
 					"-ltbb",
 					"-Xclang",
 					"-fopenmp",
+					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
