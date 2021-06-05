@@ -85,7 +85,7 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, P
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
 shared(this->gridCache, lngInc, latInc, initCtrLat, initCtrLng, initLat1) \
 firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) collapse(2) \
-ordered
+//ordered // big impact on 12 cores zen2 than on 4 cores skylake
     for (size_t r = 0; r < rowSize; ++r) {
         dist_type lat1 = r*latInc + initLat1;
         dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);

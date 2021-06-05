@@ -56,7 +56,7 @@ loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
 shared(this->gridCache, thisRowStartIdxThisLngIncInverseVec, colSizeCosLngIncEachRowVec, \
        this->latInc, initCtrLat, initLat1) \
 firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) \
-ordered
+//ordered
     for (std::size_t idx = 0; idx < totalCacheCells; ++idx) {
         const auto it = std::upper_bound(thisRowStartIdxThisLngIncInverseVec.cbegin(), thisRowStartIdxThisLngIncInverseVec.cend(), idx, [](const std::size_t &idx, const std::pair<std::size_t, dist_type> &p){return idx < p.first;}) - 1;
         std::size_t r = it - thisRowStartIdxThisLngIncInverseVec.begin();

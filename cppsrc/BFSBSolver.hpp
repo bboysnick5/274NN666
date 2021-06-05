@@ -9,7 +9,6 @@
 #ifndef BFSBSolver_hpp
 #define BFSBSolver_hpp
 
-#include <stdio.h>
 #include <vector>
 #include "SBSolver.hpp"
 

@@ -11,7 +11,14 @@
 
 #include "Point.hpp"
 //#include "PoolAllocator.hpp"
+
+
+
 #include "BoundedPQueue.hpp"
+
+
+//#include <oneapi/dpl/execution>
+//#include <oneapi/dpl/algorithm>
 #include <stdexcept>
 #include <unordered_map>
 #include <map>
@@ -203,8 +210,6 @@ private:
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
     int heightHelper(const TreeNode *n) const;
-    
-    bool equalHelper(const TreeNode*) const;
     
     void deAlloc();
     
@@ -456,9 +461,9 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, 
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <class RAI>
+template <class Const_RAI>
 std::tuple<std::array<_Tp, N>, std::array<_Tp, N>, std::array<_Tp, N>> KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-computeInitBBoxSpans(RAI begin, RAI end) {
+computeInitBBoxSpans(Const_RAI begin, Const_RAI end) {
     std::array<_Tp, N> lows, highs, spans;
     lows.fill(std::numeric_limits<_Tp>::max());
     highs.fill(std::numeric_limits<_Tp>::min());
@@ -482,8 +487,9 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
     auto dim = static_cast<unsigned int>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
     TreeNode* ndPtrThisIter = curNd;
     RAI median = begin + (end - begin)/2;
-    std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
-        return p1.key[dim] < p2.key[dim];});
+    std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
+    //oneapi::dpl::nth_element(oneapi::dpl::execution::par_unseq, begin, median, end, [=](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim]; });
+
     *curNd++ = {0, dim, std::move(median->key)};
     new (curObj++) ElemType (std::move(median->value));
         

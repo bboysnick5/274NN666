@@ -34,6 +34,7 @@
 #include <thread>
 #include <cstdlib>
 #include <map>
+#include <cassert>
 
 
 
@@ -141,7 +142,7 @@ void timeNNSearch(const SBSolver<dist_type> &solver, std::vector<Point<dist_type
     
     
     std::cout << std::endl << "Ave per Search Time: " << totalElapsedTime.count()/perSearchTimeVec.size()
-              << "μs from " << perSearchTimeVec.size() << " searches" << std::endl
+              << "us from " << perSearchTimeVec.size() << " searches" << std::endl
               << "Max sinlge search time: " << maxOneSearchTime.count() << std::endl
               << "Min single search time: " << minOneSearchTime.count() << std::endl << std::endl;
     
@@ -182,8 +183,12 @@ void mainContent(int argc, const char * argv[]) {
             secondsToTimeAccuracyTest = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[6],  std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
         } catch (std::invalid_argument e) {}
     }
-    std::ifstream inRefLatLngPtLocPairVec(argv[7]);
-    std::ofstream outRefLatLngPtLocPairVec(argv[8]);
+    std::ifstream inRefLatLngPtLocPairVec;
+    if (argc >= 7)
+        inRefLatLngPtLocPairVec.open(argv[7]);
+    std::ofstream outRefLatLngPtLocPairVec;
+    if (argc >= 8)
+        outRefLatLngPtLocPairVec.open(argv[8]);
     
     
     //secondsToTimeAccuracyTest += std::chrono::seconds(10);
@@ -204,6 +209,7 @@ void mainContent(int argc, const char * argv[]) {
     locData->assign(std::istream_iterator<SBLoc<dist_type>>(infileLocs),
                     std::istream_iterator<SBLoc<dist_type>>());
     infileLocs.close();
+    assert(locData->size() != 0);
     //std::sort(locData->begin(), locData->end());
     //locData->erase(std::unique(locData->begin(), locData->end()), locData->end());
     locData->shrink_to_fit();
