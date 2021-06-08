@@ -17,6 +17,7 @@ class BFEUCPtSBSolver : public BFSBSolver<dist_type> {
 public:
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     void printSolverInfo() const override;
+    virtual ~BFEUCPtSBSolver() override {}
 };
 
 #endif /* BFEUCPtSolver_hpp */

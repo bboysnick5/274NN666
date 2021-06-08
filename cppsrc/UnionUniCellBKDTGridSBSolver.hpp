@@ -23,7 +23,8 @@ class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTTy
 public:
     UnionUniCellBKDTGridSBSolver(dist_type = 1.0, size_t = 1500);
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override final;
-    
+    virtual ~UnionUniCellBKDTGridSBSolver() override {}
+
     
 private:
     std::vector<std::pair<std::size_t, dist_type>> thisRowStartIdxThisLngIncInverseVec;

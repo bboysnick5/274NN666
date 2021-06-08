@@ -28,6 +28,7 @@ public:
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     virtual void printSolverInfo() const override final;
+    virtual ~UnionUniLatLngBKDTGridSBSolver() override {}
     
 protected:
     
@@ -105,7 +106,7 @@ protected:
         inline BitCell& operator=(BitCell&&) noexcept;
         BitCell& operator=(const BitCell&) noexcept;
 
-        inline BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type>&,
+        inline BitCell(std::vector<typename KDT<KDTType, dist_type>::node_type>&,
                        size_t, std::initializer_list<const BitCell*> prevCells);
         ~BitCell();
         
@@ -186,7 +187,7 @@ UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::BitCell::operator=(c
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
 inline UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::BitCell::
-BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
+BitCell(std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
         size_t maxCacheVecSize, std::initializer_list<const BitCell*> prevCells) {
     if (size_t size = bufVec.size(); size == 1) {
         setPtr((reinterpret_cast<std::uintptr_t>(bufVec[0].value) & MASK_OUT_16TH_BIT) | (1ull << 48));
@@ -204,7 +205,7 @@ BitCell(const std::vector<typename KDT<KDTType, dist_type>::node_type> &bufVec,
         }
         auto *cacheLocs = static_cast<typename KDT<KDTType, dist_type>::node_type*>(
                           ::operator new(size*sizeof(typename KDT<KDTType, dist_type>::node_type), std::nothrow));
-        std::uninitialized_move(bufVec.begin(), bufVec.end(), cacheLocs);
+        std::uninitialized_move(std::make_move_iterator(bufVec.begin()), std::make_move_iterator(bufVec.end()), cacheLocs);
         setPtr((reinterpret_cast<std::uintptr_t>(cacheLocs) & MASK_OUT_16TH_BIT) | (size << 48) | 1ull);
     } else [[unlikely]] {
         setPtr(reinterpret_cast<std::uintptr_t>(new KDT<KDTType, dist_type>(bufVec.begin(), bufVec.end())) & MASK_OUT_16TH_BIT);

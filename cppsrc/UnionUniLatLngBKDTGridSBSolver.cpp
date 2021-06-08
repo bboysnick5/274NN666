@@ -171,11 +171,13 @@ build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
 const SBLoc<dist_type>* UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
 returnNNLocFromCacheVariant(const Point<dist_type, 2>& geoPt, const BitCell& cell) const {
-    if (uintptr_t ptr = cell.getPtr();
-        cell.size(ptr) == 1) {
+    std::uintptr_t ptr = cell.getPtr();
+    if (std::size_t cell_size = cell.size(ptr);
+        cell_size == 1) {
         return cell.getSingleLoc(ptr);
-    } else if (cell.size(ptr) < MAX_CACHE_CELL_VEC_SIZE) {
-        return Utility::custom_min_element(cell.getLocPairs(ptr), cell.getLocPairs(ptr) + cell.size(ptr),
+    } else if (cell_size < MAX_CACHE_CELL_VEC_SIZE) {
+        const auto* loc_pairs = cell.getLocPairs(ptr);
+        return Utility::custom_min_element(loc_pairs, loc_pairs + cell_size,
                                            [&](const auto& nh) {return SBLoc<dist_type>::geoPtToCart3DPt(geoPt).template
                                                 dist<Point<dist_type, 3>::DistType::EUCSQ>(nh.key);},
                                            std::less())->value;

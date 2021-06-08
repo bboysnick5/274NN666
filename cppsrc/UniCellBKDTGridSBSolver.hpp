@@ -24,7 +24,8 @@ public:
     //void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override final;
     //virtual void printSolverInfo() const override;
-    
+    virtual ~UniCellBKDTGridSBSolver() override {}
+
 
 private:
     std::vector<std::pair<size_t, dist_type>> thisRowStartIdx;

@@ -166,8 +166,8 @@ public:
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
-    template <class Iter>
-    Iter rangeDiffKNNPairs(const Point<value_type, N>&, value_type, Iter) const;
+    template <class OutputIter>
+    OutputIter rangeDiffKNNPairs(const Point<value_type, N>&, value_type, OutputIter) const;
     
 private:
     
@@ -672,9 +672,9 @@ void KDTreeExpandLongest<_Tp, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, si
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <class Iter>
-Iter KDTreeExpandLongest<_Tp, N, ElemType, DT>::
-rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, Iter returnIt) const {
+template <class OutputIter>
+OutputIter KDTreeExpandLongest<_Tp, N, ElemType, DT>::
+rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence, OutputIter returnIt) const {
     std::vector<std::tuple<_Tp, const Point<_Tp, N>&, const ElemType&>> distPtElemTuple;
     distPtElemTuple.reserve(std::sqrt(treeSize));
     std::pair<_Tp, const TreeNode*> st[static_cast<size_t>(log2(treeSize+1))],

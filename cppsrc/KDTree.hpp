@@ -163,8 +163,8 @@ public:
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
-    template <class Iter>
-    Iter rangeDiffKNNPairs(const Point<value_type, N>&, value_type, Iter) const;
+    template <class OutputIter>
+    OutputIter rangeDiffKNNPairs(const Point<value_type, N>&, value_type, OutputIter) const;
     
 private:
     
@@ -621,9 +621,9 @@ const Point<_Tp, N>& pt, BoundedPQueue<ElemType, _Tp> &bpq) const {
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <class Iter>
-Iter KDTree<_Tp, N, ElemType, DT>::rangeDiffKNNPairs(const Point<_Tp, N>& pt,
-                                                _Tp fence, Iter returnIt) const {
+template <class OutputIter>
+OutputIter KDTree<_Tp, N, ElemType, DT>::rangeDiffKNNPairs(const Point<_Tp, N>& pt,
+                                                _Tp fence, OutputIter returnIt) const {
     /*
     std::vector<std::pair<_Tp, std::pair<Point<_Tp, N>, ElemType>>> distKVPairs;
     distKVPairs.reserve(sqrt(treeSize));

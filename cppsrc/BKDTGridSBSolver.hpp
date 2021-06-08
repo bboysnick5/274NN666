@@ -21,7 +21,8 @@ public:
     BKDTGridSBSolver(dist_type aveLocPerCell = 1);
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
-    
+    virtual ~BKDTGridSBSolver() override {}
+
     
 private:
     std::vector<KDTType<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>> gridTreeCache;

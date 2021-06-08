@@ -730,19 +730,19 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::kNNValueHelper(TreeNode *cur,
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <class Iter>
-Iter KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fenceSq, Iter returnIt) const {
+template <class OutputIter>
+OutputIter KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
+rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence_sq, OutputIter out_nd_type_it) const {
     
-    struct actRecord {
+    struct ActRecord {
         _Tp dist;
         const TreeNode* nd;
-    } st[static_cast<size_t>(log2(size_+1))], *it = st;
-    _Tp bestDistSq = std::numeric_limits<_Tp>::max(),
-        bestDistDiffSq = bestDistSq;
+    } act_record_stack[32], *act_record_it = act_record_stack;
+    _Tp best_dist_sq = std::numeric_limits<_Tp>::max(),
+        best_dist_plus_fence_sq = best_dist_sq;
     const TreeNode *cur = ndVec_;
     
-    const size_t MAX_DISTPTELEMS_ON_STACK = 8192;
+    const size_t MAX_DISTPTELEMS_ON_STACK = 1152;
     struct distPtElem {
         _Tp dist;
         const Point<_Tp, N>* pt;
@@ -753,10 +753,10 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fenceSq, Iter returnIt) const {
    
     while (true) {
         _Tp curDistSq = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
-        if (curDistSq < bestDistDiffSq) {
-            if (curDistSq < bestDistSq) {
-                bestDistSq = curDistSq;
-                bestDistDiffSq = bestDistSq + fenceSq + 2.0*sqrt(fenceSq*bestDistSq);
+        if (curDistSq < best_dist_plus_fence_sq) {
+            if (curDistSq < best_dist_sq) {
+                best_dist_sq = curDistSq;
+                best_dist_plus_fence_sq = best_dist_sq + fence_sq + _Tp(2.0)*sqrt(fence_sq*best_dist_sq);
             }
             *distPtElemsIt++ = {curDistSq, &cur->key, &objVec_[cur-ndVec_]};
             if (distPtElemsIt == distPtElemsEnd) [[unlikely]] {
@@ -769,70 +769,70 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fenceSq, Iter returnIt) const {
             unsigned int dim = cur->dimToExpand;
             _Tp diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) actRecord {diff*diff, ndVec_ + rightIdx};
+                new(act_record_it++) ActRecord {diff*diff, ndVec_ + rightIdx};
                 ++cur;
             } else {
-                new(it++) actRecord {diff*diff, cur+1};
+                new(act_record_it++) ActRecord {diff*diff, cur+1};
                 cur = ndVec_ + rightIdx;
             }
         } else if (cur++->dimToExpand == N) {
             do {
-                if (it == st) [[unlikely]]
+                if (act_record_it == act_record_stack) [[unlikely]]
                     goto FINAL;
-            } while ((--it)->dist > bestDistDiffSq);
-            cur = it->nd;
+            } while ((--act_record_it)->dist > best_dist_plus_fence_sq);
+            cur = act_record_it->nd;
         }
     }
     
 FINAL:
-    std::for_each(distPtElemVec.begin(), distPtElemVec.end(), [&returnIt, bestDistDiffSq](const auto& dpe) mutable {
-        if (dpe.dist < bestDistDiffSq)
-            *returnIt++ = {*dpe.pt, *dpe.elem};
+    std::for_each(distPtElemVec.begin(), distPtElemVec.end(), [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+        if (dpe.dist < best_dist_plus_fence_sq)
+            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
     });
-    std::for_each(distPtElems, distPtElemsIt, [&returnIt, bestDistDiffSq](const auto& dpe) mutable {
-        if (dpe.dist < bestDistDiffSq)
-            *returnIt++ = {*dpe.pt, *dpe.elem};
+    std::for_each(distPtElems, distPtElemsIt, [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+        if (dpe.dist < best_dist_plus_fence_sq)
+            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
     });
-    return returnIt;
+    return out_nd_type_it;
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
 ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, N> &pt) const {
     
-    struct actRecord {
+    struct act_record {
         _Tp dist;
         const TreeNode* nd;
-    } st[static_cast<size_t>(log2(size_+1))], *it = st;
+    } act_record_stack[32], *act_record_it = act_record_stack;
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     // used cast not std::floor for speed
-    const TreeNode *cur = ndVec_, *best = ndVec_;
-    _Tp curDist, bestDist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+    const TreeNode *cur = ndVec_, *best_node = ndVec_;
+    _Tp cur_dist, best_dist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
     
     while (true) {
-        if (unsigned int rightIdx = cur->rightIdx) {
+        if (unsigned int right_idx = cur->rightIdx) {
             unsigned int dim = cur->dimToExpand;
             _Tp diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
-                new(it++) actRecord {diff*diff, ndVec_ + rightIdx};
+                new(act_record_it++) act_record {diff*diff, ndVec_ + right_idx};
                 ++cur;
             } else {
-                new(it++) actRecord {diff*diff, cur+1};
-                cur = ndVec_ + rightIdx;
+                new(act_record_it++) act_record {diff*diff, cur+1};
+                cur = ndVec_ + right_idx;
             }
         } else if (cur++->dimToExpand == N) {
             do {
-                if (it == st)
-                    return objVec_[best - ndVec_];
-            } while ((--it)->dist >= bestDist);
-            cur = it->nd;
+                if (act_record_it == act_record_stack)
+                    return objVec_[best_node - ndVec_];
+            } while ((--act_record_it)->dist >= best_dist);
+            cur = act_record_it->nd;
         }
-        curDist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
-        if (curDist < bestDist) {
-            bestDist = curDist;
-            best = cur;
+        cur_dist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+        if (cur_dist < best_dist) {
+            best_dist = cur_dist;
+            best_node = cur;
         }
     }
-    return objVec_[best - ndVec_];
+    return objVec_[best_node - ndVec_];
 }
 
 template <typename _Tp, size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>

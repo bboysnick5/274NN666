@@ -22,6 +22,7 @@ public:
     void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
     const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
     GridSBSolver(dist_type aveLocPerCell = 1);
+    virtual ~GridSBSolver() override {}
     
 protected:
     void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
