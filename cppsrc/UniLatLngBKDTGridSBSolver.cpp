@@ -57,15 +57,15 @@ fillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDist
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
     colSize = rowSize;
-    lngInc = 2.0*Def::PI<dist_type>/colSize + 2.0*Def::PI<dist_type>/(colSize*65536);
+    lngInc = 2.0*def::kMathPi<dist_type>/colSize + 2.0*def::kMathPi<dist_type>/(colSize*65536);
     gridCache.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
     std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
     ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
     
-    dist_type thisCtrLat = 0.5 * (latInc - Def::PI<dist_type>);
+    dist_type thisCtrLat = 0.5 * (latInc - def::kMathPi<dist_type>);
     for (size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
-        dist_type thisCtrLng = 0.5 * lngInc - Def::PI<dist_type>;
-        dist_type lat1 = r*this->latInc - 0.5*Def::PI<dist_type>;
+        dist_type thisCtrLng = 0.5 * lngInc - def::kMathPi<dist_type>;
+        dist_type lat1 = r*this->latInc - 0.5*def::kMathPi<dist_type>;
         dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
         for (size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
             fillCacheCell(thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, ptLocPairs);
@@ -75,7 +75,7 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::calcSideLenFromAlpc() {
-    dist_type surfaceArea = 4*Def::PI<dist_type>*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
+    dist_type surfaceArea = 4*def::kMathPi<dist_type>*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
     dist_type numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
     sideLen = sqrt(surfaceArea/numCells);
 }
@@ -88,7 +88,7 @@ build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     calcSideLenFromAlpc();
     latInc = std::fabs(SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(sideLen));
     latIncInverse = 1.0/latInc;
-    rowSize = std::ceil(Def::PI<dist_type>/latInc);
+    rowSize = std::ceil(def::kMathPi<dist_type>/latInc);
     fillGridCache();
     this->locKdt.clear();
 }
@@ -118,7 +118,7 @@ template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> cl
 const SBLoc<dist_type>* UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 findNearest(const Point<dist_type, 2>& geoSearchPt) const {
     return returnNNLocFromCacheVariant(geoSearchPt, gridCache[static_cast<size_t>
-    ((geoSearchPt[0]+0.5*Def::PI<dist_type>)*latIncInverse)*colSize+ static_cast<size_t>((geoSearchPt[1]+Def::PI<dist_type>)/lngInc)]);
+    ((geoSearchPt[0]+0.5*def::kMathPi<dist_type>)*latIncInverse)*colSize+ static_cast<size_t>((geoSearchPt[1]+def::kMathPi<dist_type>)/lngInc)]);
 }
 
 

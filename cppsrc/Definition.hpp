@@ -12,33 +12,33 @@
 #include <stdio.h>
 #include <numbers>
 
-namespace Def {
+namespace def {
 
-using DEFAULT_DIST_TYPE = double;
-inline constexpr std::size_t DEFAULT_MAX_CACHE_CELL_VEC_SIZE = 896;
+using kDefaultDistType = double;
+inline constexpr std::size_t kDefaultMaxCacheCellVecSize = 896;
 // to better fit into 32kb L1 with each vec element being 3*sizeof(double) + pointer
 
-inline constexpr double DEFAULT_AVE_ACTUAL_LOCS_PER_CELL = 0.4;
+inline constexpr double kDefalutAveActualLocsPerCell = 0.4;
 
-inline constexpr bool DEFAULT_TEST_ACCURACY = false;
-inline constexpr std::size_t DEFAULT_TEST_ACCURACY_DURATION_IN_SECONDS = 10;
-inline constexpr std::size_t DEFAULT_TIME_SEARCH_DURATION_IN_SECONDS = 10;
-inline constexpr std::size_t MAX_SEARCH_LOCS = 1 << 24;
+inline constexpr bool kDefaultToTestAccuracy = false;
+inline constexpr std::size_t kDefaultAccuracyTestDurationInSecs = 10;
+inline constexpr std::size_t kDefaultSearchBenchDurationInSecs = 10;
+inline constexpr std::size_t kMaxTestLocs = 1 << 24;
 
 
 
 template <typename T>
-constexpr auto &PI = std::numbers::pi_v<T>;
+constexpr auto &kMathPi = std::numbers::pi_v<T>;
 
-enum class Threading_Policy {
-    SINGLE,
-    MULTI_OMP,
-    MULTI_HAND
+enum class ThreadingPolicy {
+    kSingle,
+    kMultiOmp,
+    kMultiHand
 };
 }
 
-namespace Debug {
-inline static bool misMatch = false;
+namespace debug {
+inline static bool mis_match = false;
 }
 
 

@@ -22,7 +22,7 @@ struct SBLoc {
     std::string city;
     std::string addr;
     
-    static constexpr dist_type EARTH_RADIUS = 6371.0;
+    static constexpr dist_type EARTH_RADIUS = dist_type(6371.0);
     
     SBLoc() = default;
     SBLoc(const Point<dist_type, 3>&);
@@ -87,12 +87,12 @@ inline bool SBLoc<dist_type>::operator!=(const SBLoc<dist_type> &other) const {
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toDegree(dist_type radians) {
-    return radians*180.0/Def::PI<dist_type>;
+    return radians*180.0/def::kMathPi<dist_type>;
 }
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::toRadians(dist_type degree) {
-    return degree*Def::PI<dist_type>/180.0;
+    return degree*def::kMathPi<dist_type>/180.0;
 }
 
 template <typename dist_type>
@@ -160,8 +160,8 @@ namespace std {
     template <typename dist_type>
     struct hash<SBLoc<dist_type>> {
         size_t operator()(const SBLoc<dist_type>& l) const {
-            return (static_cast<size_t>((l.geoPt[0] + 0.5*Def::PI<dist_type>) * 1000000.0) << 20) +
-                    static_cast<size_t>((l.geoPt[1] + Def::PI<dist_type>) * 1000000.0);
+            return (static_cast<size_t>((l.geoPt[0] + 0.5*def::kMathPi<dist_type>) * 1000000.0) << 20) +
+                    static_cast<size_t>((l.geoPt[1] + def::kMathPi<dist_type>) * 1000000.0);
         }
     };
     

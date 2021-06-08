@@ -10,6 +10,8 @@
 #define Utility_hpp
 
 #include <stdio.h>
+#include <execution>
+#include <omp.h>
 
 /*
  Allow pass-in value calculation formula and store the computed data
@@ -23,7 +25,7 @@ public:
     template <class _ForwardIterator, class _GetDist, class _Compare>
     static _ForwardIterator
     custom_min_element(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-        if (__first != __last) {
+        if (__first != __last) [[likely]] {
             _ForwardIterator __i = __first;
             auto __bestDist = __distFunc(*__first);
             while (++__i != __last) {
@@ -36,5 +38,33 @@ public:
         return __first;
     }
     
+    template <class _ForwardIterator, class _GetDist, class _Compare>
+    static _ForwardIterator
+    custom_min_element_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
+        if (__first == __last) [[unlikely]]
+            return __first;
+        auto __result = __first;
+        auto __bestDist = __distFunc(*__first++);
+        #pragma omp parallel
+        {
+            auto this_thread_best_dist = __bestDist;
+            _ForwardIterator this_thread_best_it = __first;
+            #pragma omp for
+            for (_ForwardIterator __i = __first; __i < __last; ++__i) {
+                if (auto this_dist = __distFunc(*__i); __comp(this_dist, this_thread_best_dist)) {
+                    this_thread_best_dist = this_dist;
+                    this_thread_best_it = __i;
+                }
+            }
+            #pragma omp critical
+            {
+                if (__comp(this_thread_best_dist, __bestDist)) {
+                    __bestDist = this_thread_best_dist;
+                    __result = this_thread_best_it;
+                }
+            }
+        }
+        return __result;
+    }
 };
 #endif /* Utility_hpp */

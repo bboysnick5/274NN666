@@ -50,7 +50,7 @@ public:
     
     template <typename... T>
     //Point(T... ts) : coords{ts...} {}
-    Point(T... ts) : coords{static_cast<value_type>(ts)...} {}
+    Point(T... ts) : coords_{static_cast<value_type>(ts)...} {}
     
     Point() = default;
     
@@ -104,7 +104,7 @@ public:
     
 private:
     // The point's actual coordinates are stored in an array.
-    std::array<value_type, _N> coords;
+    std::array<value_type, _N> coords_;
     
     template <std::size_t Dimension = _N, std::enable_if_t<Dimension == 2, bool> = true>
     static value_type eucDist(const Point<_Tp, _N>& pt1, const Point<_Tp, _N>& pt2);
@@ -134,52 +134,52 @@ constexpr size_t Point<_Tp, _N>::size() const {
 
 template <typename _Tp, size_t _N>
 _Tp& Point<_Tp, _N>::operator[] (size_t index) {
-    return coords[index];
+    return coords_[index];
 }
 
 template <typename _Tp, size_t _N>
 _Tp Point<_Tp, _N>::operator[] (size_t index) const {
-    return coords[index];
+    return coords_[index];
 }
 
 template <typename _Tp, size_t _N>
 const _Tp* Point<_Tp, _N>::data() const {
-    return coords.data();
+    return coords_.data();
 }
 
 template <typename _Tp, size_t _N>
 _Tp* Point<_Tp, _N>::data() {
-    return coords.data();
+    return coords_.data();
 }
 
 template <typename _Tp, size_t _N>
 const std::array<_Tp, _N>& Point<_Tp, _N>::dataArray() const {
-    return coords;
+    return coords_;
 }
 
 template <typename _Tp, size_t _N>
 std::array<_Tp, _N>& Point<_Tp, _N>::dataArray() {
-    return coords;
+    return coords_;
 }
 
 template <typename _Tp, size_t _N>
 typename Point<_Tp, _N>::iterator Point<_Tp, _N>::begin() {
-    return coords.begin();
+    return coords_.begin();
 }
 
 template <typename _Tp, size_t _N>
 typename Point<_Tp, _N>::const_iterator Point<_Tp, _N>::cbegin() const {
-    return coords.cbegin();
+    return coords_.cbegin();
 }
 
 template <typename _Tp, size_t _N>
 typename Point<_Tp, _N>::iterator Point<_Tp, _N>::end() {
-    return coords.end();
+    return coords_.end();
 }
 
 template <typename _Tp, size_t _N>
 typename Point<_Tp, _N>::const_iterator Point<_Tp, _N>::cend() const {
-    return coords.cend();
+    return coords_.cend();
 }
 
 template <typename _Tp, size_t _N>
@@ -264,7 +264,7 @@ _Tp Point<_Tp, _N>::manDist(const Point<_Tp, _N>& one, const Point<_Tp, _N>& two
 
 template <typename _Tp, size_t _N>
 bool Point<_Tp, _N>::operator == (const Point<_Tp, _N>& rhs) const {
-    return coords == rhs.coords;
+    return coords_ == rhs.coords_;
 }
 
 template <typename _Tp, size_t _N>

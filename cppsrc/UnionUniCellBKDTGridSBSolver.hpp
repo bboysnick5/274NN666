@@ -18,7 +18,7 @@
 
 
 template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType,
-          class dist_type, Def::Threading_Policy policy>
+          class dist_type, def::ThreadingPolicy policy>
 class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy> {
 public:
     UnionUniCellBKDTGridSBSolver(dist_type = 1.0, size_t = 1500);
@@ -31,9 +31,9 @@ private:
     std::size_t totalCacheCells;
     virtual void fillGridCache() override final;
     virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<Def::Threading_Policy::SINGLE>) override final;
+                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<def::ThreadingPolicy::kSingle>) override final;
     virtual void loopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<Def::Threading_Policy::MULTI_OMP>) override final;
+                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<def::ThreadingPolicy::kMultiOmp>) override final;
     void ompLoopCollapsePrep();
 };
 
