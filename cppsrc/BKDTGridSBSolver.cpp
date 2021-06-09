@@ -17,12 +17,12 @@
 //#include <omp.h>
 #include "BKDTGridSBSolver.hpp"
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 BKDTGridSBSolver<KDTType, dist_type>::BKDTGridSBSolver(dist_type alpc) : GridSBSolver<dist_type>(alpc) {}
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator
-BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, size_t c0, dist_type diffSq,
+BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(std::size_t r0, std::size_t c0, dist_type diffSq,
                                                                   typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator begin) {
     dist_type rowDistCellCtrGridCtr = ((r0+ 0.5 - this->rowSize/2 )*this->sideLen),
            colDistCellCtrGridCtr = ((c0 + 0.5 -this->colSize/2)*this->sideLen);
@@ -33,23 +33,23 @@ BKDTGridSBSolver<KDTType, dist_type>::cacheAllPossibleLocsOneCell(size_t r0, siz
         cellCtrLng}), diffSq, begin);
 }
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-void BKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void BKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
     gridTreeCache = std::vector<KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>>
                     (this->rowSize*this->colSize);
     gridSingleCache = std::vector<const SBLoc<dist_type>*>(this->rowSize*this->colSize);
     std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type> ptLocPairs(this->numLocs);
-    size_t totalTreeSize = 0, singleLocs = 0;
+    std::size_t totalTreeSize = 0, singleLocs = 0;
     dist_type diffSq = xyzDistSqFromSideLen();
 //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
 //default(none) schedule(guided) shared(diffSq) firstprivate(ptLocPairs) \
 //reduction(+:totalTreeSize, singleLocs) collapse(2)
-    for (size_t r = 0; r < this->rowSize; ++r) {
-        for (size_t c = 0; c < this->colSize; ++c) {
-            size_t idx = r*this->colSize+c;
+    for (std::size_t r = 0; r < this->rowSize; ++r) {
+        for (std::size_t c = 0; c < this->colSize; ++c) {
+            std::size_t idx = r*this->colSize+c;
             auto locsEnd = cacheAllPossibleLocsOneCell(r, c, diffSq,
                                                        ptLocPairs.begin());
-            size_t locsSize = locsEnd - ptLocPairs.begin();
+            std::size_t locsSize = locsEnd - ptLocPairs.begin();
             if (locsSize > 1) {
                 gridTreeCache[idx] = KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>
                     (ptLocPairs.begin(), locsEnd);
@@ -60,13 +60,13 @@ void BKDTGridSBSolver<KDTType, dist_type>::fillGridCache() {
             totalTreeSize += locsSize;
         }
     }
-    size_t multiLocs = this->rowSize*this->colSize - singleLocs;
+    std::size_t multiLocs = this->rowSize*this->colSize - singleLocs;
     std::cout << "ave tree size: " << totalTreeSize/(this->rowSize*this->colSize)
               << "\nSingle loc cells: " << singleLocs
               << "\nMulti-loc cells:" << multiLocs << std::endl;
 }
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 dist_type BKDTGridSBSolver<KDTType, dist_type>::xyzDistSqFromSideLen() {
     dist_type lat2 = SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(this->sideLen*sqrt(2));
     return Point<dist_type, 3>::template
@@ -74,8 +74,8 @@ dist_type BKDTGridSBSolver<KDTType, dist_type>::xyzDistSqFromSideLen() {
                                              SBLoc<dist_type>::geoPtToCart3DPt({lat2, 0.0}));
 }
  
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-void BKDTGridSBSolver<KDTType, dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+void BKDTGridSBSolver<KDTType, dist_type>::Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
@@ -87,18 +87,18 @@ void BKDTGridSBSolver<KDTType, dist_type>::build(const std::shared_ptr<std::vect
     this->rowSize = sqrt(locData->size()) / this->AVE_LOC_PER_CELL;
     this->sideLen = 
     SBLoc<dist_type>::havDist({this->minLat, 0.0}, {this->maxLat, 0.0}) / this->rowSize;
-    dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * cos(this->minLat < 0 ? 0 : this->minLat);
+    dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * std::cos(this->minLat < 0 ? 0 : this->minLat);
     dist_type longestColDistSpan = 2 * def::kMathPi<dist_type> * lowestLatCircleRadius *
                                 (std::fabs(this->maxLng - this->minLng)/(2*def::kMathPi<dist_type>));
     this->colSize = longestColDistSpan/this->sideLen + 1;
     
-    fillGridCache();
+    FillGridCache();
 }
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
-const SBLoc<dist_type>* BKDTGridSBSolver<KDTType, dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+const SBLoc<dist_type>* BKDTGridSBSolver<KDTType, dist_type>::FindNearestLoc(const Point<dist_type, 2>& geoSearchPt) const {
     auto idxPr = this->getIdx(geoSearchPt[1], geoSearchPt[0]);
-    size_t idx = idxPr.first*this->colSize+idxPr.second;
+    std::size_t idx = idxPr.first*this->colSize+idxPr.second;
     auto singleLoc = gridSingleCache[idx];
     return singleLoc != nullptr ? singleLoc :
            gridTreeCache[idx].kNNValue(SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt), 1);

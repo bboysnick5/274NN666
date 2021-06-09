@@ -25,7 +25,7 @@
  * The maximum size of the bounded priority queue can be obtained
  * using the maxSize() function, as in
  *
- * size_t k = bpq.maxSize();
+ * std::size_t k = bpq.maxSize();
  *
  * Beyond these restrictions, the bounded priority queue behaves
  * similarly to other containers.  You can query its size using
@@ -65,13 +65,13 @@
 template <typename T, typename dist_type>
 class BoundedPQueue {
 public:
-    // Constructor: BoundedPQueue(size_t maxSize);
+    // Constructor: BoundedPQueue(std::size_t maxSize);
     // Usage: BoundedPQueue<int> bpq(15);
     // --------------------------------------------------
     // Constructs a new, empty BoundedPQueue with
     // maximum size equal to the constructor argument.
     ///
-    explicit BoundedPQueue(size_t maxSize);
+    explicit BoundedPQueue(std::size_t maxSize);
     
     // void enqueue(const T& value, dist_type priority);
     // Usage: bpq.enqueue("Hi!", 2.71828);
@@ -91,21 +91,21 @@ public:
     // from the queue.
     T dequeueMin();
     
-    // size_t size() const;
+    // std::size_t size() const;
     // bool empty() const;
     // Usage: while (!bpq.empty()) { ... }
     // --------------------------------------------------
     // Returns the number of elements in the queue and whether
     // the queue is empty, respectively.
-    size_t size() const;
+    std::size_t size() const;
     bool empty() const;
     
-    // size_t maxSize() const;
-    // Usage: size_t queueSize = bpq.maxSize();
+    // std::size_t maxSize() const;
+    // Usage: std::size_t queueSize = bpq.maxSize();
     // --------------------------------------------------
     // Returns the maximum number of elements that can be
     // stored in the queue.
-    size_t maxSize() const;
+    std::size_t maxSize() const;
     
     // dist_type best() const;
     // dist_type worst() const;
@@ -127,13 +127,13 @@ private:
     // This class is layered on top of a multimap mapping from priorities
     // to elements with those priorities.
     std::multimap<dist_type, T> elems;
-    size_t maximumSize;
+    std::size_t maximumSize;
 };
 
 /** BoundedPQueue class implementation details */
 
 template <typename T, typename dist_type>
-BoundedPQueue<T, dist_type>::BoundedPQueue(size_t maxSize) {
+BoundedPQueue<T, dist_type>::BoundedPQueue(std::size_t maxSize) {
     maximumSize = maxSize;
 }
 
@@ -169,7 +169,7 @@ T BoundedPQueue<T, dist_type>::dequeueMin() {
 
 // size() and empty() call directly down to the underlying map.
 template <typename T, typename dist_type>
-size_t BoundedPQueue<T, dist_type>::size() const {
+std::size_t BoundedPQueue<T, dist_type>::size() const {
     return elems.size();
 }
 
@@ -180,7 +180,7 @@ bool BoundedPQueue<T, dist_type>::empty() const {
 
 // maxSize just returns the appropriate data member.
 template <typename T, typename dist_type>
-size_t BoundedPQueue<T, dist_type>::maxSize() const {
+std::size_t BoundedPQueue<T, dist_type>::maxSize() const {
     return maximumSize;
 }
 

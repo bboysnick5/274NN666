@@ -17,19 +17,19 @@
 #include <iterator>
 
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType, dist_type> {
 public:
-    UniCellBKDTGridSBSolver(dist_type = 1.0, size_t = 1500);
-    //void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
-    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override final;
-    //virtual void printSolverInfo() const override;
+    UniCellBKDTGridSBSolver(dist_type = 1.0, std::size_t = 1500);
+    //void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
+    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override final;
+    //virtual void PrintSolverInfo() const override;
     virtual ~UniCellBKDTGridSBSolver() override {}
 
 
 private:
-    std::vector<std::pair<size_t, dist_type>> thisRowStartIdx;
-    void fillGridCache() override final;
+    std::vector<std::pair<std::size_t, dist_type>> thisRowStartIdx;
+    void FillGridCache() override final;
 };
 
 

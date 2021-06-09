@@ -39,7 +39,7 @@ template <typename dist_type>
 void GridSBSolver<dist_type>::constructGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     rowSize = sqrt(locData->size()) / AVE_LOC_PER_CELL;
     sideLen = SBLoc<dist_type>::havDist({minLat, 0.0}, {maxLat, 0.0}) / rowSize;
-    dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * cos(minLat);
+    dist_type lowestLatCircleRadius = SBLoc<dist_type>::EARTH_RADIUS * std::cos(minLat);
     dist_type longestColDistSpan = lowestLatCircleRadius *
                                 std::fabs(maxLng - minLng);
     colSize = longestColDistSpan/sideLen + 1;
@@ -48,7 +48,7 @@ void GridSBSolver<dist_type>::constructGrid(const std::shared_ptr<std::vector<SB
 }
 
 template <typename dist_type>
-std::pair<size_t, size_t> GridSBSolver<dist_type>::getIdx(dist_type lng, dist_type lat) const {
+std::pair<std::size_t, std::size_t> GridSBSolver<dist_type>::getIdx(dist_type lng, dist_type lat) const {
     dist_type unsignedRowDistFromCenter = SBLoc<dist_type>::havDist({lat, lng}, {midLat, lng}),
            unsignedColDistFromCenter = SBLoc<dist_type>::havDist({lat, lng}, {lat, midLng});
     return std::make_pair((lat < midLat ? -unsignedRowDistFromCenter :
@@ -68,7 +68,7 @@ void GridSBSolver<dist_type>::fillGrid(const std::shared_ptr<std::vector<SBLoc<d
 }
 
 template <typename dist_type>
-void GridSBSolver<dist_type>::build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
+void GridSBSolver<dist_type>::Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     findKeyLngLat(locData);
     constructGrid(locData);
     fillGrid(locData);
@@ -87,16 +87,16 @@ dist_type lng, dist_type lat, dist_type &minDist, const SBLoc<dist_type>* &best)
 }
 
 template <typename dist_type>
-const SBLoc<dist_type>* GridSBSolver<dist_type>::findNearest(const Point<dist_type, 2>& geoSearchPt) const {
+const SBLoc<dist_type>* GridSBSolver<dist_type>::FindNearestLoc(const Point<dist_type, 2>& geoSearchPt) const {
     auto idxPr = getIdx(geoSearchPt[1], geoSearchPt[0]);
-    size_t r0 = idxPr.first, c0 = idxPr.second;
+    std::size_t r0 = idxPr.first, c0 = idxPr.second;
     dist_type minDist = dist_type_MAX<dist_type>;
     const SBLoc<dist_type>* best = nullptr;
     // exact cell check
     NNOneCell(grid[r0][c0], geoSearchPt[1], geoSearchPt[0], minDist, best);
     
     // Spiral Search
-    for (size_t d = 1; ; ++d) {
+    for (std::size_t d = 1; ; ++d) {
         for (int r = std::max(0,static_cast<int>(r0-d)); r <= std::min(static_cast<int>(r0+d), static_cast<int>(rowSize)-1); ++r) {
             if (c0-d >= 0)
                 NNOneCell(grid[r][c0-d], geoSearchPt[1], geoSearchPt[0], minDist, best);

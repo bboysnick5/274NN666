@@ -42,7 +42,7 @@
 
 
 template <typename dist_type>
-std::vector<Point<dist_type, 2>> GenerateTestLatLngPts(size_t num_tests, std::mt19937_64& mt) {
+std::vector<Point<dist_type, 2>> GenerateTestLatLngPts(std::size_t num_tests, std::mt19937_64& mt) {
     std::uniform_real_distribution<dist_type> dist(0.0, 1.0);
     std::vector<Point<dist_type, 2>> test_lat_lng_pts;
     test_lat_lng_pts.reserve(num_tests + 4);
@@ -69,12 +69,12 @@ void AccuracyTestFromRefSolver(const std::vector<Point<dist_type, 2>> &test_lat_
                                const SBSolver<dist_type>& test_solver,
                                const std::chrono::duration<dist_type> &duration) {
     dist_type test_dist_err_total = 0.0, ref_dist_for_err_pts_total = 0.0;
-    size_t errot_count = 0;
+    std::size_t errot_count = 0;
     auto start_time = std::chrono::steady_clock::now();
     if (ref_locs.empty()) {
         ref_locs.reserve(1ull<<24);
         for (int locIdx = 0; locIdx < test_lat_lng_pts.size() && (std::chrono::steady_clock::now() - start_time < duration); ++locIdx) {
-            ref_locs.emplace_back(test_solver.findNearest(test_lat_lng_pts[locIdx]));
+            ref_locs.emplace_back(test_solver.FindNearestLoc(test_lat_lng_pts[locIdx]));
         }
         ref_locs.shrink_to_fit();
         std::cout << "A total number of " << ref_locs.size()
@@ -82,7 +82,7 @@ void AccuracyTestFromRefSolver(const std::vector<Point<dist_type, 2>> &test_lat_
     } else {
         for (int locIdx = 0; locIdx < ref_locs.size() && std::chrono::steady_clock::now() - start_time < duration; ++locIdx) {
             std::chrono::time_point<std::chrono::steady_clock> this_search_start_time = std::chrono::steady_clock::now();
-            const SBLoc<dist_type>* testLoc = test_solver.findNearest(test_lat_lng_pts[locIdx]);
+            const SBLoc<dist_type>* testLoc = test_solver.FindNearestLoc(test_lat_lng_pts[locIdx]);
             std::chrono::duration<dist_type, std::micro> this_search_duration = std::chrono::steady_clock::now() - this_search_start_time;
             dist_type test_dist, ref_dist;
             auto test_lat_lng_pt = test_lat_lng_pts[locIdx];
@@ -113,12 +113,12 @@ template <typename dist_type>
 void TimeBuild(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &loc_data_vec,
                SBSolver<dist_type> &solver) {
     std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-    solver.build(loc_data_vec);
+    solver.Build(loc_data_vec);
     std::chrono::duration<dist_type> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
     std::cout << std::regex_replace(typeid(solver).name(),
                                     std::regex("[A-Z]?[0-9]+|.$"), "")
               << std::endl << "Build time: " << elapsed_time_in_secs.count() << std::endl;
-    solver.printSolverInfo();
+    solver.PrintSolverInfo();
 }
 
 template <typename dist_type>
@@ -134,7 +134,7 @@ void TimeNNSearch(const SBSolver<dist_type> &solver, std::vector<Point<dist_type
          loc_idx < test_lat_lng_pts.size() && (total_elapsed_time_in_micro_secs = std::chrono::steady_clock::now() - startTime) < search_duration_in_secs;
          ++loc_idx) {
         std::chrono::time_point<std::chrono::steady_clock> this_search_start_time = std::chrono::steady_clock::now();
-        solver.findNearest(test_lat_lng_pts[loc_idx]);
+        solver.FindNearestLoc(test_lat_lng_pts[loc_idx]);
         per_search_time_vec_in_micro_secs.emplace_back(std::chrono::steady_clock::now() - this_search_start_time);
     }
     
@@ -160,7 +160,7 @@ void WriteResults(const char* argv[],
     std::transform(test_lat_lng_pts.cbegin(), test_lat_lng_pts.cend(),
                    std::ostream_iterator<std::string>(outrefLocPtrPerSearchTimePairVecs),
                    [&](const auto &p){
-                       const auto resultLoc = solver->findNearest(p);
+                       const auto resultLoc = solver->FindNearestLoc(p);
                        return std::to_string(p[0]) + " " + std::to_string(p[1]) + " " +
                        std::to_string(resultLoc->geoPt[0]) + " " + std::to_string(resultLoc->geoPt[1]) +
                        resultLoc->city + "," + resultLoc->addr + std::endl;});
@@ -177,15 +177,11 @@ void MainContent(int argc, const char * argv[]) {
     bool to_test_accuracy = argc < 6 ? def::kDefaultToTestAccuracy : std::tolower(argv[5][0]) == 'y';
     std::chrono::duration<dist_type> accuracy_test_time_in_secs(def::kDefaultAccuracyTestDurationInSecs);
     if (to_test_accuracy) {
-        try {
-            accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[5], std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
-        }   catch (std::invalid_argument e) {}
+        accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[5], std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
     }
     std::chrono::duration<dist_type> search_benchmark_duration_in_secs(def::kDefaultSearchBenchDurationInSecs);
     if (argc >= 6) {
-        try {
-            accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[6],  std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
-        } catch (std::invalid_argument e) {}
+        accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[6],  std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
     }
     std::ifstream inRefLatLngPtLocPairVec;
     if (argc >= 7)
@@ -261,7 +257,7 @@ void MainContent(int argc, const char * argv[]) {
     if (to_test_accuracy)
         accuracy_test_lat_lng_pts = GenerateTestLatLngPts<dist_type>(def::kMaxTestLocs, mt);
 
-    for (size_t i = 0; i < std::size(solvers); ++i) {
+    for (std::size_t i = 0; i < std::size(solvers); ++i) {
         TimeBuild(locData, *solvers[i]);
         TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, seed, search_benchmark_duration_in_secs);
         if (to_test_accuracy) {

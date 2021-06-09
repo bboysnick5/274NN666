@@ -19,14 +19,14 @@ template <typename dist_type>
 class GridSBSolver : public SBSolver<dist_type> {
     
 public:
-    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
+    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override;
     GridSBSolver(dist_type aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     
 protected:
     void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
-    std::pair<size_t, size_t> getIdx(dist_type lng, dist_type lat) const;
+    std::pair<std::size_t, std::size_t> getIdx(dist_type lng, dist_type lat) const;
 
     void constructGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
     void fillGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
@@ -36,7 +36,7 @@ protected:
     const dist_type AVE_LOC_PER_CELL;
     std::vector<std::vector<std::unordered_set<const SBLoc<dist_type>*>>> grid;
     dist_type sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
-    size_t rowSize, colSize, numLocs = 0;
+    std::size_t rowSize, colSize, numLocs = 0;
     
 private:
     static constexpr dist_type DISTORT_FACTOR = 0.95;

@@ -18,9 +18,9 @@
 template <typename dist_type>
 class SBSolver {
 public:
-    virtual void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) = 0;
-    virtual const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const = 0;
-    virtual void printSolverInfo() const = 0;
+    virtual void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) = 0;
+    virtual const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const = 0;
+    virtual void PrintSolverInfo() const = 0;
     virtual ~SBSolver() {}
 };
 

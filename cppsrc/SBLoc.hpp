@@ -64,7 +64,7 @@ struct SBLoc {
 
 template <typename dist_type>
 inline SBLoc<dist_type>::SBLoc(const Point<dist_type, 3> &pt) :
-geoPt(asin(pt[2]), lng(asin(pt[1]/cos(asin(pt[2]))))), city(""), addr("") {}
+geoPt(std::asin(pt[2]), lng(std::asin(pt[1]/std::cos(std::asin(pt[2]))))), city(""), addr("") {}
 
 
 template <typename dist_type>
@@ -124,7 +124,7 @@ template <typename dist_type>
 inline dist_type SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(dist_type dist) {
     dist_type c = dist/EARTH_RADIUS;
     dist_type sum = sin(c*0.5);
-    dist_type dLat = asin(sum)*2.0;
+    dist_type dLat = std::asin(sum)*2.0;
     return dLat;
 }
 
@@ -132,7 +132,7 @@ template <typename dist_type>
 inline dist_type SBLoc<dist_type>::lngFromSameLatHavDist(dist_type dist, dist_type lng1, dist_type lat) {
     dist_type c = dist/EARTH_RADIUS;
     dist_type sum = sin(c*0.5);
-    dist_type dLng = asin(sum/cos(lat))*2.0;
+    dist_type dLng = std::asin(sum/std::cos(lat))*2.0;
     return dLng + lng1;
 }
 
@@ -143,7 +143,7 @@ inline Point<dist_type, 3> SBLoc<dist_type>::locToCart3DPt() const {
 
 template <typename dist_type>
 inline Point<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const Point<dist_type, 2>& geoPt) {
-    return Point<dist_type, 3>{cos(geoPt[0])*cos(geoPt[1]), cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
+    return Point<dist_type, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
 }
 
 template <typename dist_type>
@@ -153,21 +153,21 @@ inline dist_type SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(dist_type lat1, dist
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
-    return 2.0 - 2.0 * (sin(lat1)*sin(lat2) + cos(lat1)*cos(lat2)*cos(deltaLng));
+    return 2.0 - 2.0 * (sin(lat1)*sin(lat2) + std::cos(lat1)*std::cos(lat2)*std::cos(deltaLng));
 }
 
 namespace std {
     template <typename dist_type>
     struct hash<SBLoc<dist_type>> {
-        size_t operator()(const SBLoc<dist_type>& l) const {
-            return (static_cast<size_t>((l.geoPt[0] + 0.5*def::kMathPi<dist_type>) * 1000000.0) << 20) +
-                    static_cast<size_t>((l.geoPt[1] + def::kMathPi<dist_type>) * 1000000.0);
+        std::size_t operator()(const SBLoc<dist_type>& l) const {
+            return (static_cast<std::size_t>((l.geoPt[0] + 0.5*def::kMathPi<dist_type>) * 1000000.0) << 20) +
+                    static_cast<std::size_t>((l.geoPt[1] + def::kMathPi<dist_type>) * 1000000.0);
         }
     };
     
     template <typename dist_type>
     struct hash<const SBLoc<dist_type>*> {
-        size_t operator()(const SBLoc<dist_type>* l) const {
+        std::size_t operator()(const SBLoc<dist_type>* l) const {
             return std::hash<SBLoc<dist_type>>()(*l);
         }
     };

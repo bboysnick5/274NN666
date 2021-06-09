@@ -21,10 +21,10 @@ class PooledAllocator {
     /* Minimum number of bytes requested at a time from the system.  Must be
      * multiple of WORDSIZE. */
     
-    constexpr static size_t WORDSIZE = 8;
-    constexpr static size_t BLOCKSIZE = 8192;
+    constexpr static std::size_t WORDSIZE = 8;
+    constexpr static std::size_t BLOCKSIZE = 8192;
     
-    size_t remaining; /* Number of bytes left in current block of storage. */
+    std::size_t remaining; /* Number of bytes left in current block of storage. */
     void *base;       /* Pointer to base of current block of storage. */
     void *loc;        /* Current location in block to next allocate memory. */
     
@@ -37,20 +37,20 @@ class PooledAllocator {
      * Returns a pointer to a piece of new memory of the given size in bytes
      * allocated from the pool.
      */
-    void *malloc(const size_t req_size, bool exact = true) {
+    void *malloc(const std::size_t req_size, bool exact = true) {
         /* Round size up to a multiple of wordsize.  The following expression
          only works for WORDSIZE that is a power of 2, by masking last bits of
          incremented size to zero.
          */
-        const size_t size = (req_size + (WORDSIZE - 1)) & ~(WORDSIZE - 1);
+        const std::size_t size = (req_size + (WORDSIZE - 1)) & ~(WORDSIZE - 1);
         
         /* Check whether a new block must be allocated.  Note that the first word
          of a block is reserved for a pointer to the previous block.
          */
         if (size > remaining) {
             /* Allocate new storage. */
-            const size_t blockSizeReq = size + sizeof(void *) + (WORDSIZE - 1);
-            const size_t blocksize = exact ? blockSizeReq :
+            const std::size_t blockSizeReq = size + sizeof(void *) + (WORDSIZE - 1);
+            const std::size_t blocksize = exact ? blockSizeReq :
                 ((blockSizeReq > BLOCKSIZE) ? blockSizeReq : BLOCKSIZE);
             
             // use the standard C malloc to allocate memory
@@ -64,7 +64,7 @@ class PooledAllocator {
             static_cast<void **>(m)[0] = base;
             base = m;
             
-            constexpr static size_t SIZE_OF_VOID_STAR = sizeof(void*);
+            constexpr static std::size_t SIZE_OF_VOID_STAR = sizeof(void*);
             remaining = blocksize - SIZE_OF_VOID_STAR;
             loc = static_cast<char *>(m) + SIZE_OF_VOID_STAR;
         }
@@ -147,12 +147,12 @@ public:
      * Returns: pointer (of type T*) to memory buffer
      */
     template <typename T>
-    T *allocateExact(const size_t count = 1) {
+    T *allocateExact(const std::size_t count = 1) {
         return static_cast<T *>(this->malloc(sizeof(T) * count));
     }
     
     template <typename T>
-    T *allocatePool(const size_t count = 1) {
+    T *allocatePool(const std::size_t count = 1) {
         return static_cast<T *>(this->malloc(sizeof(T) * count, false));
     }
 };

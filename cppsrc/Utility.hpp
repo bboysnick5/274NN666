@@ -24,7 +24,7 @@ class Utility {
 public:
     template <class _ForwardIterator, class _GetDist, class _Compare>
     static _ForwardIterator
-    custom_min_element(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
+    MinElementGivenDistFunc(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
         if (__first != __last) [[likely]] {
             _ForwardIterator __i = __first;
             auto __bestDist = __distFunc(*__first);
@@ -40,7 +40,7 @@ public:
     
     template <class _ForwardIterator, class _GetDist, class _Compare>
     static _ForwardIterator
-    custom_min_element_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
+    MinElementGivenDistFunc_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
         /* requires OPENMP 4.0+
         if (__first == __last) [[unlikely]]
             return __first;

@@ -15,12 +15,12 @@
 #include "GridSBSolver.hpp"
 #include "KDTree.hpp"
 
-template <template <class DT, size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
 class BKDTGridSBSolver : public GridSBSolver<dist_type> {
 public:
     BKDTGridSBSolver(dist_type aveLocPerCell = 1);
-    void build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* findNearest(const Point<dist_type, 2>&) const override;
+    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override;
     virtual ~BKDTGridSBSolver() override {}
 
     
@@ -28,9 +28,9 @@ private:
     std::vector<KDTType<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>> gridTreeCache;
     std::vector<const SBLoc<dist_type>*> gridSingleCache;
     typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator
-        cacheAllPossibleLocsOneCell(size_t, size_t, dist_type,
+        cacheAllPossibleLocsOneCell(std::size_t, std::size_t, dist_type,
                                     typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC>::node_type>::iterator);
-    void fillGridCache();
+    void FillGridCache();
     dist_type xyzDistSqFromSideLen();
     
     KDTree<dist_type, 3, const SBLoc<dist_type>*, Point<dist_type, 3>::DistType::EUC> sbKdt;
