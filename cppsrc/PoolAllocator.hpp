@@ -25,7 +25,7 @@ class PooledAllocator {
     constexpr static std::size_t BLOCKSIZE = 8192;
     
     std::size_t remaining; /* Number of bytes left in current block of storage. */
-    void *base;       /* Pointer to base of current block of storage. */
+    void *base;       /* PointNDer to base of current block of storage. */
     void *loc;        /* Current location in block to next allocate memory. */
     
     void internal_init() {

@@ -17,7 +17,7 @@
 template <typename dist_type>
 class BFSBSolver : public SBSolver<dist_type> {
 public:
-    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override;
+    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
     void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &sbData) override;
     void PrintSolverInfo() const override;
     

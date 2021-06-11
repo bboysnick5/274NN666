@@ -87,7 +87,7 @@ dist_type lng, dist_type lat, dist_type &minDist, const SBLoc<dist_type>* &best)
 }
 
 template <typename dist_type>
-const SBLoc<dist_type>* GridSBSolver<dist_type>::FindNearestLoc(const Point<dist_type, 2>& geoSearchPt) const {
+const SBLoc<dist_type>* GridSBSolver<dist_type>::FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
     auto idxPr = getIdx(geoSearchPt[1], geoSearchPt[0]);
     std::size_t r0 = idxPr.first, c0 = idxPr.second;
     dist_type minDist = dist_type_MAX<dist_type>;

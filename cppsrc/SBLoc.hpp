@@ -18,14 +18,14 @@
 template <typename dist_type>
 struct SBLoc {
     
-    Point<dist_type, 2> geoPt;
+    PointND<dist_type, 2> geoPt;
     std::string city;
     std::string addr;
     
     static constexpr dist_type EARTH_RADIUS = dist_type(6371.0);
     
     SBLoc() = default;
-    SBLoc(const Point<dist_type, 3>&);
+    SBLoc(const PointND<dist_type, 3>&);
     
     bool operator<(const SBLoc<dist_type> &other) const;
     
@@ -39,21 +39,21 @@ struct SBLoc {
     
     static dist_type havDist(const SBLoc<dist_type>&, const SBLoc<dist_type>&);
         
-    static dist_type havDist(const Point<dist_type, 2>& p1, const Point<dist_type, 2>& p2);
+    static dist_type havDist(const PointND<dist_type, 2>& p1, const PointND<dist_type, 2>& p2);
     
     dist_type havDist(const SBLoc<dist_type>& other) const;
     
-    dist_type havDist(const Point<dist_type, 2>& other) const;
+    dist_type havDist(const PointND<dist_type, 2>& other) const;
     
-    dist_type havDistComp(const Point<dist_type, 2>& other) const;
+    dist_type havDistComp(const PointND<dist_type, 2>& other) const;
 
     static dist_type deltaLatOnSameLngFromHavDist(dist_type dist);
     
     static dist_type lngFromSameLatHavDist(dist_type dist, dist_type lng1, dist_type lat);
     
-    Point<dist_type, 3> locToCart3DPt() const;
+    PointND<dist_type, 3> locToCart3DPt() const;
     
-    static Point<dist_type, 3> geoPtToCart3DPt(const Point<dist_type, 2>&);
+    static PointND<dist_type, 3> geoPtToCart3DPt(const PointND<dist_type, 2>&);
     
     static dist_type EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
     
@@ -63,7 +63,7 @@ struct SBLoc {
 
 
 template <typename dist_type>
-inline SBLoc<dist_type>::SBLoc(const Point<dist_type, 3> &pt) :
+inline SBLoc<dist_type>::SBLoc(const PointND<dist_type, 3> &pt) :
 geoPt(std::asin(pt[2]), lng(std::asin(pt[1]/std::cos(std::asin(pt[2]))))), city(""), addr("") {}
 
 
@@ -101,23 +101,23 @@ dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& other) const {
 }
 
 template <typename dist_type>
-dist_type SBLoc<dist_type>::havDist(const Point<dist_type, 2>& otherGeoPt) const {
-    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(geoPt, otherGeoPt, EARTH_RADIUS);
+dist_type SBLoc<dist_type>::havDist(const PointND<dist_type, 2>& otherGeoPt) const {
+    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(geoPt, otherGeoPt, EARTH_RADIUS);
 }
 
 template <typename dist_type>
-dist_type SBLoc<dist_type>::havDistComp(const Point<dist_type, 2>& otherGeoPt) const {
-    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAVCOMP>(geoPt, otherGeoPt, EARTH_RADIUS);
+dist_type SBLoc<dist_type>::havDistComp(const PointND<dist_type, 2>& otherGeoPt) const {
+    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAVCOMP>(geoPt, otherGeoPt, EARTH_RADIUS);
 }
 
 template <typename dist_type>
 inline dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
-    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(l1.geoPt, l2.geoPt, EARTH_RADIUS);
+    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(l1.geoPt, l2.geoPt, EARTH_RADIUS);
 }
 
 template <typename dist_type>
-inline dist_type SBLoc<dist_type>::havDist(const Point<dist_type, 2>& p1, const Point<dist_type, 2>& p2) {
-    return Point<dist_type, 2>::template dist<Point<dist_type, 2>::DistType::HAV>(p1, p2, EARTH_RADIUS);
+inline dist_type SBLoc<dist_type>::havDist(const PointND<dist_type, 2>& p1, const PointND<dist_type, 2>& p2) {
+    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(p1, p2, EARTH_RADIUS);
 }
 
 template <typename dist_type>
@@ -137,13 +137,13 @@ inline dist_type SBLoc<dist_type>::lngFromSameLatHavDist(dist_type dist, dist_ty
 }
 
 template <typename dist_type>
-inline Point<dist_type, 3> SBLoc<dist_type>::locToCart3DPt() const {
+inline PointND<dist_type, 3> SBLoc<dist_type>::locToCart3DPt() const {
     return geoPtToCart3DPt(geoPt);
 }
 
 template <typename dist_type>
-inline Point<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const Point<dist_type, 2>& geoPt) {
-    return Point<dist_type, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
+inline PointND<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const PointND<dist_type, 2>& geoPt) {
+    return PointND<dist_type, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
 }
 
 template <typename dist_type>

@@ -17,12 +17,12 @@
 #include <iterator>
 
 
-template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy> {
 public:
     UnionUniCellBKDTGridSBSolver(dist_type = 1.0, std::size_t = 1500);
-    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override final;
+    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override final;
     virtual ~UnionUniCellBKDTGridSBSolver() override {}
 
     

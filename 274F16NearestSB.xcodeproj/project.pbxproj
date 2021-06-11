@@ -61,6 +61,7 @@
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		8200D42B265CD1E2001A60C5 /* Definition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
+		8223DF2F267207C70029B47E /* 274F16NearestSB.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = 274F16NearestSB.profdata; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
 		823641461E00D1AE007AE0FD /* SBLoc.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SBLoc.hpp; sourceTree = "<group>"; };
@@ -95,6 +96,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8223DF2E267207C70029B47E /* OptimizationProfiles */ = {
+			isa = PBXGroup;
+			children = (
+				8223DF2F267207C70029B47E /* 274F16NearestSB.profdata */,
+			);
+			path = OptimizationProfiles;
+			sourceTree = "<group>";
+		};
 		82717C7A26537A5300D90DE7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -110,6 +119,7 @@
 				82A66E281E00383F00D5FAFD /* cppsrc */,
 				82717C7A26537A5300D90DE7 /* Frameworks */,
 				82A66E1F1E00382500D5FAFD /* Products */,
+				8223DF2E267207C70029B47E /* OptimizationProfiles */,
 			);
 			sourceTree = "<group>";
 		};
@@ -246,6 +256,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -297,6 +308,7 @@
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
+				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -321,6 +333,7 @@
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_COMMA = YES;
@@ -371,6 +384,7 @@
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
+				LLVM_LTO = NO;
 				MACOSX_DEPLOYMENT_TARGET = 11.4;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CFLAGS = (
@@ -390,6 +404,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CODE_SIGN_IDENTITY = "-";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_VERSION = "";
@@ -411,11 +426,11 @@
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
 				);
+				LLVM_LTO = NO;
 				OTHER_CFLAGS = (
 					"-ltbb",
 					"-Xclang",
 					"-fopenmp",
-					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -427,6 +442,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++20";
+				CLANG_USE_OPTIMIZATION_PROFILE = NO;
 				CODE_SIGN_IDENTITY = "-";
 				GCC_C_LANGUAGE_STANDARD = c11;
 				GCC_OPTIMIZATION_LEVEL = fast;
@@ -450,11 +466,11 @@
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
 				);
+				LLVM_LTO = NO;
 				OTHER_CFLAGS = (
 					"-ltbb",
 					"-Xclang",
 					"-fopenmp",
-					"-lomp",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};

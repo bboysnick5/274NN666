@@ -20,7 +20,7 @@ class GridSBSolver : public SBSolver<dist_type> {
     
 public:
     void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override;
+    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
     GridSBSolver(dist_type aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     

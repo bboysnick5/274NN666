@@ -17,7 +17,7 @@ void BFSBSolver<dist_type>::Build(const std::shared_ptr<std::vector<SBLoc<dist_t
 }
 
 template <typename dist_type>
-const SBLoc<dist_type>* BFSBSolver<dist_type>::FindNearestLoc(const Point<dist_type, 2>& geoSearchPt) const {
+const SBLoc<dist_type>* BFSBSolver<dist_type>::FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
     return &*Utility::MinElementGivenDistFunc_p(locData->cbegin(), locData->cend(),
                                          [&geoSearchPt](const SBLoc<dist_type>& l) {return l.havDistComp(geoSearchPt);},
                                          std::less<dist_type>());

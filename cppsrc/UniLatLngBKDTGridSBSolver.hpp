@@ -18,12 +18,12 @@
 #include <variant>
 
 
-template <template <class DT, std::size_t, class, typename Point<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
 public:
     UniLatLngBKDTGridSBSolver(dist_type = 1, std::size_t = 1500);
     void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const Point<dist_type, 2>&) const override;
+    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
     virtual void PrintSolverInfo() const override final;
     virtual ~UniLatLngBKDTGridSBSolver() override {}
 
@@ -39,7 +39,7 @@ protected:
     void calcSideLenFromAlpc();
     void FillCacheCell(dist_type, dist_type, dist_type,
                        std::vector<typename KDT<KDTType, dist_type>::node_type>&);
-    const SBLoc<dist_type>* ReturnNNLocFromCacheVariant(const Point<dist_type, 2>&,
+    const SBLoc<dist_type>* ReturnNNLocFromCacheVariant(const PointND<dist_type, 2>&,
           const std::variant<std::vector<typename KDT<KDTType, dist_type>::node_type>,
           const SBLoc<dist_type>*, KDT<KDTType, dist_type>>&) const;
     

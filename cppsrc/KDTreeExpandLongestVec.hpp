@@ -37,8 +37,8 @@
 #include <array>
 
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT
-= Point<_Tp, N>::DistType::EUC>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT
+= PointND<_Tp, N>::DistType::EUC>
 class KDTreeExpandLongestVec {
 public:
     
@@ -48,7 +48,7 @@ public:
 
     
     struct node_type {
-        Point<value_type, N> key;
+        PointND<value_type, N> key;
         ElemType value;
     };
     
@@ -117,7 +117,7 @@ public:
     // ----------------------------------------------------
     // Returns the dimension of the points stored in this KDTreeExpandLongestVec.
     constexpr std::size_t dimension() const;
-    typename Point<value_type, N>::DistType distType() const;
+    typename PointND<value_type, N>::DistType distType() const;
     
     // std::size_t size() const;
     // std::size_t height() const;
@@ -140,47 +140,47 @@ public:
     
     void printTreeInfo() const;
     
-    // bool contains(const Point<_Tp, N>& pt) const;
+    // bool contains(const PointND<_Tp, N>& pt) const;
     // Usage: if (kd.contains(pt))
     // ----------------------------------------------------
     // Returns whether the specified point is contained in the KDTreeExpandLongestVec.
-    bool contains(const Point<value_type, N>&) const;
+    bool contains(const PointND<value_type, N>&) const;
     
-    // void insert(const Point<_Tp, N>& pt, const ElemType& value);
+    // void insert(const PointND<_Tp, N>& pt, const ElemType& value);
     // Usage: kd.insert(v, "This value is associated with v.");
     // ----------------------------------------------------
     // Inserts the point pt into the KDTreeExpandLongestVec, associating it with the specified
     // value. If the element already existed in the tree, the new value will
     // overwrite the existing one.
-    void insert(const Point<value_type, N>&, const ElemType&);
+    void insert(const PointND<value_type, N>&, const ElemType&);
     
-    // ElemType& operator[](const Point<_Tp, N>& pt);
+    // ElemType& operator[](const PointND<_Tp, N>& pt);
     // Usage: kd[v] = "Some Value";
     // ----------------------------------------------------
     // Returns a reference to the value associated with point pt in the KDTreeExpandLongestVec.
     // If the point does not exist, then it is added to the KDTreeExpandLongestVec using the
     // default value of ElemType as its key.
-    ElemType& operator[](const Point<value_type, N>& pt);
+    ElemType& operator[](const PointND<value_type, N>& pt);
     
-    // ElemType& at(const Point<_Tp, N>& pt);
-    // const ElemType& at(const Point<_Tp, N>& pt) const;
+    // ElemType& at(const PointND<_Tp, N>& pt);
+    // const ElemType& at(const PointND<_Tp, N>& pt) const;
     // Usage: cout << kd.at(v) << endl;
     // ----------------------------------------------------
     // Returns a reference to the key associated with the point pt. If the point
     // is not in the tree, this function //throws an out_of_range exception.
-    ElemType& at(const Point<value_type, N>& pt);
-    const ElemType& at(const Point<value_type, N>& pt) const;
+    ElemType& at(const PointND<value_type, N>& pt);
+    const ElemType& at(const PointND<value_type, N>& pt) const;
     
-    // ElemType kNNValue(const Point<_Tp, N>& key, std::size_t k) const
+    // ElemType kNNValue(const PointND<_Tp, N>& key, std::size_t k) const
     // Usage: cout << kd.kNNValue(v, 3) << endl;
     // ----------------------------------------------------
     // Given a point v and an integer k, finds the k points in the KDTreeExpandLonge*stVec
     // nearest to v and returns the most common value associated with those
     // points. In the event of a tie, one of the most frequent value will be
     // chosen.
-    ElemType kNNValue(const Point<value_type, N>& key, std::size_t k) const;
+    ElemType kNNValue(const PointND<value_type, N>& key, std::size_t k) const;
     
-    // Iter rangeDiffKNNPairs(const Point<_Tp, N>&, _Tp, Iter) const
+    // Iter rangeDiffKNNPairs(const PointND<_Tp, N>&, _Tp, Iter) const
     // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
     // ----------------------------------------------------
     // Given a point p and a value_type fence IN SQUARE, fill the container iterator result
@@ -189,7 +189,7 @@ public:
     // and return the iterator with final value +1 position.
     // The forward iterator is passed in and filled and the end will be returned.
     template <class Forward_Iter>
-    Forward_Iter rangeDiffKNNPairs(const Point<value_type, N>& p, value_type fenseSq, Forward_Iter result) const;
+    Forward_Iter rangeDiffKNNPairs(const PointND<value_type, N>& p, value_type fenseSq, Forward_Iter result) const;
     
 private:
     
@@ -197,7 +197,7 @@ private:
     struct TreeNode {
         unsigned int rightIdx;
         unsigned int dimToExpand;
-        Point<value_type, N> key;
+        PointND<value_type, N> key;
         bool operator==(const TreeNode&) const = default;
         bool operator!=(const TreeNode&) const = default;
     };
@@ -226,37 +226,37 @@ private:
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
-    void kNNValueHelper(TreeNode *cur, std::size_t dim, const Point<value_type, N> &pt,
+    void kNNValueHelper(TreeNode *cur, std::size_t dim, const PointND<value_type, N> &pt,
                         BoundedPQueue<ElemType, value_type> &bpq) const;
     
     // ----------------------------------------------------
     // Identical to kNNValue method with k equals 1. NNValue
     // and its helper method are used to speed up the search
     // when finding the nearest neighbor only.
-    ElemType NNValue(const Point<value_type, N>& key) const;
+    ElemType NNValue(const PointND<value_type, N>& key) const;
     
-    template <typename Point<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt == Point<value_type, N>::DistType::EUC, int>::type = 0>
-    void NNValueHelper(TreeNode*, std::size_t, const Point<value_type, N>&,
+    template <typename PointND<value_type, N>::DistType thisDt = DT,
+    typename std::enable_if<thisDt == PointND<value_type, N>::DistType::EUC, int>::type = 0>
+    void NNValueHelper(TreeNode*, std::size_t, const PointND<value_type, N>&,
                        const ElemType *&, value_type&) const;
     
-    template <typename Point<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt != Point<value_type, N>::DistType::EUC, int>::type = 0>
-    void NNValueHelper(TreeNode*, std::size_t, const Point<value_type, N>&,
+    template <typename PointND<value_type, N>::DistType thisDt = DT,
+    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::EUC, int>::type = 0>
+    void NNValueHelper(TreeNode*, std::size_t, const PointND<value_type, N>&,
                        const ElemType*&, value_type&) const;
     
     
-    // TreeNode** findNodePtr(const Point<_Tp, N>& pt);
-    // TreeNode*const* findNodePtr(const Point<_Tp, N>& pt) const;
+    // TreeNode** findNodePtr(const PointND<_Tp, N>& pt);
+    // TreeNode*const* findNodePtr(const PointND<_Tp, N>& pt) const;
     // Usage: TreeNode **nodePtr = findNodePtr(pt);
     // ----------------------------------------------------
     // Returns the pointer pointing to the node address
-    // corresponding to the given Point. In this _Tp pointing
+    // corresponding to the given PointND. In this _Tp pointing
     // fashion, we can construct a node at that location.
-    TreeNode** findNodePtr(const Point<value_type, N>& pt);
-    TreeNode*const* findNodePtr(const Point<value_type, N>& pt) const;
+    TreeNode** findNodePtr(const PointND<value_type, N>& pt);
+    TreeNode*const* findNodePtr(const PointND<value_type, N>& pt) const;
     
-    value_type branchMin(const Point<value_type, N>&, const Point<value_type, N>&, std::size_t) const;
+    value_type branchMin(const PointND<value_type, N>&, const PointND<value_type, N>&, std::size_t) const;
     
 };
 
@@ -267,14 +267,14 @@ private:
 // ----------------------- BIG FIVE -------------------------
 // ----------------------------------------------------------
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec() {
     size_ = cap_ = 0;
     ndVec_ = nullptr;
     objVec_ = nullptr;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : size_(rhs.size_), cap_(rhs.cap_) {
     ndVec_ = new TreeNode[size_];
@@ -283,7 +283,7 @@ KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : size_(rhs.size_), ca
     std::uninitialized_copy_n(rhs.objVec_, size_, objVec_);
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>&
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLongestVec& rhs) noexcept {
     if (this != &rhs) [[likely]] {
@@ -297,7 +297,7 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator=(const KDTreeExpandLonges
     return *this;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 KDTreeExpandLongestVec(KDTreeExpandLongestVec&& rhs) noexcept
 : ndVec_(rhs.ndVec_), objVec_(rhs.objVec_), size_(rhs.size_), cap_(rhs.cap_) {
@@ -306,7 +306,7 @@ KDTreeExpandLongestVec(KDTreeExpandLongestVec&& rhs) noexcept
     rhs.size_ = rhs.cap_ = 0;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 operator=(KDTreeExpandLongestVec&& rhs) noexcept {
     if (this != &rhs) [[likely]] {
@@ -322,19 +322,19 @@ operator=(KDTreeExpandLongestVec&& rhs) noexcept {
     return *this;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::~KDTreeExpandLongestVec() {
     deAlloc();
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::deAlloc() {
     delete[] ndVec_;
     std::destroy_n(objVec_, size_);
     ::operator delete(static_cast<void*>(objVec_));
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 template <typename Const_RAI,
 typename std::enable_if<std::is_same<typename std::iterator_traits<typename
 std::remove_const_t<Const_RAI>>::iterator_category,
@@ -362,7 +362,7 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(Const_RAI c
     rangeCtorHelper(curNd, curObj, constructData.begin(), constructData.end(), lows, highs, spans);
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 template <typename RAI, typename std::enable_if<std::is_same<typename
 std::iterator_traits<RAI>::iterator_category,
 std::random_access_iterator_tag>::value
@@ -460,7 +460,7 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, 
     */
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 template <class Const_RAI>
 std::tuple<std::array<_Tp, N>, std::array<_Tp, N>, std::array<_Tp, N>> KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 computeInitBBoxSpans(Const_RAI begin, Const_RAI end) {
@@ -479,7 +479,7 @@ computeInitBBoxSpans(Const_RAI begin, Const_RAI end) {
     return {lows, highs, spans};
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
 rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
@@ -506,19 +506,21 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
         spans[dim] = prevDimHigh - lows[dim];
     }
     
-    if (median + 2 == end) {
-        ndPtrThisIter->rightIdx = static_cast<unsigned int>(curNd - ndVec_);
-        *curNd++ = {0, N, std::move((median+1)->key)};
-        new (curObj++) ElemType (std::move((median+1)->value));
-    } else if (median + 1 != end) {
-        ndPtrThisIter->rightIdx = static_cast<unsigned int>(curNd - ndVec_);
-        _Tp curValOnDim = ndPtrThisIter->key[dim];
-        auto prevDimLow = lows[dim];
-        lows[dim] = curValOnDim;
-        spans[dim] = highs[dim] - curValOnDim;
-        rangeCtorHelper(curNd, curObj, median+1, end, lows, highs, spans);
-        lows[dim] = prevDimLow;
-        spans[dim] = highs[dim] - prevDimLow;
+    if (median + 1 != end) {
+        if (median + 2 == end) {
+            ndPtrThisIter->rightIdx = static_cast<unsigned int>(curNd - ndVec_);
+            *curNd++ = {0, N, std::move((median+1)->key)};
+            new (curObj++) ElemType (std::move((median+1)->value));
+        } else {
+            ndPtrThisIter->rightIdx = static_cast<unsigned int>(curNd - ndVec_);
+            _Tp curValOnDim = ndPtrThisIter->key[dim];
+            auto prevDimLow = lows[dim];
+            lows[dim] = curValOnDim;
+            spans[dim] = highs[dim] - curValOnDim;
+            rangeCtorHelper(curNd, curObj, median+1, end, lows, highs, spans);
+            lows[dim] = prevDimLow;
+            spans[dim] = highs[dim] - prevDimLow;
+        }
     }
 }
 
@@ -527,58 +529,58 @@ rangeCtorHelper(TreeNode *&curNd, ElemType *&curObj, RAI begin, RAI end,
 // ----------------- TREE INFORMATION  ----------------------
 // ----------------------------------------------------------
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 constexpr std::size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::dimension() const {
     return N;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-typename Point<_Tp, N>::DistType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::distType() const {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+typename PointND<_Tp, N>::DistType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::distType() const {
     return DT;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 std::size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::size() const {
     return size_;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 std::size_t KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::cap() const {
     return cap_;
 }
 
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 int KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::height() const {
     const TreeNode *root = &ndVec_[0];
     return heightHelper(root);
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 int KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::heightHelper(const TreeNode *n) const {
     //return n ? 1 + std::max(heightHelper(n->left), heightHelper(n->right)) : -1;
     return 1;
 }
 
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::empty() const {
     return size_ == 0;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator==(const KDTreeExpandLongestVec& rhs) const {
     if (size_ != rhs.size_)
         return false;
     return std::equal(objVec_, objVec_ + size_, rhs.objVec_) && std::equal(ndVec_, ndVec_ + size_, rhs.ndVec_);
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator!=(const KDTreeExpandLongestVec& rhs) const {
     return !(*this == rhs);
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::printTreeInfo() const {
     std::cout << "Tree height is " << height()
     << "\nTree size is " << size() << "\n";
@@ -588,14 +590,14 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::printTreeInfo() const {
 // ----------------- MODIFIERS AND ACCESS -------------------
 // ----------------------------------------------------------
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::clear() {
     std::destroy_n(ndVec_, size_);
     std::destroy_n(objVec_, size_);
     size_ = 0;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::shrink_to_fit() {
     if (cap_ > size_) {
         // TO DO
@@ -606,9 +608,9 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::shrink_to_fit() {
 }
 
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-insert(const Point<_Tp, N>& pt, const ElemType& value) {
+insert(const PointND<_Tp, N>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
         //(*ndPtr)->object = value;
@@ -618,13 +620,13 @@ insert(const Point<_Tp, N>& pt, const ElemType& value) {
     }
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::contains(const Point<_Tp, N>& pt) const {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+bool KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::contains(const PointND<_Tp, N>& pt) const {
     return *findNodePtr(pt) != nullptr;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator[] (const Point<_Tp, N>& pt) {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator[] (const PointND<_Tp, N>& pt) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
         *ndPtr = new TreeNode(pt, ElemType());
@@ -633,13 +635,13 @@ ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::operator[] (const Point<
     return (*ndPtr)->object;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::at(const Point<_Tp, N>& pt) {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::at(const PointND<_Tp, N>& pt) {
     return const_cast<ElemType&>(static_cast<const KDTreeExpandLongestVec&>(*this).at(pt));
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-const ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::at(const Point<_Tp, N>& pt) const {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+const ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::at(const PointND<_Tp, N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
         //throw out_of_range("The point is out of range");
@@ -647,15 +649,15 @@ const ElemType& KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::at(const Point<_Tp
     return (*n)->object;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::TreeNode**
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::findNodePtr(const Point<_Tp, N>& pt) {
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::findNodePtr(const PointND<_Tp, N>& pt) {
     return const_cast<TreeNode**>(static_cast<const KDTreeExpandLongestVec*>(this)->findNodePtr(pt));
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::TreeNode*const*
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::findNodePtr(const Point<_Tp, N>& pt) const {
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::findNodePtr(const PointND<_Tp, N>& pt) const {
     //TreeNode *const*n = &root;
     TreeNode *const*n;
     for (std::size_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1){}
@@ -664,9 +666,9 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::findNodePtr(const Point<_Tp, N>& p
 }
 
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-kNNValue(const Point<_Tp, N>& pt, std::size_t k) const {
+kNNValue(const PointND<_Tp, N>& pt, std::size_t k) const {
     //if (empty())
     //    return ElemType();
     if (k == 1)
@@ -713,10 +715,10 @@ kNNValue(const Point<_Tp, N>& pt, std::size_t k) const {
      return frequent; */
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, std::size_t dim,
-                                                             const Point<_Tp, N>& pt, BoundedPQueue<ElemType, _Tp> &bpq) const {
-    bpq.enqueue(cur->object, Point<_Tp, N>::template dist<DT>(cur->key, pt));
+                                                             const PointND<_Tp, N>& pt, BoundedPQueue<ElemType, _Tp> &bpq) const {
+    bpq.enqueue(cur->object, PointND<_Tp, N>::template dist<DT>(cur->key, pt));
     std::size_t nextDim = dim + 1 < N ? dim + 1 : 0;
     TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
     if (next)
@@ -729,10 +731,10 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::kNNValueHelper(TreeNode *cur,
     }
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 template <class OutputIter>
 OutputIter KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence_sq, OutputIter out_nd_type_it) const {
+rangeDiffKNNPairs(const PointND<_Tp, N>& pt, _Tp fence_sq, OutputIter out_nd_type_it) const {
     
     struct ActRecord {
         _Tp dist;
@@ -745,14 +747,14 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence_sq, OutputIter out_nd_type_
     const std::size_t MAX_DISTPTELEMS_ON_STACK = 1152;
     struct DistKV {
         _Tp dist;
-        const Point<_Tp, N>* pt;
+        const PointND<_Tp, N>* pt;
         const ElemType* elem;
     } result_dist_kv_arr[MAX_DISTPTELEMS_ON_STACK], *result_dist_kv_arr_it = result_dist_kv_arr,
       *result_dist_kv_arr_end = result_dist_kv_arr + MAX_DISTPTELEMS_ON_STACK;
     std::vector<DistKV> result_dist_kv_vec;
    
     while (true) {
-        _Tp curDistSq = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+        _Tp curDistSq = PointND<_Tp, N>::template dist<PointND<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
         if (curDistSq < best_dist_plus_fence_sq) {
             if (curDistSq < best_dist_sq) {
                 best_dist_sq = curDistSq;
@@ -777,27 +779,26 @@ rangeDiffKNNPairs(const Point<_Tp, N>& pt, _Tp fence_sq, OutputIter out_nd_type_
             }
         } else if (cur++->dimToExpand == N) {
             do {
-                if (act_record_it == act_record_stack) [[unlikely]]
-                    goto FINAL;
+                if (act_record_it == act_record_stack) [[unlikely]] {
+                    std::for_each(result_dist_kv_vec.begin(), result_dist_kv_vec.end(), [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+                        if (dpe.dist < best_dist_plus_fence_sq)
+                            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
+                    });
+                    std::for_each(result_dist_kv_arr, result_dist_kv_arr_it, [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+                        if (dpe.dist < best_dist_plus_fence_sq)
+                            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
+                    });
+                    return out_nd_type_it;
+                }
             } while ((--act_record_it)->dist > best_dist_plus_fence_sq);
             cur = act_record_it->nd;
         }
     }
-    
-FINAL:
-    std::for_each(result_dist_kv_vec.begin(), result_dist_kv_vec.end(), [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
-        if (dpe.dist < best_dist_plus_fence_sq)
-            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
-    });
-    std::for_each(result_dist_kv_arr, result_dist_kv_arr_it, [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
-        if (dpe.dist < best_dist_plus_fence_sq)
-            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
-    });
     return out_nd_type_it;
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, N> &pt) const {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const PointND<_Tp, N> &pt) const {
     
     struct act_record {
         _Tp dist;
@@ -806,7 +807,7 @@ ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, 
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     // used cast not std::floor for speed
     const TreeNode *cur = ndVec_, *best_node = ndVec_;
-    _Tp cur_dist, best_dist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+    _Tp cur_dist, best_dist = PointND<_Tp, N>::template dist<PointND<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
     
     while (true) {
         if (unsigned int right_idx = cur->rightIdx) {
@@ -826,7 +827,7 @@ ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, 
             } while ((--act_record_it)->dist >= best_dist);
             cur = act_record_it->nd;
         }
-        cur_dist = Point<_Tp, N>::template dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+        cur_dist = PointND<_Tp, N>::template dist<PointND<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
         if (cur_dist < best_dist) {
             best_dist = cur_dist;
             best_node = cur;
@@ -835,14 +836,14 @@ ElemType KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::NNValue(const Point<_Tp, 
     return objVec_[best_node - ndVec_];
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <typename Point<_Tp, N>::DistType thisDt,
-typename std::enable_if<thisDt == Point<_Tp, N>::DistType::EUC, int>::type>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+template <typename PointND<_Tp, N>::DistType thisDt,
+typename std::enable_if<thisDt == PointND<_Tp, N>::DistType::EUC, int>::type>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-NNValueHelper(TreeNode *cur, std::size_t dim, const Point<_Tp, N> &pt,
+NNValueHelper(TreeNode *cur, std::size_t dim, const PointND<_Tp, N> &pt,
               const ElemType *&bestValue, _Tp &bestDist) const {
-    _Tp curDist = Point<_Tp, N>::template
-    dist<Point<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
+    _Tp curDist = PointND<_Tp, N>::template
+    dist<PointND<_Tp, N>::DistType::EUCSQ>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -859,13 +860,13 @@ NNValueHelper(TreeNode *cur, std::size_t dim, const Point<_Tp, N> &pt,
     }
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-template <typename Point<_Tp, N>::DistType thisDt,
-typename std::enable_if<thisDt != Point<_Tp, N>::DistType::EUC, int>::type>
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+template <typename PointND<_Tp, N>::DistType thisDt,
+typename std::enable_if<thisDt != PointND<_Tp, N>::DistType::EUC, int>::type>
 void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::
-NNValueHelper(TreeNode *cur, std::size_t dim, const Point<_Tp, N> &pt,
+NNValueHelper(TreeNode *cur, std::size_t dim, const PointND<_Tp, N> &pt,
               const ElemType *&bestValue, _Tp &bestDist) const {
-    _Tp curDist = Point<_Tp, N>::template dist<DT>(cur->key, pt);
+    _Tp curDist = PointND<_Tp, N>::template dist<DT>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -881,19 +882,19 @@ NNValueHelper(TreeNode *cur, std::size_t dim, const Point<_Tp, N> &pt,
     }
 }
 
-template <typename _Tp, std::size_t N, typename ElemType, typename Point<_Tp, N>::DistType DT>
-_Tp KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::branchMin(const Point<_Tp, N> &trPt,
-                                                          const Point<_Tp, N> &searchPt, std::size_t idx) const {
+template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
+_Tp KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::branchMin(const PointND<_Tp, N> &trPt,
+                                                          const PointND<_Tp, N> &searchPt, std::size_t idx) const {
     switch (DT) {
-        case Point<_Tp, N>::DistType::EUC:
-        case Point<_Tp, N>::DistType::MAN:
+        case PointND<_Tp, N>::DistType::EUC:
+        case PointND<_Tp, N>::DistType::MAN:
             return std::fabs(trPt[idx] - searchPt[idx]);
             /*
              case DistType::HAV:
-             Point<_Tp, N> pt;
+             PointND<_Tp, N> pt;
              pt[idx] = searchPt[idx];
              pt[1-idx] = trPt[1-idx];
-             return Point<_Tp, N>::havDist(trPt, pt);
+             return PointND<_Tp, N>::havDist(trPt, pt);
              */
     }
 }
