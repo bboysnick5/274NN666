@@ -68,25 +68,11 @@ public:
     // NOTE: The tree will not eliminate duplicates and the
     //       intended behavior will not be comprimised, tho
     //       less efficient with extra wasteful space.
-    template <typename RAI,
-    typename std::enable_if<
-    std::is_same<typename std::iterator_traits<RAI>::iterator_category,
-    std::random_access_iterator_tag>::value
-    && !std::is_const<typename std::remove_pointer<
-    typename std::iterator_traits<RAI>::pointer>::type>::value
-    && std::is_same<typename std::iterator_traits<RAI>::value_type, node_type>::value,
-    int>::type = 0>
+    template <typename RAI> requires std::random_access_iterator<RAI>
     KDTreeExpandLongestVec(RAI, RAI);
     
-    template <typename Const_RAI,
-    typename std::enable_if<
-    std::is_same<typename std::iterator_traits<typename std::remove_const_t<Const_RAI>>::iterator_category,
-    std::random_access_iterator_tag>::value
-    && std::is_const<typename std::remove_pointer<typename std::iterator_traits<Const_RAI>::pointer>
-    ::type>::value
-    && std::is_same<typename std::iterator_traits<Const_RAI>::value_type, node_type>::value,
-    int>::type = 0>
-    KDTreeExpandLongestVec(Const_RAI, Const_RAI);
+    template <typename ConstRAI> requires (std::random_access_iterator<ConstRAI> && def::const_iterator<ConstRAI>)
+    KDTreeExpandLongestVec(ConstRAI, ConstRAI);
     
     // Destructor: ~KDTreeExpandLongestVec()
     // Usage: (implicit)
@@ -335,16 +321,8 @@ void KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::deAlloc() {
 }
 
 template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
-template <typename Const_RAI,
-typename std::enable_if<std::is_same<typename std::iterator_traits<typename
-std::remove_const_t<Const_RAI>>::iterator_category,
-std::random_access_iterator_tag>::value
-&& std::is_const<typename std::remove_pointer<typename
-std::iterator_traits<Const_RAI>::pointer>::type>::value
-&& std::is_same<typename std::iterator_traits<Const_RAI>::value_type,
-                typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::node_type>::value,
-int>::type>
-KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(Const_RAI cbegin, Const_RAI cend)
+template <typename ConstRAI> requires (std::random_access_iterator<ConstRAI>&& def::const_iterator<ConstRAI>)
+KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(ConstRAI cbegin, ConstRAI cend)
 : size_(static_cast<uint32_t>(cend - cbegin)) {
     if (size_ == 0) [[unlikely]]
         return;
@@ -363,11 +341,7 @@ KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(Const_RAI c
 }
 
 template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
-template <typename RAI, typename std::enable_if<std::is_same<typename
-std::iterator_traits<RAI>::iterator_category,
-std::random_access_iterator_tag>::value
-&& !std::is_const<typename std::remove_pointer<typename std::iterator_traits<RAI>::pointer>::type>::value
-&& std::is_same<typename std::iterator_traits<RAI>::value_type, typename KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::node_type>::value, int>::type>
+template <typename RAI> requires std::random_access_iterator<RAI>
 KDTreeExpandLongestVec<_Tp, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, RAI end) :size_(static_cast<uint32_t>(end - begin)) {
     if (size_ == 0) [[unlikely]]
         return;

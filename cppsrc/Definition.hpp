@@ -11,6 +11,7 @@
 
 #include <stdio.h>
 #include <numbers>
+#include <iterator>
 
 namespace def {
 
@@ -24,6 +25,12 @@ inline constexpr bool kDefaultToTestAccuracy = false;
 inline constexpr std::size_t kDefaultAccuracyTestDurationInSecs = 10;
 inline constexpr std::size_t kDefaultSearchBenchDurationInSecs = 10;
 inline constexpr std::size_t kMaxTestLocs = 1 << 24;
+
+template <class ConstIt>
+concept const_iterator = std::is_const_v<typename std::remove_pointer_t<typename std::iterator_traits<ConstIt>::pointer>>;
+
+template <class Non_Const_It>
+concept non_const_iterator = !std::is_const_v<typename std::remove_pointer_t<typename std::iterator_traits<Non_Const_It>::pointer>>;
 
 
 
