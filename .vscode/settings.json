@@ -1,0 +1,10 @@
+{
+    "cmake.debugConfig": {
+        "args": [
+            "/Users/yunlongliu/Downloads/countries.csv"
+        ]
+    },
+    "files.associations": {
+        "new": "cpp"
+    }
+}

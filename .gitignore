@@ -423,3 +423,5 @@ FodyWeavers.xsd
 .idea/
 *.sln.iml
 
+OptimizationProfiles/274F16NearestSB.profdata
+.DS_Store
