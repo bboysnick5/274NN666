@@ -32,9 +32,9 @@ private:
     std::size_t totalCacheCells;
     virtual void FillGridCache() override final;
     virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<def::ThreadingPolicy::kSingle>) override final;
+                          typename def::Policy_Tag<def::ThreadingPolicy::kSingle>) override final;
     virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-                          typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<def::ThreadingPolicy::kMultiOmp>) override final;
+                          typename def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>) override final;
     void ompLoopCollapsePrep();
 };
 

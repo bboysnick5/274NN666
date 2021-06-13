@@ -9,6 +9,8 @@
 #ifndef BFEUCPtSolver_hpp
 #define BFEUCPtSolver_hpp
 
+#include "Point.hpp"
+#include "SBLoc.hpp"
 #include "BFSBSolver.hpp"
 #include <stdio.h>
 

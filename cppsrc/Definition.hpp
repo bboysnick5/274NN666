@@ -42,6 +42,16 @@ enum class ThreadingPolicy {
     kMultiOmp,
     kMultiHand
 };
+
+template <def::ThreadingPolicy = def::ThreadingPolicy::kSingle>
+struct Policy_Tag {};
+    
+template <>
+struct Policy_Tag<def::ThreadingPolicy::kMultiOmp> {};
+    
+template <>
+struct Policy_Tag<def::ThreadingPolicy::kMultiHand> {};
+
 }
 
 namespace debug {

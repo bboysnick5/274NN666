@@ -10,6 +10,7 @@
 #include <thread>
 #include <map>
 #include <algorithm>
+#include <omp.h>
 
 
 template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
@@ -22,7 +23,7 @@ template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistT
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-              typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::template Policy_Tag<def::ThreadingPolicy::kSingle>) {
+         def::Policy_Tag<def::ThreadingPolicy::kSingle>) {
     this->grid_cache_.reserve(totalCacheCells);
     dist_type thisCtrLat = 0.5*this->latInc - 0.5*def::kMathPi<dist_type>;
     dist_type lat1 = - 0.5*def::kMathPi<dist_type>;
@@ -47,14 +48,15 @@ template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistT
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
-         typename UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
-         template Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
+         def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
     this->grid_cache_.resize(totalCacheCells, 0);
     dist_type initCtrLat = 0.5*this->latInc - 0.5*def::kMathPi<dist_type>;
     dist_type initLat1 = - 0.5*def::kMathPi<dist_type>;
+    auto &grid_cache_alias_ = this->grid_cache_; // to comply with G++ omp
+    dist_type lat_inc_alias = this->latInc;
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
-shared(this->grid_cache_, thisRowStartIdxThisLngIncInverseVec, colSizeCosLngIncEachRowVec, \
-       this->latInc, initCtrLat, initLat1) \
+shared(grid_cache_alias_, thisRowStartIdxThisLngIncInverseVec, colSizeCosLngIncEachRowVec, \
+       lat_inc_alias, initCtrLat, initLat1, def::kMathPi<dist_type>) \
 firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) 
     for (std::size_t idx = 0; idx < totalCacheCells; ++idx) {
         const auto it = std::upper_bound(thisRowStartIdxThisLngIncInverseVec.cbegin(), thisRowStartIdxThisLngIncInverseVec.cend(), idx, [](const std::size_t &idx, const std::pair<std::size_t, dist_type> &p){return idx < p.first;}) - 1;

@@ -59,7 +59,7 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::PrintSolverInfo
 template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
-LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kSingle>) {
+LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kSingle>) {
     grid_cache_.reserve(rowSize*colSize);
     dist_type lat1 = -0.5*def::kMathPi<dist_type>;
     dist_type thisCtrLat = 0.5 * (latInc - def::kMathPi<dist_type>);
@@ -75,7 +75,7 @@ LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, P
 template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
-LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
+LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
     grid_cache_.resize(rowSize*colSize, 0);
     dist_type initCtrLat = 0.5*latInc - 0.5*def::kMathPi<dist_type>;
     dist_type initCtrLng = 0.5*lngInc - def::kMathPi<dist_type>;
@@ -83,24 +83,25 @@ LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, P
     
 //#pragma ompdeclare reduction (merge : std::vector<BitCell> : omp_out.insert(omp_out.end(), omp_in.begin(), omp_in.end())) initializer(omp_priv = omp_orig) //only one thread is used
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
-shared(this->grid_cache_, lngInc, latInc, initCtrLat, initCtrLng, initLat1) \
+shared(grid_cache_, lngInc, latInc, initCtrLat, initCtrLng, initLat1) \
 firstprivate(ptLocPairs) default(none) schedule(dynamic, 1) collapse(2) 
     for (std::size_t r = 0; r < rowSize; ++r) {
-        dist_type lat1 = r*latInc + initLat1;
-        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
-        dist_type thisCtrLat = initCtrLat + r*latInc;
-        std::size_t startIdxThisRow = r*colSize;
         for (std::size_t c = 0; c < colSize; ++c) {
+            dist_type lat1 = r*latInc + initLat1;
+            dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
+            dist_type thisCtrLat = initCtrLat + r*latInc;
+            std::size_t startIdxThisRow = r*colSize;
             FillCacheCell(startIdxThisRow + c, {thisCtrLat, initCtrLng + c*lngInc},
                           diagonalDistSq3DEUC, colSize, ptLocPairs);
         }
     }
 }
 
+
 template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
-LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kMultiHand>) {
+LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kMultiHand>) {
     std::size_t totalCacheCells = rowSize*colSize;
     grid_cache_.resize(totalCacheCells, 0);
     dist_type initCtrLat = 0.5*latInc - 0.5*def::kMathPi<dist_type>;
@@ -139,9 +140,9 @@ template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistT
 void UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::
 LoopBodyThreadingPolicyDispatch(std::vector<typename KDT<KDTType, dist_type>::node_type> &ptLocPairs) {
     if constexpr (policy == def::ThreadingPolicy::kSingle) {
-        LoopBody(ptLocPairs, Policy_Tag<def::ThreadingPolicy::kSingle>{});
+        LoopBody(ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kSingle>{});
     } else if (policy == def::ThreadingPolicy::kMultiOmp) {
-        LoopBody(ptLocPairs, Policy_Tag<def::ThreadingPolicy::kMultiOmp>{});
+        LoopBody(ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>{});
     }
 }
 

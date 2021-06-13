@@ -1,11 +1,12 @@
-cmake_minimum_required(VERSION 3.0.0)
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -DNDEBUG")
+cmake_minimum_required(VERSION 3.12)
 project(274NN666 VERSION 0.1.0)
 
 include(CTest)
 enable_testing()
 
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ffast-math")
-set(CMAKE_CXX_FLAGS "-fopenmp")
+set(OpenMP_CXX_FLAGS "-fopenmp")
+set(OpenMP_CXX_LIB_NAMES "libomp")
 
 
 set(CMAKE_CXX_STANDARD 20)
@@ -17,6 +18,10 @@ include_directories(
 )
 
 
+link_directories( /usr/local/lib/)
+
+find_package(OpenMP REQUIRED)
+
 file(GLOB all_SRCS
         "${PROJECT_SOURCE_DIR}/cppsrc/*.h"
         "${PROJECT_SOURCE_DIR}/cppsrc/*.hpp"
@@ -25,6 +30,7 @@ file(GLOB all_SRCS
         )
 
 add_executable(274NN666 ${all_SRCS})
+target_link_libraries(274NN666 PUBLIC OpenMP::OpenMP_CXX)
 
 project(274NN666)
 
@@ -33,3 +39,5 @@ project(274NN666)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)
+
+message(${CMAKE_CXX_FLAGS_RELEASE})

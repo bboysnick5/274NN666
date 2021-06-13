@@ -36,16 +36,6 @@ protected:
     
     struct BitCell;
     
-    template <def::ThreadingPolicy = def::ThreadingPolicy::kSingle>
-    struct Policy_Tag {};
-    
-    template <>
-    struct Policy_Tag<def::ThreadingPolicy::kMultiOmp> {};
-    
-    template <>
-    struct Policy_Tag<def::ThreadingPolicy::kMultiHand> {};
-    
-    
     inline static dist_type EUC3DDistSqFromLatCosDeltaLng(dist_type lat1, dist_type lat2, dist_type cosDeltaLng);
     
     void calcSideLenFromAlpc();
@@ -85,11 +75,11 @@ private:
     
     virtual void FillGridCache();
     
-    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kSingle>);
+    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kSingle>);
     
-    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kMultiOmp>);
+    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>);
     
-    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, Policy_Tag<def::ThreadingPolicy::kMultiHand>);
+    virtual void LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs, def::Policy_Tag<def::ThreadingPolicy::kMultiHand>);
     
     
     
