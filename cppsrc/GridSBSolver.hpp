@@ -15,31 +15,31 @@
 #include "SBSolver.hpp"
 
 
-template <typename dist_type>
-class GridSBSolver : public SBSolver<dist_type> {
+template <typename FPType>
+class GridSBSolver : public SBSolver<FPType> {
     
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
-    GridSBSolver(dist_type aveLocPerCell = 1);
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    GridSBSolver(FPType aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     
 protected:
-    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
-    std::pair<std::size_t, std::size_t> getIdx(dist_type lng, dist_type lat) const;
+    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    std::pair<std::size_t, std::size_t> getIdx(FPType lng, FPType lat) const;
 
-    void constructGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
-    void fillGrid(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
-    void NNOneCell(const std::unordered_set<const SBLoc<dist_type>*>&,
-                  dist_type, dist_type, dist_type&, const SBLoc<dist_type>*&) const;
+    void constructGrid(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    void fillGrid(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    void NNOneCell(const std::unordered_set<const SBLoc<FPType>*>&,
+                  FPType, FPType, FPType&, const SBLoc<FPType>*&) const;
     
-    const dist_type AVE_LOC_PER_CELL;
-    std::vector<std::vector<std::unordered_set<const SBLoc<dist_type>*>>> grid;
-    dist_type sideLen, minLng, maxLng, minLat, maxLat, midLng, midLat;
-    std::size_t rowSize, colSize, numLocs = 0;
+    const FPType AVE_LOC_PER_CELL;
+    std::vector<std::vector<std::unordered_set<const SBLoc<FPType>*>>> grid;
+    FPType side_len_, minLng, maxLng, minLat, maxLat, midLng, midLat;
+    std::size_t row_size_, col_size_, numLocs = 0;
     
 private:
-    static constexpr dist_type DISTORT_FACTOR = 0.95;
+    static constexpr FPType DISTORT_FACTOR = 0.95;
     
 };
 

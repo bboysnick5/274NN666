@@ -15,11 +15,11 @@
 #include <vector>
 #include <memory>
 
-template <typename dist_type>
+template <typename FPType>
 class SBSolver {
 public:
-    virtual void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) = 0;
-    virtual const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const = 0;
+    virtual void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) = 0;
+    virtual const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const = 0;
     virtual void PrintSolverInfo() const = 0;
     virtual ~SBSolver() {}
 };

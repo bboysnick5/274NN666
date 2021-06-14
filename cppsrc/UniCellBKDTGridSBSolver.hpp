@@ -17,18 +17,18 @@
 #include <iterator>
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType, dist_type> {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType, FPType> {
 public:
-    UniCellBKDTGridSBSolver(dist_type = 1.0, std::size_t = 1500);
-    //void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override final;
+    UniCellBKDTGridSBSolver(FPType = 1.0, std::size_t = 1500);
+    //void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override final;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override final;
     //virtual void PrintSolverInfo() const override;
     virtual ~UniCellBKDTGridSBSolver() override {}
 
 
 private:
-    std::vector<std::pair<std::size_t, dist_type>> thisRowStartIdx;
+    std::vector<std::pair<std::size_t, FPType>> thisRowStartIdx;
     void FillGridCache() override final;
 };
 

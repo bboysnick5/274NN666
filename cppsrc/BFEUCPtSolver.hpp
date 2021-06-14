@@ -14,10 +14,10 @@
 #include "BFSBSolver.hpp"
 #include <stdio.h>
 
-template <typename dist_type>
-class BFEUCPtSBSolver : public BFSBSolver<dist_type> {
+template <typename FPType>
+class BFEUCPtSBSolver : public BFSBSolver<FPType> {
 public:
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     void PrintSolverInfo() const override;
     virtual ~BFEUCPtSBSolver() override {}
 };

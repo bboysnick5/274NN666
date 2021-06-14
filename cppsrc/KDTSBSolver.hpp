@@ -16,21 +16,21 @@
 #include "KDTreeExpandLongestVec.hpp"
 #include <stdio.h>
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-using KDT = KDTType<dist_type, 3, const SBLoc<dist_type>*, PointND<dist_type, 3>::DistType::EUC>;
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+using KDT = KDTType<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>;
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-class KDTSBSolver : public SBSolver<dist_type> {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+class KDTSBSolver : public SBSolver<FPType> {
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual void PrintSolverInfo() const override;
     virtual ~KDTSBSolver() override {}
 
 
 protected:
-    KDT<KDTType, dist_type> locKdt;
-    virtual void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&);
+    KDT<KDTType, FPType> locKdt;
+    virtual void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
 };
 
 

@@ -10,17 +10,17 @@
 #include "Utility.hpp"
 #include <algorithm>
 
-template <typename dist_type>
-const SBLoc<dist_type>* BFEUCPtSBSolver<dist_type>::FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
-    const auto testPt = SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt);
+template <typename FPType>
+const SBLoc<FPType>* BFEUCPtSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
+    const auto testPt = SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt);
     return &*Utility::MinElementGivenDistFunc(this->locData->cbegin(), this->locData->cend(),
-                                         [&testPt](const SBLoc<dist_type>& l) {
-                                            return testPt.template dist<PointND<dist_type, 3>::DistType::EUCSQ>(l.locToCart3DPt());},
-                                         std::less<dist_type>());
+                                         [&testPt](const SBLoc<FPType>& l) {
+                                            return testPt.template dist<PointND<FPType, 3>::DistType::EUCSQ>(l.locToCart3DPt());},
+                                         std::less<FPType>());
 }
 
-template <typename dist_type>
-void BFEUCPtSBSolver<dist_type>::PrintSolverInfo() const {
+template <typename FPType>
+void BFEUCPtSBSolver<FPType>::PrintSolverInfo() const {
     std::cout << "This is brute force solver using converted euclidean distance metric.\n";
 }
 

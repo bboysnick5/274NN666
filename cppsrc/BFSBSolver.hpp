@@ -14,17 +14,17 @@
 #include "SBSolver.hpp"
 
 
-template <typename dist_type>
-class BFSBSolver : public SBSolver<dist_type> {
+template <typename FPType>
+class BFSBSolver : public SBSolver<FPType> {
 public:
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &sbData) override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &sbData) override;
     void PrintSolverInfo() const override;
     
     virtual ~BFSBSolver() {}
     
 protected:
-    std::shared_ptr<std::vector<SBLoc<dist_type>>> locData;
+    std::shared_ptr<std::vector<SBLoc<FPType>>> locData;
 };
 
 

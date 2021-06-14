@@ -40,34 +40,34 @@
 
 
 
-template <typename dist_type>
-std::vector<PointND<dist_type, 2>> GenerateTestLatLngPts(std::size_t num_tests, std::mt19937_64& mt) {
-    std::uniform_real_distribution<dist_type> dist(0.0, 1.0);
-    std::vector<PointND<dist_type, 2>> test_lat_lng_pts;
+template <typename FPType>
+std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, std::mt19937_64& mt) {
+    std::uniform_real_distribution<FPType> dist(0.0, 1.0);
+    std::vector<PointND<FPType, 2>> test_lat_lng_pts;
     test_lat_lng_pts.reserve(num_tests + 4);
     test_lat_lng_pts.insert(test_lat_lng_pts.end(),
-                    {{def::kMathPi<dist_type>*0.5, def::kMathPi<dist_type>},
-                     {-def::kMathPi<dist_type>*0.5, -def::kMathPi<dist_type>},
-                     {-def::kMathPi<dist_type>*0.5, def::kMathPi<dist_type>},
-                     {def::kMathPi<dist_type>*0.5, -def::kMathPi<dist_type>}});
-    std::generate_n(std::back_inserter(test_lat_lng_pts), num_tests, [&]()->PointND<dist_type, 2> {
-        return {-0.5*def::kMathPi<dist_type> + def::kMathPi<dist_type>*dist(mt),
-                -def::kMathPi<dist_type> + 2.0*def::kMathPi<dist_type>*dist(mt)};});
+                    {{def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
+                     {-def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>},
+                     {-def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
+                     {def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>}});
+    std::generate_n(std::back_inserter(test_lat_lng_pts), num_tests, [&]()->PointND<FPType, 2> {
+        return {-0.5*def::kMathPi<FPType> + def::kMathPi<FPType>*dist(mt),
+                -def::kMathPi<FPType> + 2.0*def::kMathPi<FPType>*dist(mt)};});
     return test_lat_lng_pts;
 }
 
-template <typename dist_type>
+template <typename FPType>
 void accuracyTestFromRefFile() {
     
 }
 
 
-template <typename dist_type>
-void AccuracyTestFromRefSolver(const std::vector<PointND<dist_type, 2>> &test_lat_lng_pts,
-                               std::vector<const SBLoc<dist_type>*> &ref_locs,
-                               const SBSolver<dist_type>& test_solver,
-                               const std::chrono::duration<dist_type> &duration) {
-    dist_type test_dist_err_total = 0.0, ref_dist_for_err_pts_total = 0.0;
+template <typename FPType>
+void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_lng_pts,
+                               std::vector<const SBLoc<FPType>*> &ref_locs,
+                               const SBSolver<FPType>& test_solver,
+                               const std::chrono::duration<FPType> &duration) {
+    FPType test_dist_err_total = 0.0, ref_dist_for_err_pts_total = 0.0;
     std::size_t errot_count = 0;
     auto start_time = std::chrono::steady_clock::now();
     if (ref_locs.empty()) {
@@ -81,22 +81,22 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<dist_type, 2>> &test_la
     } else {
         for (std::size_t loc_idx = 0; loc_idx < ref_locs.size() && std::chrono::steady_clock::now() - start_time < duration; ++loc_idx) {
             std::chrono::time_point<std::chrono::steady_clock> this_search_start_time = std::chrono::steady_clock::now();
-            const SBLoc<dist_type>* testLoc = test_solver.FindNearestLoc(test_lat_lng_pts[loc_idx]);
-            std::chrono::duration<dist_type, std::micro> this_search_duration = std::chrono::steady_clock::now() - this_search_start_time;
-            dist_type test_dist, ref_dist;
+            const SBLoc<FPType>* testLoc = test_solver.FindNearestLoc(test_lat_lng_pts[loc_idx]);
+            std::chrono::duration<FPType, std::micro> this_search_duration = std::chrono::steady_clock::now() - this_search_start_time;
+            FPType test_dist, ref_dist;
             auto test_lat_lng_pt = test_lat_lng_pts[loc_idx];
             auto refLoc = ref_locs[loc_idx];
             if (testLoc != refLoc
                 && (std::fabs((test_dist = testLoc->havDist(test_lat_lng_pt)) - (ref_dist = refLoc->havDist(test_lat_lng_pt))))
-                > static_cast<dist_type>(0.000001)) {
+                > static_cast<FPType>(0.000001)) {
                 test_dist_err_total += testLoc->havDist(test_lat_lng_pt);
                 ref_dist_for_err_pts_total += refLoc->havDist(test_lat_lng_pt);
                 ++errot_count;
                 auto[test_lat, test_lng] = test_lat_lng_pt.dataArray();
                 std::cout << "Test solver this one search time is: " << this_search_duration.count() << "μs" << std::endl
                           << (test_dist < ref_dist ? "Test" : "Ref") << " dist is closer" << std::endl
-                          << "Test PointND: Lat: " << SBLoc<dist_type>::toDegree(test_lat)
-                          << ", Lng: " << SBLoc<dist_type>::toDegree(test_lng) << std::endl
+                          << "Test PointND: Lat: " << SBLoc<FPType>::toDegree(test_lat)
+                          << ", Lng: " << SBLoc<FPType>::toDegree(test_lng) << std::endl
                           << "Test result point: " << *testLoc << "Ref point: " << *refLoc << std::endl;
             }
         }
@@ -108,24 +108,24 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<dist_type, 2>> &test_la
     }
 }
 
-template <typename dist_type>
-void TimeBuild(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &loc_data_vec,
-               SBSolver<dist_type> &solver) {
+template <typename FPType>
+void TimeBuild(const std::shared_ptr<std::vector<SBLoc<FPType>>> &loc_data_vec,
+               SBSolver<FPType> &solver) {
     std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
     solver.Build(loc_data_vec);
-    std::chrono::duration<dist_type> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
+    std::chrono::duration<FPType> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
     std::cout << std::regex_replace(typeid(solver).name(), std::regex("[A-Z]?[0-9]+|.$"), "")
               << std::endl << "Build time: " << elapsed_time_in_secs.count() << std::endl;
     solver.PrintSolverInfo();
 }
 
-template <typename dist_type>
-void TimeNNSearch(const SBSolver<dist_type> &solver, std::vector<PointND<dist_type, 2>> &test_lat_lng_pts,
-                  uint_fast64_t seed, std::chrono::duration<dist_type> search_duration_in_secs) {
+template <typename FPType>
+void TimeNNSearch(const SBSolver<FPType> &solver, std::vector<PointND<FPType, 2>> &test_lat_lng_pts,
+                  uint_fast64_t seed, std::chrono::duration<FPType> search_duration_in_secs) {
     std::mt19937_64 mt(seed);
     std::shuffle(test_lat_lng_pts.begin(), test_lat_lng_pts.end(), mt);
-    std::vector<std::chrono::duration<dist_type, std::micro>> per_search_time_vec_in_micro_secs;
-    std::chrono::duration<dist_type, std::micro> total_elapsed_time_in_micro_secs, max_one_search_time_in_micro_secs{}, min_one_search_time_in_micro_secs(std::numeric_limits<dist_type>::max());
+    std::vector<std::chrono::duration<FPType, std::micro>> per_search_time_vec_in_micro_secs;
+    std::chrono::duration<FPType, std::micro> total_elapsed_time_in_micro_secs, max_one_search_time_in_micro_secs{}, min_one_search_time_in_micro_secs(std::numeric_limits<FPType>::max());
     per_search_time_vec_in_micro_secs.reserve(test_lat_lng_pts.size());
     std::chrono::time_point<std::chrono::steady_clock> startTime = std::chrono::steady_clock::now();
     for (std::size_t loc_idx = 0;
@@ -150,10 +150,10 @@ void TimeNNSearch(const SBSolver<dist_type> &solver, std::vector<PointND<dist_ty
     
 }
 
-template <typename dist_type>
+template <typename FPType>
 void WriteResults(const char* argv[],
-                  const std::vector<PointND<dist_type, 2>> &test_lat_lng_pts,
-                  const SBSolver<dist_type> *solver) {
+                  const std::vector<PointND<FPType, 2>> &test_lat_lng_pts,
+                  const SBSolver<FPType> *solver) {
     std::ofstream outrefLocPtrPerSearchTimePairVecs(argv[2], std::ios::app);
     std::transform(test_lat_lng_pts.cbegin(), test_lat_lng_pts.cend(),
                    std::ostream_iterator<std::string>(outrefLocPtrPerSearchTimePairVecs),
@@ -166,20 +166,20 @@ void WriteResults(const char* argv[],
 }
 
 
-template <typename dist_type>
+template <typename FPType>
 void MainContent(int argc, const char * argv[]) {
     
     std::ifstream infilestream_locs(argv[1]);
-    dist_type ave_actual_locs_per_cell = argc < 4 ? def::kDefalutAveActualLocsPerCell : std::stod(argv[3]);
+    FPType ave_actual_locs_per_cell = argc < 4 ? def::kDefalutAveActualLocsPerCell : std::stod(argv[3]);
     std::size_t max_cached_cell_vec_size = argc < 5 ? def::kDefaultMaxCacheCellVecSize : std::stoi(argv[4]);
     bool to_test_accuracy = argc < 6 ? def::kDefaultToTestAccuracy : std::tolower(argv[5][0]) == 'y';
-    std::chrono::duration<dist_type> accuracy_test_time_in_secs(def::kDefaultAccuracyTestDurationInSecs);
+    std::chrono::duration<FPType> accuracy_test_time_in_secs(def::kDefaultAccuracyTestDurationInSecs);
     if (to_test_accuracy) {
-        accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[5], std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
+        accuracy_test_time_in_secs = std::chrono::duration<FPType>(std::stoi(std::regex_replace(argv[5], std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
     }
-    std::chrono::duration<dist_type> search_benchmark_duration_in_secs(def::kDefaultSearchBenchDurationInSecs);
+    std::chrono::duration<FPType> search_benchmark_duration_in_secs(def::kDefaultSearchBenchDurationInSecs);
     if (argc >= 6) {
-        accuracy_test_time_in_secs = std::chrono::duration<dist_type>(std::stoi(std::regex_replace(argv[6],  std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
+        accuracy_test_time_in_secs = std::chrono::duration<FPType>(std::stoi(std::regex_replace(argv[6],  std::regex("[^0-9]*([0-9]+).*"), std::string("$1"))));
     }
     std::ifstream inRefLatLngPtLocPairVec;
     if (argc >= 7)
@@ -200,10 +200,10 @@ void MainContent(int argc, const char * argv[]) {
     //maxCacheCellVecSize = (1 << 9ull);
     //aveActualLocsPerCell = 0.2;
     
-    const auto locData = std::make_shared<std::vector<SBLoc<dist_type>>>();
+    const auto locData = std::make_shared<std::vector<SBLoc<FPType>>>();
     locData->reserve(1 << 24);
-    locData->assign(std::istream_iterator<SBLoc<dist_type>>(infilestream_locs),
-                    std::istream_iterator<SBLoc<dist_type>>());
+    locData->assign(std::istream_iterator<SBLoc<FPType>>(infilestream_locs),
+                    std::istream_iterator<SBLoc<FPType>>());
     infilestream_locs.close();
     assert(locData->size() != 0);
     //std::sort(locData->begin(), locData->end());
@@ -215,46 +215,46 @@ void MainContent(int argc, const char * argv[]) {
     
     /*
     if (numOfLocsToWriteToFile) {
-        auto solver = std::make_unique<BFSBSolver<dist_type>>();
-        //auto solver = std::make_unique<BKDTSBSolver<dist_type><KDTree>>();
-        timeBuild<dist_type>(locData, *solver);
-        writeResults<dist_type>(argv, generatetestSearchLatLngPts<dist_type>(numOfLocsToWriteToFile, mt), solver.get());
+        auto solver = std::make_unique<BFSBSolver<FPType>>();
+        //auto solver = std::make_unique<BKDTSBSolver<FPType><KDTree>>();
+        timeBuild<FPType>(locData, *solver);
+        writeResults<FPType>(argv, generatetestSearchLatLngPts<FPType>(numOfLocsToWriteToFile, mt), solver.get());
         return 0;
     } */
     
     
 
-    std::unique_ptr<SBSolver<dist_type>> solvers[] = {
-        //std::make_unique<BFSBSolver<dist_type>>(),
-        //std::make_unique<BFEUCPtSBSolver<dist_type>>(),
-        //std::make_unique<KDTSBSolver<KDTree,dist_type>>(),
-        //std::make_unique<BKDTSBSolver<KDTree, dist_type>>(),
-        //std::make_unique<BKDTSBSolver<dist_type><KDTreeCusMem>>(),
-        //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, dist_type>>(),
-        std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, dist_type>>(),
-        //std::make_unique<GridSBSolver<dist_type>>(),
-        //std::make_unique<BKDTGridSBSolver<dist_type>>(aveLocPerCell),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTree, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeCusMem, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(0.85*aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec,dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<dist_type><KDTreeExpandLongestVec>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
-        // std::make_unique<UniCellBKDTGridSBSolver<dist_type><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
-        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type>>(aveLocPerCell, MAX_CACHE_CELL_VEC_SIZE),
-        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, dist_type, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+    std::unique_ptr<SBSolver<FPType>> solvers[] = {
+        //std::make_unique<BFSBSolver<FPType>>(),
+        //std::make_unique<BFEUCPtSBSolver<FPType>>(),
+        //std::make_unique<KDTSBSolver<KDTree,FPType>>(),
+        //std::make_unique<BKDTSBSolver<KDTree, FPType>>(),
+        //std::make_unique<BKDTSBSolver<FPType><KDTreeCusMem>>(),
+        //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, FPType>>(),
+        std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>(),
+        //std::make_unique<GridSBSolver<FPType>>(),
+        //std::make_unique<BKDTGridSBSolver<FPType>>(aveLocPerCell),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTree, FPType>>(0.85*aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeCusMem, FPType>>(0.85*aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(0.85*aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec,FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<FPType><KDTreeExpandLongestVec>>(aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTree>>(aveLocPerCell, maxCacheCellVecSize),
+        // std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
+        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
+        //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
     uint_fast64_t seed = rd();
-    std::vector<PointND<dist_type, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<dist_type>(def::kMaxTestLocs, mt);
-    std::vector<const SBLoc<dist_type>*> ref_locs;
-    std::vector<PointND<dist_type, 2>> accuracy_test_lat_lng_pts;
+    std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
+    std::vector<const SBLoc<FPType>*> ref_locs;
+    std::vector<PointND<FPType, 2>> accuracy_test_lat_lng_pts;
     if (to_test_accuracy)
-        accuracy_test_lat_lng_pts = GenerateTestLatLngPts<dist_type>(def::kMaxTestLocs, mt);
+        accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
         TimeBuild(locData, *solvers[i]);

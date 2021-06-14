@@ -10,15 +10,15 @@
 #include "Utility.hpp"
 //#include <omp.h>
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-UniLatLngBKDTGridSBSolver(dist_type alpc, std::size_t maxCacheCellVecSize)
-: BKDTSBSolver<KDTType, dist_type>(), AVE_LOC_PER_CELL(alpc),
-  MAX_CACHE_CELL_VEC_SIZE(maxCacheCellVecSize) {}
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+UniLatLngBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
+: BKDTSBSolver<KDTType, FPType>(), AVE_LOC_PER_CELL(alpc),
+  kMaxCacheCellVecSize_(maxCacheCellVecSize) {}
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::PrintSolverInfo() const {
     std::cout << "Total cache locs: " << totalNodeSize
     << "\nAve tree size: " << totalNodeSize/grid_cache_.size()
     << "\nAve tree height: "
@@ -32,93 +32,93 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
 }
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-FillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDistSq3DEUC,
-              std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<dist_type>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
-                                   diagonalDistSq3DEUC, std::back_inserter(ptLocPairs));
-    std::size_t locsSize = ptLocPairs.size();
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+FillCacheCell(FPType thisCtrLng, FPType thisCtrLat, FPType diagonalDistSq3DEUC,
+              std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
+    this->locKdt.rangeDiffKNNPairs(SBLoc<FPType>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
+                                   diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
+    std::size_t locsSize = pt_loc_vec.size();
     this->totalNodeSize += locsSize;
     if (locsSize == 1) {
-        this->grid_cache_.emplace_back(ptLocPairs[0].value);
+        this->grid_cache_.emplace_back(pt_loc_vec[0].value);
         this->singleLocs++;
-    } else if (locsSize < MAX_CACHE_CELL_VEC_SIZE) {
-        this->grid_cache_.emplace_back(ptLocPairs);
+    } else if (locsSize < kMaxCacheCellVecSize_) {
+        this->grid_cache_.emplace_back(pt_loc_vec);
         this->vecLocs++;
     } else {
-        this->grid_cache_.emplace_back(std::in_place_type<KDT<KDTType, dist_type>>,
-                                     ptLocPairs.begin(), ptLocPairs.end());
+        this->grid_cache_.emplace_back(std::in_place_type<KDT<KDTType, FPType>>,
+                                     pt_loc_vec.begin(), pt_loc_vec.end());
     }
-    ptLocPairs.clear();
+    pt_loc_vec.clear();
 }
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
-    colSize = rowSize;
-    lngInc = 2.0*def::kMathPi<dist_type>/colSize + 2.0*def::kMathPi<dist_type>/(colSize*65536);
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
+    col_size_ = row_size_;
+    lng_inc_ = 2.0*def::kMathPi<FPType>/col_size_ + 2.0*def::kMathPi<FPType>/(col_size_*65536);
     grid_cache_.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
-    std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
-    ptLocPairs.reserve(MAX_CACHE_CELL_VEC_SIZE);
+    std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
+    pt_loc_vec.reserve(kMaxCacheCellVecSize_);
     
-    dist_type thisCtrLat = 0.5 * (latInc - def::kMathPi<dist_type>);
-    for (std::size_t r = 0; r < rowSize; ++r, thisCtrLat += latInc) {
-        dist_type thisCtrLng = 0.5 * lngInc - def::kMathPi<dist_type>;
-        dist_type lat1 = r*this->latInc - 0.5*def::kMathPi<dist_type>;
-        dist_type diagonalDistSq3DEUC = SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + latInc, lngInc);
-        for (std::size_t c = 0; c < colSize; ++c, thisCtrLng += lngInc) {
-            FillCacheCell(thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, ptLocPairs);
+    FPType thisCtrLat = 0.5 * (lat_inc_ - def::kMathPi<FPType>);
+    for (std::size_t r = 0; r < row_size_; ++r, thisCtrLat += lat_inc_) {
+        FPType thisCtrLng = 0.5 * lng_inc_ - def::kMathPi<FPType>;
+        FPType lat1 = r*this->lat_inc_ - 0.5*def::kMathPi<FPType>;
+        FPType diagonalDistSq3DEUC = SBLoc<FPType>::EUC3DDistSqFromLatDeltaLng(lat1, lat1 + lat_inc_, lng_inc_);
+        for (std::size_t c = 0; c < col_size_; ++c, thisCtrLng += lng_inc_) {
+            FillCacheCell(thisCtrLng, thisCtrLat, diagonalDistSq3DEUC, pt_loc_vec);
         }
     }
 }
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::calcSideLenFromAlpc() {
-    dist_type surfaceArea = 4*def::kMathPi<dist_type>*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
-    dist_type numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
-    sideLen = sqrt(surfaceArea/numCells);
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::calcSideLenFromAlpc() {
+    FPType surfaceArea = 4*def::kMathPi<FPType>*SBLoc<FPType>::EARTH_RADIUS*SBLoc<FPType>::EARTH_RADIUS;
+    FPType numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
+    side_len_ = sqrt(surfaceArea/numCells);
 }
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
     totalLocSize = locData->size();
-    BKDTSBSolver<KDTType, dist_type>::GenerateKDT(locData);
+    BKDTSBSolver<KDTType, FPType>::GenerateKDT(locData);
     calcSideLenFromAlpc();
-    latInc = std::fabs(SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(sideLen));
-    latIncInverse = 1.0/latInc;
-    rowSize = std::ceil(def::kMathPi<dist_type>/latInc);
+    lat_inc_ = std::fabs(SBLoc<FPType>::deltaLatOnSameLngFromHavDist(side_len_));
+    lat_inc_inverse_ = 1.0/lat_inc_;
+    row_size_ = std::ceil(def::kMathPi<FPType>/lat_inc_);
     FillGridCache();
     this->locKdt.clear();
 }
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-const SBLoc<dist_type>* UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-ReturnNNLocFromCacheVariant(const PointND<dist_type, 2>& geoSearchPt,
-                            const std::variant<std::vector<typename KDT<KDTType, dist_type>::node_type>, const SBLoc<dist_type>*, KDT<KDTType, dist_type>>& v) const {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geoSearchPt,
+                            const std::variant<std::vector<typename KDT<KDTType, FPType>::node_type>, const SBLoc<FPType>*, KDT<KDTType, FPType>>& v) const {
     switch (v.index()) {
         case 0: {
-            const auto p = SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt);
+            const auto p = SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt);
             const auto &vec = std::get<0>(v);
             return Utility::MinElementGivenDistFunc(vec.cbegin(), vec.cend(),
                                                [&p](const auto& nh){return p.template
-                                                    dist<PointND<dist_type, 3>::DistType::EUCSQ>(nh.key);}, std::less()
+                                                    dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);}, std::less()
                                                )->value;
         }
         case 1:
             return std::get<1>(v);
         default:
-            return std::get<2>(v).kNNValue(SBLoc<dist_type>::geoPtToCart3DPt(geoSearchPt), 1);
+            return std::get<2>(v).kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt), 1);
     }
 }
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-const SBLoc<dist_type>* UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
-FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
     return ReturnNNLocFromCacheVariant(geoSearchPt, grid_cache_[static_cast<std::size_t>
-    ((geoSearchPt[0]+0.5*def::kMathPi<dist_type>)*latIncInverse)*colSize+ static_cast<std::size_t>((geoSearchPt[1]+def::kMathPi<dist_type>)/lngInc)]);
+    ((geoSearchPt[0]+0.5*def::kMathPi<FPType>)*lat_inc_inverse_)*col_size_+ static_cast<std::size_t>((geoSearchPt[1]+def::kMathPi<FPType>)/lng_inc_)]);
 }
 
 

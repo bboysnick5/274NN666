@@ -106,6 +106,8 @@
     <ClCompile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <OpenMP>GenerateParallelCode</OpenMP>
+      <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/openmp:llvm %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,11 +126,11 @@
       <FSYCLEarlyOptimizations>Yes</FSYCLEarlyOptimizations>
       <FSYCLDeadArgsOptimization>Yes</FSYCLDeadArgsOptimization>
       <UseMSVC>false</UseMSVC>
-      <AdditionalOptions>-openmp -Xclang -Ofast %(AdditionalOptions)</AdditionalOptions>
       <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SpecifySyclFrontendTargetOptionsForOpenMP>
       </SpecifySyclFrontendTargetOptionsForOpenMP>
       <EnableModules>true</EnableModules>
+      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast </AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

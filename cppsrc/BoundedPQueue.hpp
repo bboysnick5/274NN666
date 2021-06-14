@@ -62,7 +62,7 @@
 
 
 
-template <typename T, typename dist_type>
+template <typename T, typename FPType>
 class BoundedPQueue {
 public:
     // Constructor: BoundedPQueue(std::size_t maxSize);
@@ -73,7 +73,7 @@ public:
     ///
     explicit BoundedPQueue(std::size_t maxSize);
     
-    // void enqueue(const T& value, dist_type priority);
+    // void enqueue(const T& value, FPType priority);
     // Usage: bpq.enqueue("Hi!", 2.71828);
     // --------------------------------------------------
     // Enqueues a new element into the BoundedPQueue with
@@ -81,7 +81,7 @@ public:
     // size of the queue, the element with the highest
     // priority will be deleted from the queue. Note that
     // this might be the element that was just added.
-    void enqueue(const T& value, dist_type priority);
+    void enqueue(const T& value, FPType priority);
     
     // T dequeueMin();
     // Usage: int val = bpq.dequeueMin();
@@ -107,9 +107,9 @@ public:
     // stored in the queue.
     std::size_t maxSize() const;
     
-    // dist_type best() const;
-    // dist_type worst() const;
-    // Usage: dist_type highestPriority = bpq.worst();
+    // FPType best() const;
+    // FPType worst() const;
+    // Usage: FPType highestPriority = bpq.worst();
     // --------------------------------------------------
     // best() returns the smallest priority of an element
     // stored in the container (i.e. the priority of the
@@ -118,29 +118,29 @@ public:
     // stored in the container.  If an element is enqueued
     // with a priority above this value, it will automatically
     // be deleted from the queue.  Both functions return
-    // numeric_limits<dist_type>::infinity() if the queue is
+    // numeric_limits<FPType>::infinity() if the queue is
     // empty.
-    dist_type best()  const;
-    dist_type worst() const;
+    FPType best()  const;
+    FPType worst() const;
     
 private:
     // This class is layered on top of a multimap mapping from priorities
     // to elements with those priorities.
-    std::multimap<dist_type, T> elems;
+    std::multimap<FPType, T> elems;
     std::size_t maximumSize;
 };
 
 /** BoundedPQueue class implementation details */
 
-template <typename T, typename dist_type>
-BoundedPQueue<T, dist_type>::BoundedPQueue(std::size_t maxSize) {
+template <typename T, typename FPType>
+BoundedPQueue<T, FPType>::BoundedPQueue(std::size_t maxSize) {
     maximumSize = maxSize;
 }
 
 // enqueue adds the element to the map, then deletes the last element of the
 // map if there size exceeds the maximum size.
-template <typename T, typename dist_type>
-void BoundedPQueue<T, dist_type>::enqueue(const T& value, dist_type priority) {
+template <typename T, typename FPType>
+void BoundedPQueue<T, FPType>::enqueue(const T& value, FPType priority) {
     // Add the element to the collection.
     if (size() == maxSize() && priority > worst())
         return;
@@ -148,7 +148,7 @@ void BoundedPQueue<T, dist_type>::enqueue(const T& value, dist_type priority) {
     
     // If there are too many elements in the queue, drop off the last one.
     if (size() > maxSize()) {
-        typename std::multimap<dist_type, T>::iterator last = elems.end();
+        typename std::multimap<FPType, T>::iterator last = elems.end();
         --last; // Now points to highest-priority element
         elems.erase(last);
     }
@@ -156,8 +156,8 @@ void BoundedPQueue<T, dist_type>::enqueue(const T& value, dist_type priority) {
 
 // dequeueMin copies the lowest element of the map (the one pointed at by
 // begin()) and then removes it.
-template <typename T, typename dist_type>
-T BoundedPQueue<T, dist_type>::dequeueMin() {
+template <typename T, typename FPType>
+T BoundedPQueue<T, FPType>::dequeueMin() {
     // Copy the best value.
     T result = elems.begin()->second;
     
@@ -168,32 +168,32 @@ T BoundedPQueue<T, dist_type>::dequeueMin() {
 }
 
 // size() and empty() call directly down to the underlying map.
-template <typename T, typename dist_type>
-std::size_t BoundedPQueue<T, dist_type>::size() const {
+template <typename T, typename FPType>
+std::size_t BoundedPQueue<T, FPType>::size() const {
     return elems.size();
 }
 
-template <typename T, typename dist_type>
-bool BoundedPQueue<T, dist_type>::empty() const {
+template <typename T, typename FPType>
+bool BoundedPQueue<T, FPType>::empty() const {
     return elems.empty();
 }
 
 // maxSize just returns the appropriate data member.
-template <typename T, typename dist_type>
-std::size_t BoundedPQueue<T, dist_type>::maxSize() const {
+template <typename T, typename FPType>
+std::size_t BoundedPQueue<T, FPType>::maxSize() const {
     return maximumSize;
 }
 
 // The best() and worst() functions check if the queue is empty,
 // and if so return infinity.
-template <typename T, typename dist_type>
-dist_type BoundedPQueue<T, dist_type>::best() const {
-    return empty()? std::numeric_limits<dist_type>::infinity() : elems.begin()->first;
+template <typename T, typename FPType>
+FPType BoundedPQueue<T, FPType>::best() const {
+    return empty()? std::numeric_limits<FPType>::infinity() : elems.begin()->first;
 }
 
-template <typename T, typename dist_type>
-dist_type BoundedPQueue<T, dist_type>::worst() const {
-    return empty()? std::numeric_limits<dist_type>::infinity() : elems.rbegin()->first;
+template <typename T, typename FPType>
+FPType BoundedPQueue<T, FPType>::worst() const {
+    return empty()? std::numeric_limits<FPType>::infinity() : elems.rbegin()->first;
 }
 
 #endif // BOUNDED_PQUEUE_INCLUDED

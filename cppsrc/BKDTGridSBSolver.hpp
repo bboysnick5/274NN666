@@ -15,25 +15,25 @@
 #include "GridSBSolver.hpp"
 #include "KDTree.hpp"
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-class BKDTGridSBSolver : public GridSBSolver<dist_type> {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+class BKDTGridSBSolver : public GridSBSolver<FPType> {
 public:
-    BKDTGridSBSolver(dist_type aveLocPerCell = 1);
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
+    BKDTGridSBSolver(FPType aveLocPerCell = 1);
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual ~BKDTGridSBSolver() override {}
 
     
 private:
-    std::vector<KDTType<dist_type, 3, const SBLoc<dist_type>*, PointND<dist_type, 3>::DistType::EUC>> gridTreeCache;
-    std::vector<const SBLoc<dist_type>*> gridSingleCache;
-    typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, PointND<dist_type, 3>::DistType::EUC>::node_type>::iterator
-        cacheAllPossibleLocsOneCell(std::size_t, std::size_t, dist_type,
-                                    typename std::vector<typename KDTree<dist_type, 3, const SBLoc<dist_type>*, PointND<dist_type, 3>::DistType::EUC>::node_type>::iterator);
+    std::vector<KDTType<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>> gridTreeCache;
+    std::vector<const SBLoc<FPType>*> gridSingleCache;
+    typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type>::iterator
+        cacheAllPossibleLocsOneCell(std::size_t, std::size_t, FPType,
+                                    typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type>::iterator);
     void FillGridCache();
-    dist_type xyzDistSqFromSideLen();
+    FPType xyzDistSqFromSideLen();
     
-    KDTree<dist_type, 3, const SBLoc<dist_type>*, PointND<dist_type, 3>::DistType::EUC> sbKdt;
+    KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC> sbKdt;
 };
 
 

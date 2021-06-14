@@ -13,25 +13,25 @@
 
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void BKDTSBSolver<KDTType, dist_type>::Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void BKDTSBSolver<KDTType, FPType>::Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
     GenerateKDT(locData);
 }
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void BKDTSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void BKDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
     this->locKdt.printTreeInfo();
 }
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-void BKDTSBSolver<KDTType, dist_type>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
-    std::vector<typename KDT<KDTType, dist_type>::node_type> kdtData;
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+void BKDTSBSolver<KDTType, FPType>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
+    std::vector<typename KDT<KDTType, FPType>::node_type> kdtData;
     kdtData.reserve(locData->size());
     std::transform(locData->cbegin(), locData->cend(), std::back_inserter(kdtData),
-                   [](const SBLoc<dist_type>& l) -> typename KDT<KDTType, dist_type>::node_type {
+                   [](const SBLoc<FPType>& l) -> typename KDT<KDTType, FPType>::node_type {
                        return {l.locToCart3DPt(), &l};});
-    this->locKdt = KDT<KDTType, dist_type>(kdtData.begin(), kdtData.end());
+    this->locKdt = KDT<KDTType, FPType>(kdtData.begin(), kdtData.end());
 }
 
 

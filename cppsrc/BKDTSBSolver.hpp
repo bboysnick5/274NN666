@@ -14,16 +14,16 @@
 
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-class BKDTSBSolver : public KDTSBSolver<KDTType, dist_type> {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+class BKDTSBSolver : public KDTSBSolver<KDTType, FPType> {
     
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
     virtual void PrintSolverInfo() const override;
     virtual ~BKDTSBSolver() {}
     
 protected:
-    void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override final;
+    void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override final;
 };
 
 

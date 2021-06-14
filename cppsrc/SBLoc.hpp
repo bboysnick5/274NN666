@@ -1,5 +1,5 @@
 //
-//  SBLoc<dist_type>.hpp
+//  SBLoc<FPType>.hpp
 //  274F16NearestSB
 //
 //  Created by Yunlong Liu on 12/13/16.
@@ -15,179 +15,179 @@
 #include <string>
 #include <iostream>
 
-template <typename dist_type>
+template <typename FPType>
 struct SBLoc {
     
-    PointND<dist_type, 2> geoPt;
+    PointND<FPType, 2> geoPt;
     std::string city;
     std::string addr;
     
-    static constexpr dist_type EARTH_RADIUS = dist_type(6371.0);
+    static constexpr FPType EARTH_RADIUS = FPType(6371.0);
     
     SBLoc() = default;
-    SBLoc(const PointND<dist_type, 3>&);
+    SBLoc(const PointND<FPType, 3>&);
     
-    bool operator<(const SBLoc<dist_type> &other) const;
+    bool operator<(const SBLoc<FPType> &other) const;
     
-    bool operator==(const SBLoc<dist_type> &other) const;
+    bool operator==(const SBLoc<FPType> &other) const;
     
-    bool operator!=(const SBLoc<dist_type> &other) const;
+    bool operator!=(const SBLoc<FPType> &other) const;
     
-    static dist_type toRadians(dist_type degree);
+    static FPType toRadians(FPType degree);
     
-    static dist_type toDegree(dist_type radians);
+    static FPType toDegree(FPType radians);
     
-    static dist_type havDist(const SBLoc<dist_type>&, const SBLoc<dist_type>&);
+    static FPType havDist(const SBLoc<FPType>&, const SBLoc<FPType>&);
         
-    static dist_type havDist(const PointND<dist_type, 2>& p1, const PointND<dist_type, 2>& p2);
+    static FPType havDist(const PointND<FPType, 2>& p1, const PointND<FPType, 2>& p2);
     
-    dist_type havDist(const SBLoc<dist_type>& other) const;
+    FPType havDist(const SBLoc<FPType>& other) const;
     
-    dist_type havDist(const PointND<dist_type, 2>& other) const;
+    FPType havDist(const PointND<FPType, 2>& other) const;
     
-    dist_type havDistComp(const PointND<dist_type, 2>& other) const;
+    FPType havDistComp(const PointND<FPType, 2>& other) const;
 
-    static dist_type deltaLatOnSameLngFromHavDist(dist_type dist);
+    static FPType deltaLatOnSameLngFromHavDist(FPType dist);
     
-    static dist_type lngFromSameLatHavDist(dist_type dist, dist_type lng1, dist_type lat);
+    static FPType lngFromSameLatHavDist(FPType dist, FPType lng1, FPType lat);
     
-    PointND<dist_type, 3> locToCart3DPt() const;
+    PointND<FPType, 3> locToCart3DPt() const;
     
-    static PointND<dist_type, 3> geoPtToCart3DPt(const PointND<dist_type, 2>&);
+    static PointND<FPType, 3> geoPtToCart3DPt(const PointND<FPType, 2>&);
     
-    static dist_type EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
+    static FPType EUC3DDistFromLatDeltaLng(FPType lat1, FPType lat2, FPType deltaLng);
     
-    static dist_type EUC3DDistSqFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng);
+    static FPType EUC3DDistSqFromLatDeltaLng(FPType lat1, FPType lat2, FPType deltaLng);
 
 };
 
 
-template <typename dist_type>
-inline SBLoc<dist_type>::SBLoc(const PointND<dist_type, 3> &pt) :
+template <typename FPType>
+inline SBLoc<FPType>::SBLoc(const PointND<FPType, 3> &pt) :
 geoPt(std::asin(pt[2]), lng(std::asin(pt[1]/std::cos(std::asin(pt[2]))))), city(""), addr("") {}
 
 
-template <typename dist_type>
-inline bool SBLoc<dist_type>::operator<(const SBLoc<dist_type> &other) const {
+template <typename FPType>
+inline bool SBLoc<FPType>::operator<(const SBLoc<FPType> &other) const {
     return geoPt[0] < other.geoPt[0];
 }
 
-template <typename dist_type>
-inline bool SBLoc<dist_type>::operator==(const SBLoc<dist_type> &other) const {
+template <typename FPType>
+inline bool SBLoc<FPType>::operator==(const SBLoc<FPType> &other) const {
     if (geoPt == other.geoPt)
         return true;
-    return std::fabs(geoPt[0] - other.geoPt[0]) < static_cast<dist_type>(0.000001) &&
-           std::fabs(geoPt[1] - other.geoPt[1]) < static_cast<dist_type>(0.000001);
+    return std::fabs(geoPt[0] - other.geoPt[0]) < static_cast<FPType>(0.000001) &&
+           std::fabs(geoPt[1] - other.geoPt[1]) < static_cast<FPType>(0.000001);
 }
 
-template <typename dist_type>
-inline bool SBLoc<dist_type>::operator!=(const SBLoc<dist_type> &other) const {
+template <typename FPType>
+inline bool SBLoc<FPType>::operator!=(const SBLoc<FPType> &other) const {
     return !(*this == other);
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::toDegree(dist_type radians) {
-    return radians*180.0/def::kMathPi<dist_type>;
+template <typename FPType>
+inline FPType SBLoc<FPType>::toDegree(FPType radians) {
+    return radians*180.0/def::kMathPi<FPType>;
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::toRadians(dist_type degree) {
-    return degree*def::kMathPi<dist_type>/180.0;
+template <typename FPType>
+inline FPType SBLoc<FPType>::toRadians(FPType degree) {
+    return degree*def::kMathPi<FPType>/180.0;
 }
 
-template <typename dist_type>
-dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& other) const {
+template <typename FPType>
+FPType SBLoc<FPType>::havDist(const SBLoc<FPType>& other) const {
     return havDist(geoPt, other.geoPt);
 }
 
-template <typename dist_type>
-dist_type SBLoc<dist_type>::havDist(const PointND<dist_type, 2>& otherGeoPt) const {
-    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(geoPt, otherGeoPt, EARTH_RADIUS);
+template <typename FPType>
+FPType SBLoc<FPType>::havDist(const PointND<FPType, 2>& otherGeoPt) const {
+    return PointND<FPType, 2>::template dist<PointND<FPType, 2>::DistType::HAV>(geoPt, otherGeoPt, EARTH_RADIUS);
 }
 
-template <typename dist_type>
-dist_type SBLoc<dist_type>::havDistComp(const PointND<dist_type, 2>& otherGeoPt) const {
-    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAVCOMP>(geoPt, otherGeoPt, EARTH_RADIUS);
+template <typename FPType>
+FPType SBLoc<FPType>::havDistComp(const PointND<FPType, 2>& otherGeoPt) const {
+    return PointND<FPType, 2>::template dist<PointND<FPType, 2>::DistType::HAVCOMP>(geoPt, otherGeoPt, EARTH_RADIUS);
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::havDist(const SBLoc<dist_type>& l1, const SBLoc<dist_type>& l2) {
-    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(l1.geoPt, l2.geoPt, EARTH_RADIUS);
+template <typename FPType>
+inline FPType SBLoc<FPType>::havDist(const SBLoc<FPType>& l1, const SBLoc<FPType>& l2) {
+    return PointND<FPType, 2>::template dist<PointND<FPType, 2>::DistType::HAV>(l1.geoPt, l2.geoPt, EARTH_RADIUS);
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::havDist(const PointND<dist_type, 2>& p1, const PointND<dist_type, 2>& p2) {
-    return PointND<dist_type, 2>::template dist<PointND<dist_type, 2>::DistType::HAV>(p1, p2, EARTH_RADIUS);
+template <typename FPType>
+inline FPType SBLoc<FPType>::havDist(const PointND<FPType, 2>& p1, const PointND<FPType, 2>& p2) {
+    return PointND<FPType, 2>::template dist<PointND<FPType, 2>::DistType::HAV>(p1, p2, EARTH_RADIUS);
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::deltaLatOnSameLngFromHavDist(dist_type dist) {
-    dist_type c = dist/EARTH_RADIUS;
-    dist_type sum = sin(c*0.5);
-    dist_type dLat = std::asin(sum)*2.0;
+template <typename FPType>
+inline FPType SBLoc<FPType>::deltaLatOnSameLngFromHavDist(FPType dist) {
+    FPType c = dist/EARTH_RADIUS;
+    FPType sum = sin(c*0.5);
+    FPType dLat = std::asin(sum)*2.0;
     return dLat;
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::lngFromSameLatHavDist(dist_type dist, dist_type lng1, dist_type lat) {
-    dist_type c = dist/EARTH_RADIUS;
-    dist_type sum = sin(c*0.5);
-    dist_type dLng = std::asin(sum/std::cos(lat))*2.0;
+template <typename FPType>
+inline FPType SBLoc<FPType>::lngFromSameLatHavDist(FPType dist, FPType lng1, FPType lat) {
+    FPType c = dist/EARTH_RADIUS;
+    FPType sum = sin(c*0.5);
+    FPType dLng = std::asin(sum/std::cos(lat))*2.0;
     return dLng + lng1;
 }
 
-template <typename dist_type>
-inline PointND<dist_type, 3> SBLoc<dist_type>::locToCart3DPt() const {
+template <typename FPType>
+inline PointND<FPType, 3> SBLoc<FPType>::locToCart3DPt() const {
     return geoPtToCart3DPt(geoPt);
 }
 
-template <typename dist_type>
-inline PointND<dist_type, 3> SBLoc<dist_type>::geoPtToCart3DPt(const PointND<dist_type, 2>& geoPt) {
-    return PointND<dist_type, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
+template <typename FPType>
+inline PointND<FPType, 3> SBLoc<FPType>::geoPtToCart3DPt(const PointND<FPType, 2>& geoPt) {
+    return PointND<FPType, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::EUC3DDistFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
+template <typename FPType>
+inline FPType SBLoc<FPType>::EUC3DDistFromLatDeltaLng(FPType lat1, FPType lat2, FPType deltaLng) {
     return sqrt(EUC3DDistSqFromLatDeltaLng(lat1, lat2, deltaLng));
 }
 
-template <typename dist_type>
-inline dist_type SBLoc<dist_type>::EUC3DDistSqFromLatDeltaLng(dist_type lat1, dist_type lat2, dist_type deltaLng) {
+template <typename FPType>
+inline FPType SBLoc<FPType>::EUC3DDistSqFromLatDeltaLng(FPType lat1, FPType lat2, FPType deltaLng) {
     return 2.0 - 2.0 * (sin(lat1)*sin(lat2) + std::cos(lat1)*std::cos(lat2)*std::cos(deltaLng));
 }
 
 namespace std {
-    template <typename dist_type>
-    struct hash<SBLoc<dist_type>> {
-        std::size_t operator()(const SBLoc<dist_type>& l) const {
-            return (static_cast<std::size_t>((l.geoPt[0] + 0.5*def::kMathPi<dist_type>) * 1000000.0) << 20) +
-                    static_cast<std::size_t>((l.geoPt[1] + def::kMathPi<dist_type>) * 1000000.0);
+    template <typename FPType>
+    struct hash<SBLoc<FPType>> {
+        std::size_t operator()(const SBLoc<FPType>& l) const {
+            return (static_cast<std::size_t>((l.geoPt[0] + 0.5*def::kMathPi<FPType>) * 1000000.0) << 20) +
+                    static_cast<std::size_t>((l.geoPt[1] + def::kMathPi<FPType>) * 1000000.0);
         }
     };
     
-    template <typename dist_type>
-    struct hash<const SBLoc<dist_type>*> {
-        std::size_t operator()(const SBLoc<dist_type>* l) const {
-            return std::hash<SBLoc<dist_type>>()(*l);
+    template <typename FPType>
+    struct hash<const SBLoc<FPType>*> {
+        std::size_t operator()(const SBLoc<FPType>* l) const {
+            return std::hash<SBLoc<FPType>>()(*l);
         }
     };
 }
 
-template <typename dist_type>
-inline std::ostream& operator<<(std::ostream &os, const SBLoc<dist_type> &l) {
-    return os << "Lat: " << SBLoc<dist_type>::toDegree(l.geoPt[0]) << ", Lng: "
-              << SBLoc<dist_type>::toDegree(l.geoPt[1]) << "\nCity: "
+template <typename FPType>
+inline std::ostream& operator<<(std::ostream &os, const SBLoc<FPType> &l) {
+    return os << "Lat: " << SBLoc<FPType>::toDegree(l.geoPt[0]) << ", Lng: "
+              << SBLoc<FPType>::toDegree(l.geoPt[1]) << "\nCity: "
               << l.city << std::endl << "Addr: " << l.addr << std::endl;
 }
 
-template <typename dist_type>
-inline std::istream& operator>>(std::istream &is, SBLoc<dist_type> &l) {
+template <typename FPType>
+inline std::istream& operator>>(std::istream &is, SBLoc<FPType> &l) {
     std::getline(is, l.city, ',');
     is >> l.geoPt[0];
-    l.geoPt[0] = SBLoc<dist_type>::toRadians(l.geoPt[0]);
+    l.geoPt[0] = SBLoc<FPType>::toRadians(l.geoPt[0]);
     is.ignore(256, ',');
     is >> l.geoPt[1];
-    l.geoPt[1] = SBLoc<dist_type>::toRadians(l.geoPt[1]);
+    l.geoPt[1] = SBLoc<FPType>::toRadians(l.geoPt[1]);
     is.ignore(256, ',');
     std::getline(is, l.addr, '\r');
     return is;

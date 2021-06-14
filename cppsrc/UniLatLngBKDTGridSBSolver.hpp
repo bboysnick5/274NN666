@@ -18,30 +18,30 @@
 #include <variant>
 
 
-template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
-class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
+template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType> {
 public:
-    UniLatLngBKDTGridSBSolver(dist_type = 1, std::size_t = 1500);
-    void Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>>&) override;
-    const SBLoc<dist_type>* FindNearestLoc(const PointND<dist_type, 2>&) const override;
+    UniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
+    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual void PrintSolverInfo() const override final;
     virtual ~UniLatLngBKDTGridSBSolver() override {}
 
     
 protected:
-    const dist_type AVE_LOC_PER_CELL;
-    const std::size_t MAX_CACHE_CELL_VEC_SIZE;
-    dist_type lngInc, latInc, latIncInverse, sideLen;
+    const FPType AVE_LOC_PER_CELL;
+    const std::size_t kMaxCacheCellVecSize_;
+    FPType lng_inc_, lat_inc_, lat_inc_inverse_, side_len_;
     std::size_t totalLocSize, totalNodeSize = 0, singleLocs = 0,
-           vecLocs = 0, rowSize, colSize;
-    std::vector<std::variant<std::vector<typename KDT<KDTType, dist_type>::node_type>,
-                             const SBLoc<dist_type>*, KDT<KDTType, dist_type>>> grid_cache_;
+           vecLocs = 0, row_size_, col_size_;
+    std::vector<std::variant<std::vector<typename KDT<KDTType, FPType>::node_type>,
+                             const SBLoc<FPType>*, KDT<KDTType, FPType>>> grid_cache_;
     void calcSideLenFromAlpc();
-    void FillCacheCell(dist_type, dist_type, dist_type,
-                       std::vector<typename KDT<KDTType, dist_type>::node_type>&);
-    const SBLoc<dist_type>* ReturnNNLocFromCacheVariant(const PointND<dist_type, 2>&,
-          const std::variant<std::vector<typename KDT<KDTType, dist_type>::node_type>,
-          const SBLoc<dist_type>*, KDT<KDTType, dist_type>>&) const;
+    void FillCacheCell(FPType, FPType, FPType,
+                       std::vector<typename KDT<KDTType, FPType>::node_type>&);
+    const SBLoc<FPType>* ReturnNNLocFromCacheVariant(const PointND<FPType, 2>&,
+          const std::variant<std::vector<typename KDT<KDTType, FPType>::node_type>,
+          const SBLoc<FPType>*, KDT<KDTType, FPType>>&) const;
     
 private:
     virtual void FillGridCache();

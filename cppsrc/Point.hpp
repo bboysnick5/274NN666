@@ -23,16 +23,16 @@
 
 
 
-template <typename _Tp, std::size_t _N>
+template <typename FPType, std::size_t N>
 class PointND {
 public:
 
     typedef PointND                                                        __self;
-    typedef _Tp                                                          value_type;
+    typedef FPType                                                          value_type;
     typedef value_type&                                                  reference;
     typedef const value_type&                                            const_reference;
-    typedef typename std::array<_Tp, _N>::iterator                       iterator;
-    typedef typename std::array<_Tp, _N>::const_iterator                 const_iterator;
+    typedef typename std::array<FPType, N>::iterator                       iterator;
+    typedef typename std::array<FPType, N>::const_iterator                 const_iterator;
     typedef value_type*                                                  pointer;
     typedef const value_type*                                            const_pointer;
     typedef std::size_t                                                  size_type;
@@ -61,12 +61,12 @@ public:
     // Returns N, the dimension of the point.
     constexpr std::size_t size() const;
     
-    bool operator == (const PointND<_Tp, _N>& rhs) const;
-    bool operator != (const PointND<_Tp, _N>& rhs) const;
+    bool operator == (const PointND<FPType, N>& rhs) const;
+    bool operator != (const PointND<FPType, N>& rhs) const;
     
     
-    // _Tp& operator[](std::size_t index);
-    // _Tp operator[](std::size_t index) const;
+    // FPType& operator[](std::size_t index);
+    // FPType operator[](std::size_t index) const;
     // Usage: myPointND[3] = 137;
     // ------------------------------------------------------------------------
     // Queries or retrieves the value of the point at a particular point. The
@@ -77,18 +77,18 @@ public:
     const value_type* data() const;
     value_type* data();
     
-    const std::array<_Tp, _N>& dataArray() const;
-    std::array<_Tp, _N>& dataArray();
+    const std::array<FPType, N>& dataArray() const;
+    std::array<FPType, N>& dataArray();
     
-    // static _Tp eulDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two);
-    // Usage: _Tp d = Distance(one, two);
+    // static FPType eulDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two);
+    // Usage: FPType d = Distance(one, two);
     // ----------------------------------------------------------------------------
     // Returns the Euclidean distance between two points.
     template <DistType, typename... VArgs>
-    static value_type dist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2, VArgs... args);
+    static value_type dist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2, VArgs... args);
    
     template <DistType, typename... VArgs>
-    value_type dist(const PointND<_Tp, _N>&, VArgs... args) const;
+    value_type dist(const PointND<FPType, N>&, VArgs... args) const;
     
     // iterator begin();
     // iterator end();
@@ -105,87 +105,87 @@ public:
     
 private:
     // The point's actual coordinates are stored in an array.
-    std::array<value_type, _N> coords_;
+    std::array<value_type, N> coords_;
     
-    template <std::size_t Dimension = _N, std::enable_if_t<Dimension == 2, bool> = true>
-    static value_type eucDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
+    template <std::size_t Dimension = N, std::enable_if_t<Dimension == 2, bool> = true>
+    static value_type eucDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
     
-    template <std::size_t Dimension = _N, std::enable_if_t<Dimension == 3, bool> = true>
-    static value_type eucDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
+    template <std::size_t Dimension = N, std::enable_if_t<Dimension == 3, bool> = true>
+    static value_type eucDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
     
-    template <std::size_t Dimension = _N, std::enable_if_t<Dimension != 2 && Dimension != 3, bool> = true>
-    static value_type eucDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
+    template <std::size_t Dimension = N, std::enable_if_t<Dimension != 2 && Dimension != 3, bool> = true>
+    static value_type eucDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
 
-    static value_type eucSqDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
-    static value_type manDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
+    static value_type eucSqDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
+    static value_type manDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
     
     //template <typename... VArgs>
-    static value_type havDist(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2, _Tp radius);
-    static value_type havDistCompCalcA(const PointND<_Tp, _N>& pt1, const PointND<_Tp, _N>& pt2);
+    static value_type havDist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2, FPType radius);
+    static value_type havDistCompCalcA(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2);
 
 };
 
 /** PointND class implementation details */
 
 
-template <typename _Tp, std::size_t _N>
-constexpr std::size_t PointND<_Tp, _N>::size() const {
-    return _N;
+template <typename FPType, std::size_t N>
+constexpr std::size_t PointND<FPType, N>::size() const {
+    return N;
 }
 
-template <typename _Tp, std::size_t _N>
-_Tp& PointND<_Tp, _N>::operator[] (std::size_t index) {
+template <typename FPType, std::size_t N>
+FPType& PointND<FPType, N>::operator[] (std::size_t index) {
     return coords_[index];
 }
 
-template <typename _Tp, std::size_t _N>
-_Tp PointND<_Tp, _N>::operator[] (std::size_t index) const {
+template <typename FPType, std::size_t N>
+FPType PointND<FPType, N>::operator[] (std::size_t index) const {
     return coords_[index];
 }
 
-template <typename _Tp, std::size_t _N>
-const _Tp* PointND<_Tp, _N>::data() const {
+template <typename FPType, std::size_t N>
+const FPType* PointND<FPType, N>::data() const {
     return coords_.data();
 }
 
-template <typename _Tp, std::size_t _N>
-_Tp* PointND<_Tp, _N>::data() {
+template <typename FPType, std::size_t N>
+FPType* PointND<FPType, N>::data() {
     return coords_.data();
 }
 
-template <typename _Tp, std::size_t _N>
-const std::array<_Tp, _N>& PointND<_Tp, _N>::dataArray() const {
+template <typename FPType, std::size_t N>
+const std::array<FPType, N>& PointND<FPType, N>::dataArray() const {
     return coords_;
 }
 
-template <typename _Tp, std::size_t _N>
-std::array<_Tp, _N>& PointND<_Tp, _N>::dataArray() {
+template <typename FPType, std::size_t N>
+std::array<FPType, N>& PointND<FPType, N>::dataArray() {
     return coords_;
 }
 
-template <typename _Tp, std::size_t _N>
-typename PointND<_Tp, _N>::iterator PointND<_Tp, _N>::begin() {
+template <typename FPType, std::size_t N>
+typename PointND<FPType, N>::iterator PointND<FPType, N>::begin() {
     return coords_.begin();
 }
 
-template <typename _Tp, std::size_t _N>
-typename PointND<_Tp, _N>::const_iterator PointND<_Tp, _N>::cbegin() const {
+template <typename FPType, std::size_t N>
+typename PointND<FPType, N>::const_iterator PointND<FPType, N>::cbegin() const {
     return coords_.cbegin();
 }
 
-template <typename _Tp, std::size_t _N>
-typename PointND<_Tp, _N>::iterator PointND<_Tp, _N>::end() {
+template <typename FPType, std::size_t N>
+typename PointND<FPType, N>::iterator PointND<FPType, N>::end() {
     return coords_.end();
 }
 
-template <typename _Tp, std::size_t _N>
-typename PointND<_Tp, _N>::const_iterator PointND<_Tp, _N>::cend() const {
+template <typename FPType, std::size_t N>
+typename PointND<FPType, N>::const_iterator PointND<FPType, N>::cend() const {
     return coords_.cend();
 }
 
-template <typename _Tp, std::size_t _N>
-template <typename PointND<_Tp, _N>::DistType DT, typename... VArgs>
-_Tp PointND<_Tp, _N>::dist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two, VArgs... args) {
+template <typename FPType, std::size_t N>
+template <typename PointND<FPType, N>::DistType DT, typename... VArgs>
+FPType PointND<FPType, N>::dist(const PointND<FPType, N>& one, const PointND<FPType, N>& two, VArgs... args) {
     switch (DT) {
         case DistType::EUC:
             return eucDist(one, two);
@@ -201,39 +201,39 @@ _Tp PointND<_Tp, _N>::dist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& 
         }
 }
 
-template <typename _Tp, std::size_t _N>
-template <typename PointND<_Tp, _N>::DistType DT, typename... VArgs>
-_Tp PointND<_Tp, _N>::dist(const PointND<_Tp, _N> &other, VArgs ...args) const {
-    return PointND<_Tp, _N>::template dist<DT>(*this, other, args...);
+template <typename FPType, std::size_t N>
+template <typename PointND<FPType, N>::DistType DT, typename... VArgs>
+FPType PointND<FPType, N>::dist(const PointND<FPType, N> &other, VArgs ...args) const {
+    return PointND<FPType, N>::template dist<DT>(*this, other, args...);
 }
 
 
 
-template <typename _Tp, std::size_t _N>
+template <typename FPType, std::size_t N>
 template <std::size_t Dimension, std::enable_if_t<Dimension == 2, bool>>
-_Tp PointND<_Tp, _N>::eucDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
+FPType PointND<FPType, N>::eucDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
     return std::hypot(one[0] - two[0], one[1] - two[1]);
 }
 
-template <typename _Tp, std::size_t _N>
+template <typename FPType, std::size_t N>
 template <std::size_t Dimension, std::enable_if_t<Dimension == 3, bool>>
-_Tp PointND<_Tp, _N>::eucDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
+FPType PointND<FPType, N>::eucDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
     return std::hypot(one[0] - two[0], one[1] - two[1], one[2] - two[2]);
 }
 
-template <typename _Tp, std::size_t _N>
+template <typename FPType, std::size_t N>
 template <std::size_t Dimension, std::enable_if_t<Dimension != 2 && Dimension != 3, bool>>
-_Tp PointND<_Tp, _N>::eucDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
+FPType PointND<FPType, N>::eucDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
     return sqrt(eucSqDist(one, two));
 }
 
-template <typename _Tp, std::size_t _N>
-_Tp PointND<_Tp, _N>::eucSqDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
-    return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<_Tp>(),
-                                 [](const _Tp a, const _Tp b){return (a-b)*(a-b);});
+template <typename FPType, std::size_t N>
+FPType PointND<FPType, N>::eucSqDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
+    return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<FPType>(),
+                                 [](const FPType a, const FPType b){return (a-b)*(a-b);});
     /*
-    _Tp diff = one[0] - two[0], result = diff*diff;
-    for (std::size_t i = 1; i != _N; ++i) {
+    FPType diff = one[0] - two[0], result = diff*diff;
+    for (std::size_t i = 1; i != N; ++i) {
         diff = one[i] - two[i];
         result += diff*diff;
     }
@@ -241,35 +241,35 @@ _Tp PointND<_Tp, _N>::eucSqDist(const PointND<_Tp, _N>& one, const PointND<_Tp, 
 }
 
 
-template <typename _Tp, std::size_t _N>
-_Tp PointND<_Tp, _N>::havDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two, _Tp radius) {
+template <typename FPType, std::size_t N>
+FPType PointND<FPType, N>::havDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two, FPType radius) {
     return 2.0 * std::asin(std::sqrt(havDistCompCalcA(one, two))) * radius;
 }
 
-template <typename _Tp, std::size_t _N>
-_Tp PointND<_Tp, _N>::havDistCompCalcA(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
-    _Tp dLatOneHalf = 0.5*(one[0] - two[0]);
-    _Tp dLonOneHalf = 0.5*(one[1] - two[1]);
+template <typename FPType, std::size_t N>
+FPType PointND<FPType, N>::havDistCompCalcA(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
+    FPType dLatOneHalf = 0.5*(one[0] - two[0]);
+    FPType dLonOneHalf = 0.5*(one[1] - two[1]);
     return sin(dLatOneHalf) * sin(dLatOneHalf) +
            sin(dLonOneHalf) * sin(dLonOneHalf) * std::cos(one[0]) * std::cos(two[0]);
 }
 
 
-template <typename _Tp, std::size_t _N>
-_Tp PointND<_Tp, _N>::manDist(const PointND<_Tp, _N>& one, const PointND<_Tp, _N>& two) {
-    _Tp result = std::fabs(one[0] - two[0]);
-    for (std::size_t i = 1; i < _N; ++i)
+template <typename FPType, std::size_t N>
+FPType PointND<FPType, N>::manDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
+    FPType result = std::fabs(one[0] - two[0]);
+    for (std::size_t i = 1; i < N; ++i)
         result += std::fabs(one[i] - two[i]);
     return result;
 }
 
-template <typename _Tp, std::size_t _N>
-bool PointND<_Tp, _N>::operator == (const PointND<_Tp, _N>& rhs) const {
+template <typename FPType, std::size_t N>
+bool PointND<FPType, N>::operator == (const PointND<FPType, N>& rhs) const {
     return coords_ == rhs.coords_;
 }
 
-template <typename _Tp, std::size_t _N>
-bool PointND<_Tp, _N>::operator != (const PointND<_Tp, _N>& rhs) const {
+template <typename FPType, std::size_t N>
+bool PointND<FPType, N>::operator != (const PointND<FPType, N>& rhs) const {
     return !(*this == rhs);
 }
 
