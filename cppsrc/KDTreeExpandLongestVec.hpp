@@ -38,7 +38,7 @@
 #include <concepts>
 #include <cstdlib>
 #include <array>
-
+#include <ranges>
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 class KDTreeExpandLongestVec {
@@ -711,7 +711,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *c
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class OutputIter>
 OutputIter KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-rangeDiffKNNPairs(const PointND<FPType, N>& pt, FPType fence_sq, OutputIter out_nd_type_it) const {
+rangeDiffKNNPairs(const PointND<FPType, N>& pt, FPType fence_sq, OutputIter nd_type_output_it) const {
     
     struct ActRecord {
         FPType dist;
@@ -757,21 +757,31 @@ rangeDiffKNNPairs(const PointND<FPType, N>& pt, FPType fence_sq, OutputIter out_
         } else if (cur++->dimToExpand == N) {
             do {
                 if (act_record_it == act_record_stack) [[unlikely]] {
-                    std::for_each(result_dist_kv_vec.begin(), result_dist_kv_vec.end(), [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+                    for (DistKV dkv : std::ranges::subrange(result_dist_kv_arr, result_dist_kv_arr_it) 
+                         | std::views::reverse | std::views::filter([=](const DistKV& dkv) { return dkv.dist < best_dist_plus_fence_sq; })) {
+                        *nd_type_output_it++ = { *dkv.pt, *dkv.elem };
+                    }
+                    for (DistKV dkv : std::views::reverse(result_dist_kv_vec)
+                         | std::views::filter([=](const DistKV& dkv) { return dkv.dist < best_dist_plus_fence_sq; })) {
+                        *nd_type_output_it++ = { *dkv.pt, *dkv.elem };
+                    }
+                    /*
+                    std::for_each(std::make_reverse_iterator(result_dist_kv_arr_it), std::make_reverse_iterator(result_dist_kv_arr),
+                                  [&nd_type_output_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
                         if (dpe.dist < best_dist_plus_fence_sq)
-                            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
-                    });
-                    std::for_each(result_dist_kv_arr, result_dist_kv_arr_it, [&out_nd_type_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
+                            *nd_type_output_it++ = {*dpe.pt, *dpe.elem};
+                    }); 
+                    std::for_each(result_dist_kv_vec.rbegin(), result_dist_kv_vec.rend(), [&nd_type_output_it, best_dist_plus_fence_sq](const auto& dpe) mutable {
                         if (dpe.dist < best_dist_plus_fence_sq)
-                            *out_nd_type_it++ = {*dpe.pt, *dpe.elem};
-                    });
-                    return out_nd_type_it;
+                            *nd_type_output_it++ = {*dpe.pt, *dpe.elem};
+                    }); */
+                    return nd_type_output_it;
                 }
             } while ((--act_record_it)->dist > best_dist_plus_fence_sq);
             cur = act_record_it->nd;
         }
     }
-    return out_nd_type_it;
+    return nd_type_output_it;
 }
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
