@@ -13,18 +13,18 @@
 
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void BKDTSBSolver<KDTType, dist_type>::Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     GenerateKDT(locData);
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void BKDTSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
     this->locKdt.printTreeInfo();
 }
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void BKDTSBSolver<KDTType, dist_type>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     std::vector<typename KDT<KDTType, dist_type>::node_type> kdtData;
     kdtData.reserve(locData->size());

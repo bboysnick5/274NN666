@@ -11,13 +11,13 @@
 //#include <omp.h>
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 UniCellBKDTGridSBSolver<KDTType, dist_type>::
 UniCellBKDTGridSBSolver(dist_type alpc, std::size_t maxCacheCellVecSize)
 : UniLatLngBKDTGridSBSolver<KDTType, dist_type>(alpc, maxCacheCellVecSize) {}
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniCellBKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
     thisRowStartIdx.reserve(this->rowSize);
     this->grid_cache_.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
@@ -45,7 +45,7 @@ void UniCellBKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
     }
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 const SBLoc<dist_type>* UniCellBKDTGridSBSolver<KDTType, dist_type>::
 FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
     const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(geoSearchPt[0]+0.5*def::kMathPi<dist_type>)*this->latIncInverse];

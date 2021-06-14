@@ -200,7 +200,7 @@ void MainContent(int argc, const char * argv[]) {
     //maxCacheCellVecSize = (1 << 9ull);
     //aveActualLocsPerCell = 0.2;
     
-    auto locData = std::make_shared<std::vector<SBLoc<dist_type>>>();
+    const auto locData = std::make_shared<std::vector<SBLoc<dist_type>>>();
     locData->reserve(1 << 24);
     locData->assign(std::istream_iterator<SBLoc<dist_type>>(infilestream_locs),
                     std::istream_iterator<SBLoc<dist_type>>());

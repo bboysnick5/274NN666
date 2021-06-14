@@ -10,14 +10,14 @@
 #include "Utility.hpp"
 //#include <omp.h>
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 UniLatLngBKDTGridSBSolver(dist_type alpc, std::size_t maxCacheCellVecSize)
 : BKDTSBSolver<KDTType, dist_type>(), AVE_LOC_PER_CELL(alpc),
   MAX_CACHE_CELL_VEC_SIZE(maxCacheCellVecSize) {}
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
     std::cout << "Total cache locs: " << totalNodeSize
     << "\nAve tree size: " << totalNodeSize/grid_cache_.size()
@@ -32,7 +32,7 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::PrintSolverInfo() const {
 }
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 FillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDistSq3DEUC,
               std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs) {
@@ -54,7 +54,7 @@ FillCacheCell(dist_type thisCtrLng, dist_type thisCtrLat, dist_type diagonalDist
 }
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
     colSize = rowSize;
     lngInc = 2.0*def::kMathPi<dist_type>/colSize + 2.0*def::kMathPi<dist_type>/(colSize*65536);
@@ -73,14 +73,14 @@ void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::FillGridCache() {
     }
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::calcSideLenFromAlpc() {
     dist_type surfaceArea = 4*def::kMathPi<dist_type>*SBLoc<dist_type>::EARTH_RADIUS*SBLoc<dist_type>::EARTH_RADIUS;
     dist_type numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
     sideLen = sqrt(surfaceArea/numCells);
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 void UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     totalLocSize = locData->size();
@@ -93,7 +93,7 @@ Build(const std::shared_ptr<std::vector<SBLoc<dist_type>>> &locData) {
     this->locKdt.clear();
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 const SBLoc<dist_type>* UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 ReturnNNLocFromCacheVariant(const PointND<dist_type, 2>& geoSearchPt,
                             const std::variant<std::vector<typename KDT<KDTType, dist_type>::node_type>, const SBLoc<dist_type>*, KDT<KDTType, dist_type>>& v) const {
@@ -114,7 +114,7 @@ ReturnNNLocFromCacheVariant(const PointND<dist_type, 2>& geoSearchPt,
 }
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 const SBLoc<dist_type>* UniLatLngBKDTGridSBSolver<KDTType, dist_type>::
 FindNearestLoc(const PointND<dist_type, 2>& geoSearchPt) const {
     return ReturnNNLocFromCacheVariant(geoSearchPt, grid_cache_[static_cast<std::size_t>

@@ -677,7 +677,7 @@ OutputIter KDTreeExpandLongest<_Tp, N, ElemType, DT>::
 rangeDiffKNNPairs(const PointND<_Tp, N>& pt, _Tp fence, OutputIter returnIt) const {
     std::vector<std::tuple<_Tp, const PointND<_Tp, N>&, const ElemType&>> distPtElemTuple;
     distPtElemTuple.reserve(std::sqrt(treeSize));
-    std::pair<_Tp, const TreeNode*> st[static_cast<std::size_t>(log2(treeSize+1))],
+    std::pair<_Tp, const TreeNode*> st[32],
                                        *it = st;
     _Tp bestDistSq = std::numeric_limits<_Tp>::max(),
            bestDistDiffSq = std::numeric_limits<_Tp>::max(),
@@ -723,7 +723,7 @@ FINAL:
 template <typename _Tp, std::size_t N, typename ElemType, typename PointND<_Tp, N>::DistType DT>
 ElemType KDTreeExpandLongest<_Tp, N, ElemType, DT>::NNValue(const PointND<_Tp, N> &pt) const {
     
-    std::pair<_Tp, const TreeNode*> st[static_cast<std::size_t>(log2(treeSize+1))],
+    std::pair<_Tp, const TreeNode*> st[32],
                                        *it = st;
     _Tp bestDist = std::numeric_limits<_Tp>::max();
     const ElemType *bestValue = nullptr;

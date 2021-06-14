@@ -653,7 +653,7 @@ OutputIter KDTree<_Tp, N, ElemType, DT>::rangeDiffKNNPairs(const PointND<_Tp, N>
         TreeNode *cur;
         std::size_t dim;
     };
-    ActRecord st[static_cast<std::size_t>(log2(treeSize+1))],
+    ActRecord st[32],
     *it = st;
     while (it != st || hasNext) {
         if (!hasNext) {
@@ -743,7 +743,7 @@ ElemType KDTree<_Tp, N, ElemType, DT>::NNValue(const PointND<_Tp, N> &pt) const 
         TreeNode *cur;
         std::size_t dim;
     };
-    actRecord st[static_cast<std::size_t>(log2(treeSize+1))], *it = st;
+    actRecord st[32], *it = st;
     while (it != st || hasNext) {
         if (!hasNext) {
             const auto &ar = *--it;

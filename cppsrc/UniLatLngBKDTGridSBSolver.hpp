@@ -18,7 +18,7 @@
 #include <variant>
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, dist_type> {
 public:
     UniLatLngBKDTGridSBSolver(dist_type = 1, std::size_t = 1500);

@@ -17,7 +17,7 @@
 #include <iterator>
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 class UnionUniCellBKDTGridSBSolver : public UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy> {
 public:

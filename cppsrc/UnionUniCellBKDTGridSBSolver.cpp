@@ -13,13 +13,13 @@
 #include <omp.h>
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
 UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 UnionUniCellBKDTGridSBSolver(dist_type alpc, std::size_t maxCacheCellVecSize)
 : UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>(alpc, maxCacheCellVecSize) {}
 
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
@@ -38,13 +38,13 @@ LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
     }
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::ompLoopCollapsePrep() {
     
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 LoopBody(std::vector<typename KDT<KDTType, dist_type>::node_type>& ptLocPairs,
@@ -72,7 +72,7 @@ firstprivate(ptLocPairs) default(none) schedule(dynamic, 1)
     }
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType,
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType,
           class dist_type, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::FillGridCache() {
     std::vector<typename KDT<KDTType, dist_type>::node_type> ptLocPairs;
@@ -97,7 +97,7 @@ void UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::FillGridCache() {
     colSizeCosLngIncEachRowVec.shrink_to_fit();
 }
 
-template <template <class DT, std::size_t, class, typename PointND<DT, 3>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
+template <template <class DT, std::size_t N, class, typename PointND<DT, N>::DistType> class KDTType, class dist_type, def::ThreadingPolicy policy>
 const SBLoc<dist_type>* UnionUniCellBKDTGridSBSolver<KDTType, dist_type, policy>::
 FindNearestLoc(const PointND<dist_type, 2>& geoPt) const {
   //  return UnionUniLatLngBKDTGridSBSolver<KDTType, dist_type, policy>::FindNearestLoc(geoPt);
