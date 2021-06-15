@@ -64,14 +64,14 @@ public:
     typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type = 0>
     KDTreeExpandLongest(RAI, RAI);
     
-    template <typename Const_RAI,
+    template <typename ConstRAI,
     typename std::enable_if<std::is_same<
     typename std::iterator_traits<typename
-    std::remove_const_t<Const_RAI>>::iterator_category,
+    std::remove_const_t<ConstRAI>>::iterator_category,
     std::random_access_iterator_tag>::value && std::is_const<typename
-    std::remove_pointer<typename std::iterator_traits<Const_RAI>::pointer>
+    std::remove_pointer<typename std::iterator_traits<ConstRAI>::pointer>
     ::type>::value, int>::type = 0>
-    KDTreeExpandLongest(Const_RAI, Const_RAI);
+    KDTreeExpandLongest(ConstRAI, ConstRAI);
     
     // Destructor: ~KDTreeExpandLongest()
     // Usage: (implicit)
@@ -115,9 +115,9 @@ public:
     int height() const;
     bool empty() const;
     
-    void clear();
+    void Clear();
     
-    void printTreeInfo() const;
+    void PrintTreeInfo() const;
     
     // bool contains(const PointND<FPType, N>& pt) const;
     // Usage: if (kd.contains(pt))
@@ -159,22 +159,22 @@ public:
     // chosen.
     ElemType kNNValue(const PointND<value_type, N>& key, std::size_t k) const;
     
-    // Iter rangeDiffKNNPairs(const PointND<FPType, N>&, FPType, Iter) const
-    // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
+    // Iter NNsWithFence(const PointND<FPType, N>&, FPType, Iter) const
+    // Usage: Iter end = kd.NNsWithFence(pt, 0.33, begin);
     // ----------------------------------------------------
     // Given a point p and a FPType offset, return a set of points in the KDTreeExpandLongest
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
     template <class OutputIter>
-    OutputIter rangeDiffKNNPairs(const PointND<value_type, N>&, value_type, OutputIter) const;
+    OutputIter NNsWithFence(const PointND<value_type, N>&, value_type, OutputIter) const;
     
 private:
     
     
     struct TreeNode {
         TreeNode *right;
-        std::size_t dimToExpand;
+        std::size_t dim_to_expand;
         TreeNode *left;
         PointND<value_type, N> key;
         ElemType object;
@@ -190,12 +190,12 @@ private:
         // TreeNode(TreeNode&&) = default;
         // TreeNode& operator = (TreeNode&&) = default;
         
-        TreeNode(std::size_t dimToExpand, const PointND<value_type, N>& k, const ElemType& obj)
-        : right(nullptr), dimToExpand(dimToExpand), left(nullptr), key(k),
+        TreeNode(std::size_t dim_to_expand, const PointND<value_type, N>& k, const ElemType& obj)
+        : right(nullptr), dim_to_expand(dim_to_expand), left(nullptr), key(k),
           object(obj) {}
         
-        TreeNode(std::size_t dimToExpand, PointND<value_type, N>&& k, ElemType&& obj)
-        : right(nullptr), dimToExpand(dimToExpand), left(nullptr),
+        TreeNode(std::size_t dim_to_expand, PointND<value_type, N>&& k, ElemType&& obj)
+        : right(nullptr), dim_to_expand(dim_to_expand), left(nullptr),
         key(std::move(k)), object(std::move(obj)) {}
         
         ~TreeNode() = default;
@@ -213,7 +213,7 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, RAI, RAI, std::array<value_type, N*2>&);
+    void RangeCtorHelper(TreeNode*&, RAI, RAI, std::array<value_type, N*2>&);
     
     
     template <class RAI>
@@ -268,18 +268,18 @@ private:
 
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-template <typename Const_RAI,
+template <typename ConstRAI,
 typename std::enable_if<std::is_same<typename std::iterator_traits<typename
-std::remove_const_t<Const_RAI>>::iterator_category,
+std::remove_const_t<ConstRAI>>::iterator_category,
 std::random_access_iterator_tag>::value &&
 std::is_const<typename std::remove_pointer<typename
-std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
-KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(Const_RAI cbegin, Const_RAI cend)
+std::iterator_traits<ConstRAI>::pointer>::type>::value, int>::type>
+KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(ConstRAI cbegin, ConstRAI cend)
 : treeSize(cend-cbegin), pool(std::make_unique<PooledAllocator>()) {
     std::vector<node_type> constructData(cbegin, cend);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
     auto bbox = computeInitBBox(cbegin, cend);
-    rangeCtorHelper(ndPoolPtr, constructData.begin(), constructData.end(), bbox);
+    RangeCtorHelper(ndPoolPtr, constructData.begin(), constructData.end(), bbox);
 }
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
@@ -292,7 +292,7 @@ KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI
 : treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
     auto bbox = computeInitBBox(begin, end);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, begin, end, bbox);
+    RangeCtorHelper(ndPoolPtr, begin, end, bbox);
     
     /*
      struct actRecord {
@@ -419,7 +419,7 @@ computeInitBBox(RAI begin, RAI end) {
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongest<FPType, N, ElemType, DT>::
-rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
+RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
                 std::array<FPType, N*2> &bbox) {
     std::size_t dim = 0;
     FPType maxSpan = bbox[1] - bbox[0];
@@ -440,7 +440,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
     TreeNode* curNdPtr = ndPoolPtr;
     
     if (begin == median - 1) {
-        //curNdPtr->dimToExpand = static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::LEFT_CHILD);
+        //curNdPtr->dim_to_expand = static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::LEFT_CHILD);
         curNdPtr->left = ++ndPoolPtr;
         pool->construct(ndPoolPtr, static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::NO_CHILDREN), std::move(begin->key),
                         std::move(begin->value));
@@ -449,12 +449,12 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
         auto prevDimHigh = bbox[dim*2+1];
         bbox[dim*2+1] = curNdPtr->key[dim];
         //bbox[dim*2+1] = std::max_element(begin, median, [dim](const auto &p1, const auto&p2){return p1.first[dim] < p2.first[dim];})->first[dim];
-        rangeCtorHelper(ndPoolPtr, begin, median, bbox);
+        RangeCtorHelper(ndPoolPtr, begin, median, bbox);
         bbox[dim*2+1] = prevDimHigh;
     }
     
     if (median + 2 == end) {
-        //curNdPtr->dimToExpand = dim;
+        //curNdPtr->dim_to_expand = dim;
         curNdPtr->right = ++ndPoolPtr;
         pool->construct(ndPoolPtr, static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::NO_CHILDREN), std::move((median+1)->key),
                         std::move((median+1)->value));
@@ -463,7 +463,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
         auto prevDimLow = bbox[dim*2];
         bbox[dim*2] = curNdPtr->key[dim];
         //bbox[dim*2] = std::min_element(median + 1, end, [dim](const auto &p1, const auto &p2){return p1.first[dim] < p2.first[dim];})->first[dim];
-        rangeCtorHelper(ndPoolPtr, median+1, end, bbox);
+        RangeCtorHelper(ndPoolPtr, median+1, end, bbox);
         bbox[dim*2] = prevDimLow;
     }
 }
@@ -481,7 +481,7 @@ void KDTreeExpandLongest<FPType, N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
         } else {
             //pool->construct(thisNode, {otherNode->key, otherNode->object});
             //++ndPoolIt;
-            thisNode = new TreeNode(otherNode->dimToExpand, otherNode->key, otherNode->object);
+            thisNode = new TreeNode(otherNode->dim_to_expand, otherNode->key, otherNode->object);
         }
         treeCopy(thisNode->left, otherNode->left);
         treeCopy(thisNode->right, otherNode->right);
@@ -533,7 +533,7 @@ bool KDTreeExpandLongest<FPType, N, ElemType, DT>::empty() const {
 }
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-void KDTreeExpandLongest<FPType, N, ElemType, DT>::printTreeInfo() const {
+void KDTreeExpandLongest<FPType, N, ElemType, DT>::PrintTreeInfo() const {
     std::cout << "Tree height is " << height()
     << "\nTree size is " << size() << "\n";
 }
@@ -543,7 +543,7 @@ void KDTreeExpandLongest<FPType, N, ElemType, DT>::printTreeInfo() const {
 // ----------------------------------------------------------
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-void KDTreeExpandLongest<FPType, N, ElemType, DT>::clear() {
+void KDTreeExpandLongest<FPType, N, ElemType, DT>::Clear() {
     pool->destroy_and_free_all<TreeNode>();
     root = nullptr;
     treeSize = 0;
@@ -674,7 +674,7 @@ void KDTreeExpandLongest<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *cur,
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class OutputIter>
 OutputIter KDTreeExpandLongest<FPType, N, ElemType, DT>::
-rangeDiffKNNPairs(const PointND<FPType, N>& pt, FPType fence, OutputIter returnIt) const {
+NNsWithFence(const PointND<FPType, N>& pt, FPType fence, OutputIter returnIt) const {
     std::vector<std::tuple<FPType, const PointND<FPType, N>&, const ElemType&>> distPtElemTuple;
     distPtElemTuple.reserve(std::sqrt(treeSize));
     std::pair<FPType, const TreeNode*> st[32],
@@ -695,7 +695,7 @@ rangeDiffKNNPairs(const PointND<FPType, N>& pt, FPType fence, OutputIter returnI
         }
         
         if (cur->right) {
-            std::size_t dim = cur->dimToExpand;
+            std::size_t dim = cur->dim_to_expand;
             FPType diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
                 new(it++) std::pair<FPType, const TreeNode*>(diff*diff, cur->right);
@@ -753,7 +753,7 @@ ElemType KDTreeExpandLongest<FPType, N, ElemType, DT>::NNValue(const PointND<FPT
         // thisNumNodesSearches++;
         
         if (cur->right) {
-            std::size_t dim = cur->dimToExpand;
+            std::size_t dim = cur->dim_to_expand;
             FPType diff = pt[dim] - cur->key[dim];
             if (diff < 0.0) {
                 new(it++) std::pair<FPType, const TreeNode*>(diff*diff, cur->right);

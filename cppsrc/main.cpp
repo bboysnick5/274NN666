@@ -136,7 +136,7 @@ void TimeNNSearch(const SBSolver<FPType> &solver, std::vector<PointND<FPType, 2>
         per_search_time_vec_in_micro_secs.emplace_back(std::chrono::steady_clock::now() - this_search_start_time);
     }
     
-    std::for_each(per_search_time_vec_in_micro_secs.cbegin(), per_search_time_vec_in_micro_secs.cend(), [&](auto this_search_time_in_micro_secs) mutable {
+    std::for_each(per_search_time_vec_in_micro_secs.crbegin(), per_search_time_vec_in_micro_secs.crend(), [&](auto this_search_time_in_micro_secs) mutable {
         max_one_search_time_in_micro_secs = std::max(max_one_search_time_in_micro_secs, this_search_time_in_micro_secs);
         min_one_search_time_in_micro_secs = std::min(min_one_search_time_in_micro_secs, this_search_time_in_micro_secs);
     });
@@ -209,7 +209,7 @@ void MainContent(int argc, const char * argv[]) {
     //std::sort(locData->begin(), locData->end());
     //locData->erase(std::unique(locData->begin(), locData->end()), locData->end());
     locData->shrink_to_fit();
-    std::shuffle(locData->begin(), locData->end(), mt);
+    std::shuffle(locData->rbegin(), locData->rend(), mt);
     
     
     

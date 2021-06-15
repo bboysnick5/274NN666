@@ -20,7 +20,7 @@ void BKDTSBSolver<KDTType, FPType>::Build(const std::shared_ptr<std::vector<SBLo
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void BKDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
-    this->locKdt.printTreeInfo();
+    this->locKdt.PrintTreeInfo();
 }
 
 
@@ -28,10 +28,10 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 void BKDTSBSolver<KDTType, FPType>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
     std::vector<typename KDT<KDTType, FPType>::node_type> kdtData;
     kdtData.reserve(locData->size());
-    std::transform(locData->cbegin(), locData->cend(), std::back_inserter(kdtData),
+    std::transform(locData->crbegin(), locData->crend(), std::back_inserter(kdtData),
                    [](const SBLoc<FPType>& l) -> typename KDT<KDTType, FPType>::node_type {
                        return {l.locToCart3DPt(), &l};});
-    this->locKdt = KDT<KDTType, FPType>(kdtData.begin(), kdtData.end());
+    this->locKdt = KDT<KDTType, FPType>(kdtData.rbegin(), kdtData.rend());
 }
 
 

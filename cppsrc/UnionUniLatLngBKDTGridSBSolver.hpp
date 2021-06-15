@@ -302,7 +302,7 @@ inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(std::size_t idx_to_fill,
               const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t thiscol_size_,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt),
+    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt),
         diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     grid_cache_[idx_to_fill] = {pt_loc_vec, kMaxCacheCellVecSize_,
                             {idx_to_fill > 0 ? &grid_cache_[idx_to_fill - 1] : nullptr,
@@ -316,7 +316,7 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t thiscol_size_,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
+    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     auto size = this->grid_cache_.size();
     this->grid_cache_.emplace_back(pt_loc_vec, kMaxCacheCellVecSize_,
                                  std::initializer_list<const BitCell*>{

@@ -36,7 +36,7 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
 FillCacheCell(FPType thisCtrLng, FPType thisCtrLat, FPType diagonalDistSq3DEUC,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.rangeDiffKNNPairs(SBLoc<FPType>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
+    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
                                    diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     std::size_t locsSize = pt_loc_vec.size();
     this->totalNodeSize += locsSize;
@@ -90,7 +90,7 @@ Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
     lat_inc_inverse_ = 1.0/lat_inc_;
     row_size_ = std::ceil(def::kMathPi<FPType>/lat_inc_);
     FillGridCache();
-    this->locKdt.clear();
+    this->locKdt.Clear();
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>

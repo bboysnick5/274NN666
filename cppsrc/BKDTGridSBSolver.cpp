@@ -29,7 +29,7 @@ BKDTGridSBSolver<KDTType, FPType>::cacheAllPossibleLocsOneCell(std::size_t r0, s
     FPType cellCtrLat = this->midLat + SBLoc<FPType>::deltaLatOnSameLngFromHavDist(rowDistCellCtrGridCtr),
            cellCtrLng = SBLoc<FPType>::lngFromSameLatHavDist(colDistCellCtrGridCtr,
                                               this->midLng, cellCtrLat);
-    return sbKdt.rangeDiffKNNPairs(SBLoc<FPType>::geoPtToCart3DPt({cellCtrLat,
+    return sbKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt({cellCtrLat,
         cellCtrLng}), diffSq, begin);
 }
 

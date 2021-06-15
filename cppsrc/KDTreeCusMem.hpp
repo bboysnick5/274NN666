@@ -64,14 +64,14 @@ public:
     typename std::iterator_traits<RAI>::pointer>::type>::value, int>::type = 0>
     KDTreeCusMem(RAI, RAI);
     
-    template <typename Const_RAI,
+    template <typename ConstRAI,
         typename std::enable_if<std::is_same<
         typename std::iterator_traits<typename
-        std::remove_const_t<Const_RAI>>::iterator_category,
+        std::remove_const_t<ConstRAI>>::iterator_category,
         std::random_access_iterator_tag>::value && std::is_const<typename
-        std::remove_pointer<typename std::iterator_traits<Const_RAI>::pointer>
+        std::remove_pointer<typename std::iterator_traits<ConstRAI>::pointer>
            ::type>::value, int>::type = 0>
-    KDTreeCusMem(Const_RAI, Const_RAI);
+    KDTreeCusMem(ConstRAI, ConstRAI);
 
     // Destructor: ~KDTreeCusMem()
     // Usage: (implicit)
@@ -115,9 +115,9 @@ public:
     int height() const;
     bool empty() const;
     
-    void clear();
+    void Clear();
     
-    void printTreeInfo() const;
+    void PrintTreeInfo() const;
     
     // bool contains(const PointND<FPType, N>& pt) const;
     // Usage: if (kd.contains(pt))
@@ -159,15 +159,15 @@ public:
     // chosen.
     ElemType kNNValue(const PointND<value_type, N>& key, std::size_t k) const;
     
-    // Iter rangeDiffKNNPairs(const PointND<FPType, N>&, FPType, Iter) const
-    // Usage: Iter end = kd.rangeDiffKNNPairs(pt, 0.33, begin);
+    // Iter NNsWithFence(const PointND<FPType, N>&, FPType, Iter) const
+    // Usage: Iter end = kd.NNsWithFence(pt, 0.33, begin);
     // ----------------------------------------------------
     // Given a point p and a FPType offset, return a set of points in the KDTreeCusMem
     // nearest to p such that the farthest one in the set is at least offset
     // distance close to p than the rest of the points in the tree.
     // The forward iterator is passed in and filled and the end will be returned.
     template <class OutputIter>
-    OutputIter rangeDiffKNNPairs(const PointND<value_type, N>&, value_type, OutputIter) const;
+    OutputIter NNsWithFence(const PointND<value_type, N>&, value_type, OutputIter) const;
     
 private:
     
@@ -205,14 +205,14 @@ private:
     // ----------------------------------------------------
     // Helper method for range constructor
     template <class RAI>
-    void rangeCtorHelper(TreeNode*&, std::size_t, RAI, RAI, RAI);
+    void RangeCtorHelper(TreeNode*&, std::size_t, RAI, RAI, RAI);
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
     void kNNValueHelper(TreeNode *cur, std::size_t dim, const PointND<value_type, N> &pt,
                         BoundedPQueue<ElemType, value_type> &bpq) const;
     
-    //void rangeDiffKNNPairsHelper(TreeNode*, std::size_t, const PointND<FPType, N>&, FPType,
+    //void NNsWithFenceHelper(TreeNode*, std::size_t, const PointND<FPType, N>&, FPType,
     //                            std::vector<std::pair<FPType,
     //                         std::pair<PointND<FPType, N>, ElemType>>>&, FPType&, FPType&) const;
     
@@ -260,17 +260,17 @@ private:
 
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-template <typename Const_RAI,
+template <typename ConstRAI,
     typename std::enable_if<std::is_same<typename std::iterator_traits<typename
-    std::remove_const_t<Const_RAI>>::iterator_category,
+    std::remove_const_t<ConstRAI>>::iterator_category,
     std::random_access_iterator_tag>::value &&
     std::is_const<typename std::remove_pointer<typename
-    std::iterator_traits<Const_RAI>::pointer>::type>::value, int>::type>
-KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(Const_RAI cbegin, Const_RAI cend)
+    std::iterator_traits<ConstRAI>::pointer>::type>::value, int>::type>
+KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(ConstRAI cbegin, ConstRAI cend)
 : treeSize(cend-cbegin), pool(std::make_unique<PooledAllocator>()) {
     std::vector<node_type> constructData(cbegin, cend);
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, 0, constructData.begin(), constructData.end(),
+    RangeCtorHelper(ndPoolPtr, 0, constructData.begin(), constructData.end(),
                     constructData.begin() +
                     (constructData.end() - constructData.begin())/2);
 }
@@ -284,7 +284,7 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
                                             //, std::array<FPType, N> bboxHint)
 : treeSize(end-begin), pool(std::make_unique<PooledAllocator>()) {
     TreeNode* ndPoolPtr = root = pool->allocateExact<TreeNode>(treeSize);
-    rangeCtorHelper(ndPoolPtr, 0, begin, begin + (end - begin)/2, end);
+    RangeCtorHelper(ndPoolPtr, 0, begin, begin + (end - begin)/2, end);
     
     /*
     struct actRecord {
@@ -385,7 +385,7 @@ operator=(KDTreeCusMem&& rhs) & noexcept {
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
-rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
+RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
                 RAI median, RAI end, std::array<FPType, N>& bbox) {
     std::size_t dim = std::max_element(bbox.begin(), bbox.end()) - bbox.begin();
     std::nth_element(begin, median, end, [=](const auto& p1, const auto& p2) {
@@ -405,7 +405,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
         bbox[dim] -= dec;
         //nextDim = std::max_element(bbox, bbox+N)-bbox;
         curNdPtr->left = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, begin,
+        RangeCtorHelper(ndPoolPtr, begin,
                         begin + (median-begin)/2, median, bbox);
         bbox[dim] += dec;
     }
@@ -418,7 +418,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
         dec = (median+1)->first[dim] - begin->first[dim];
         bbox[dim] -= dec;
         curNdPtr->right = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, median+1,
+        RangeCtorHelper(ndPoolPtr, median+1,
                         median + (end-median+1)/2, end, bbox);
         bbox[dim] += dec;
     }
@@ -428,7 +428,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
-rangeCtorHelper(TreeNode*& ndPoolPtr, std::size_t dim, RAI begin,
+RangeCtorHelper(TreeNode*& ndPoolPtr, std::size_t dim, RAI begin,
                 RAI median, RAI end) {
     std::nth_element(begin, median, end, [=](const auto& nh1, const auto& nh2) {
         return nh1.key[dim] < nh2.key[dim];});
@@ -443,7 +443,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, std::size_t dim, RAI begin,
                         std::move(begin->value));
     } else if (begin != median) {
         curNdPtr->left = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, nextDim, begin,
+        RangeCtorHelper(ndPoolPtr, nextDim, begin,
                         begin + (median-begin)/2, median);
     }
     
@@ -453,7 +453,7 @@ rangeCtorHelper(TreeNode*& ndPoolPtr, std::size_t dim, RAI begin,
                         std::move((median+1)->value));
     } else if (median + 1 != end) {
         curNdPtr->right = ++ndPoolPtr;
-        rangeCtorHelper(ndPoolPtr, nextDim, median+1,
+        RangeCtorHelper(ndPoolPtr, nextDim, median+1,
                         median + (end-median+1)/2, end);
     }
 }
@@ -524,7 +524,7 @@ bool KDTreeCusMem<FPType, N, ElemType, DT>::empty() const {
 }
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-void KDTreeCusMem<FPType, N, ElemType, DT>::printTreeInfo() const {
+void KDTreeCusMem<FPType, N, ElemType, DT>::PrintTreeInfo() const {
     std::cout << "Tree height is " << height()
               << "\nTree size is " << size() << "\n";
 }
@@ -534,7 +534,7 @@ void KDTreeCusMem<FPType, N, ElemType, DT>::printTreeInfo() const {
 // ----------------------------------------------------------
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-void KDTreeCusMem<FPType, N, ElemType, DT>::clear() {
+void KDTreeCusMem<FPType, N, ElemType, DT>::Clear() {
     pool->destroy_and_free_all<TreeNode>();
     root = nullptr;
     treeSize = 0;
@@ -662,14 +662,14 @@ void KDTreeCusMem<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, std::s
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class OutputIter>
-OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::rangeDiffKNNPairs(const PointND<FPType, N>& pt,
+OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPType, N>& pt,
                                                 FPType fence, OutputIter returnIt) const {
     /*
      std::vector<std::pair<FPType, std::pair<PointND<FPType, N>, ElemType>>> distKVPairs;
      distKVPairs.reserve(sqrt(treeSize));
      FPType bestSq = std::numeric_limits<FPType>::max(),
      bestDiffSq = std::numeric_limits<FPType>::max();
-     rangeDiffKNNPairsHelper(root, 0, key, diff, distKVPairs, bestSq, bestDiffSq);
+     NNsWithFenceHelper(root, 0, key, diff, distKVPairs, bestSq, bestDiffSq);
      for (const auto &p : distKVPairs) {
      if (p.first < bestDiffSq)
      *it++ = std::move(p.second);
@@ -744,7 +744,7 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::rangeDiffKNNPairs(const PointN
 /*
  template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
  void KDTreeCusMem<FPType, N, ElemType, DT>::
- rangeDiffKNNPairsHelper(TreeNode *cur, std::size_t dim, const PointND<FPType, N>& pt,
+ NNsWithFenceHelper(TreeNode *cur, std::size_t dim, const PointND<FPType, N>& pt,
  FPType diff, std::vector<std::pair<FPType,
  std::pair<PointND<FPType, N>, ElemType>>> &distKVPairs,
  FPType& bestDistSq, FPType&bestDistDiffSq) const {
@@ -760,11 +760,11 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::rangeDiffKNNPairs(const PointN
  FPType thisDiff = pt[dim] - cur->key[dim];
  TreeNode *next = thisDiff < 0 ? cur->left : cur->right;
  if (next)
- rangeDiffKNNPairsHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
+ NNsWithFenceHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
  if (thisDiff*thisDiff < bestDistDiffSq) {
  next = next == cur->left ? cur->right : cur->left;
  if (next)
- rangeDiffKNNPairsHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
+ NNsWithFenceHelper(next, nextDim, pt, diff, distKVPairs, bestDistSq, bestDistDiffSq);
  }
  }*/
 
