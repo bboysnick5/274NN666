@@ -2,9 +2,14 @@
     "cmake.debugConfig": {
         "args": [
             "/Users/yunlongliu/Downloads/countries.csv"
-        ]
+        ],
+        "MIMode": "lldb",
+        "miDebuggerPath": "/Users/yunlongliu/.vscode/extensions/ms-vscode.cpptools-1.4.1/debugAdapters/lldb-mi/bin/lldb-mi",
     },
     "files.associations": {
-        "new": "cpp"
-    }
+        "new": "cpp",
+        "__locale": "cpp",
+        "bitset": "cpp",
+        "locale": "cpp"
+    },
 }

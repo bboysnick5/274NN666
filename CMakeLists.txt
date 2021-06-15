@@ -1,4 +1,4 @@
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -march=native -DNDEBUG")
 cmake_minimum_required(VERSION 3.12)
 project(274NN666 VERSION 0.1.0)
 
