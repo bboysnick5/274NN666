@@ -29,7 +29,7 @@ BKDTGridSBSolver<KDTType, FPType>::cacheAllPossibleLocsOneCell(std::size_t r0, s
     FPType cellCtrLat = this->midLat + SBLoc<FPType>::deltaLatOnSameLngFromHavDist(rowDistCellCtrGridCtr),
            cellCtrLng = SBLoc<FPType>::lngFromSameLatHavDist(colDistCellCtrGridCtr,
                                               this->midLng, cellCtrLat);
-    return sbKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt({cellCtrLat,
+    return sbKdt.NNsWithFence(SBLoc<FPType>::GeoPtTo3dEucPt({cellCtrLat,
         cellCtrLng}), diffSq, begin);
 }
 
@@ -70,8 +70,8 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 FPType BKDTGridSBSolver<KDTType, FPType>::xyzDistSqFromSideLen() {
     FPType lat2 = SBLoc<FPType>::deltaLatOnSameLngFromHavDist(this->side_len_*sqrt(2));
     return PointND<FPType, 3>::template
-    dist<PointND<FPType, 3>::DistType::EUCSQ>(SBLoc<FPType>::geoPtToCart3DPt({0.0, 0.0}),
-                                             SBLoc<FPType>::geoPtToCart3DPt({lat2, 0.0}));
+    dist<PointND<FPType, 3>::DistType::EUCSQ>(SBLoc<FPType>::GeoPtTo3dEucPt({0.0, 0.0}),
+                                             SBLoc<FPType>::GeoPtTo3dEucPt({lat2, 0.0}));
 }
  
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
@@ -80,7 +80,7 @@ void BKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc
     kdt_data_vec.reserve(loc_data_span.size());
     std::transform(loc_data_span.rbegin(), loc_data_span.rend(), std::back_inserter(kdt_data_vec),
                    [&](const SBLoc<FPType>& loc) -> typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type { return
-                       {SBLoc<FPType>::geoPtToCart3DPt(loc.geoPt), &loc};});
+                       {SBLoc<FPType>::GeoPtTo3dEucPt(loc.geoPt), &loc};});
     sbKdt = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>(kdt_data_vec.begin(), kdt_data_vec.end());
     this->numLocs = sbKdt.size();
     this->findKeyLngLat(loc_data_span);
@@ -96,12 +96,12 @@ void BKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* BKDTGridSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    auto idxPr = this->getIdx(geoSearchPt[1], geoSearchPt[0]);
+const SBLoc<FPType>* BKDTGridSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+    auto idxPr = this->getIdx(geo_search_pt[1], geo_search_pt[0]);
     std::size_t idx = idxPr.first*this->col_size_+idxPr.second;
     auto singleLoc = gridSingleCache[idx];
     return singleLoc != nullptr ? singleLoc :
-           gridTreeCache[idx].kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt), 1);
+           gridTreeCache[idx].kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt), 1);
 }
 
 

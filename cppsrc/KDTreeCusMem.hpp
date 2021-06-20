@@ -288,20 +288,20 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
     
     /*
     struct actRecord {
-        TreeNode** curNdPtr;
+        TreeNode** cur_ndPtr;
         std::size_t dim;
         RAI thisBeginIt, median, thisEndIt;
     };
     
     actRecord st[static_cast<std::size_t>(log2(treeSize+1))], *it = st;
     bool hasChild = true;
-    TreeNode* curNd;
+    TreeNode* cur_nd;
     std::size_t dim = 0;
     RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
     while (it != st || hasChild) {
         if (!hasChild) {
             hasChild = true;
-            *(--it)->curNdPtr = ndPoolPtr;
+            *(--it)->cur_ndPtr = ndPoolPtr;
             dim = it->dim;
             thisBeginIt = it->thisBeginIt;
             thisEndIt = it->thisEndIt;
@@ -313,21 +313,21 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
                              return p1.first[dim] < p2.first[dim];});
         pool->construct(ndPoolPtr, std::move(median->first),
                        std::move(median->second));
-        curNd = ndPoolPtr++;
+        cur_nd = ndPoolPtr++;
         dim = dim == N - 1 ? 0 : dim + 1;
         
         if (thisBeginIt != median) {
             if (median + 1 != thisEndIt) {
-                *it++ = {&curNd->right, dim, median + 1,
+                *it++ = {&cur_nd->right, dim, median + 1,
                          median + (thisEndIt-median+1)/2, thisEndIt};
             }
             thisEndIt = median;
             median = thisBeginIt + (median-thisBeginIt)/2;
-            curNd->left = ndPoolPtr;
+            cur_nd->left = ndPoolPtr;
         } else if (median + 1 != thisEndIt) {
             thisBeginIt = median+1;
             median = median + (thisEndIt-median+1)/2;
-            curNd->right = ndPoolPtr;
+            cur_nd->right = ndPoolPtr;
         } else {
             hasChild = false;
         }
@@ -392,32 +392,32 @@ RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
         return p1.first[dim] < p2.first[dim];});
     pool->construct(ndPoolPtr, std::move(median->first),
                     std::move(median->second));
-    auto curNdPtr = ndPoolPtr;
+    auto cur_ndPtr = ndPoolPtr;
     //std::size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     FPType dec;
     
     if (begin == median - 1) {
-        curNdPtr->left = ++ndPoolPtr;
+        cur_ndPtr->left = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move(begin->first),
                         std::move(begin->second));
     } else if (begin != median) {
         dec = (end-1)->first[dim] - (median-1)->first[dim];
         bbox[dim] -= dec;
         //nextDim = std::max_element(bbox, bbox+N)-bbox;
-        curNdPtr->left = ++ndPoolPtr;
+        cur_ndPtr->left = ++ndPoolPtr;
         RangeCtorHelper(ndPoolPtr, begin,
                         begin + (median-begin)/2, median, bbox);
         bbox[dim] += dec;
     }
     
     if (median + 2 == end) {
-        curNdPtr->right = ++ndPoolPtr;
+        cur_ndPtr->right = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move((median + 1)->first),
                         std::move((median+1)->second));
     } else if (median + 1 != end) {
         dec = (median+1)->first[dim] - begin->first[dim];
         bbox[dim] -= dec;
-        curNdPtr->right = ++ndPoolPtr;
+        cur_ndPtr->right = ++ndPoolPtr;
         RangeCtorHelper(ndPoolPtr, median+1,
                         median + (end-median+1)/2, end, bbox);
         bbox[dim] += dec;
@@ -434,25 +434,25 @@ RangeCtorHelper(TreeNode*& ndPoolPtr, std::size_t dim, RAI begin,
         return nh1.key[dim] < nh2.key[dim];});
     pool->construct(ndPoolPtr, std::move(median->key),
                    std::move(median->value));
-    auto curNdPtr = ndPoolPtr;
+    auto cur_ndPtr = ndPoolPtr;
     std::size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     
     if (begin == median - 1) {
-        curNdPtr->left = ++ndPoolPtr;
+        cur_ndPtr->left = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move(begin->key),
                         std::move(begin->value));
     } else if (begin != median) {
-        curNdPtr->left = ++ndPoolPtr;
+        cur_ndPtr->left = ++ndPoolPtr;
         RangeCtorHelper(ndPoolPtr, nextDim, begin,
                         begin + (median-begin)/2, median);
     }
     
     if (median + 2 == end) {
-        curNdPtr->right = ++ndPoolPtr;
+        cur_ndPtr->right = ++ndPoolPtr;
         pool->construct(ndPoolPtr, std::move((median + 1)->key),
                         std::move((median+1)->value));
     } else if (median + 1 != end) {
-        curNdPtr->right = ++ndPoolPtr;
+        cur_ndPtr->right = ++ndPoolPtr;
         RangeCtorHelper(ndPoolPtr, nextDim, median+1,
                         median + (end-median+1)/2, end);
     }

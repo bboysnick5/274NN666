@@ -179,23 +179,23 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geoPt, const BitCell& cell
         return cell.GetSingleLoc(ptr);
     } else if (raw_cell_size != 0) {
         const auto* loc_pairs = cell.GetLocPairs(ptr);
-        const auto pt_3d = SBLoc<FPType>::geoPtToCart3DPt(geoPt);
+        const auto pt_3d = SBLoc<FPType>::GeoPtTo3dEucPt(geoPt);
         return Utility::MinElementGivenDistFunc(loc_pairs, loc_pairs + raw_cell_size,
                                                 [&](const auto& nh) {return pt_3d.template
                                                     dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);},
                                                 std::less())->value;
     } else [[unlikely]] {
-        return cell.GetCacheTree(ptr)->kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoPt), 1);
+        return cell.GetCacheTree(ptr)->kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geoPt), 1);
     }
 }
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    return ReturnNNLocFromCacheVariant(geoSearchPt,
-           grid_cache_[static_cast<std::size_t>((geoSearchPt[0]+0.5*def::kMathPi<FPType>)*lat_inc_inverse_)*col_size_ +
-                       static_cast<std::size_t>((geoSearchPt[1]+def::kMathPi<FPType>)*lng_inc_inverse_)]);
+FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+    return ReturnNNLocFromCacheVariant(geo_search_pt,
+           grid_cache_[static_cast<std::size_t>((geo_search_pt[0]+0.5*def::kMathPi<FPType>)*lat_inc_inverse_)*col_size_ +
+                       static_cast<std::size_t>((geo_search_pt[1]+def::kMathPi<FPType>)*lng_inc_inverse_)]);
 }
 
 

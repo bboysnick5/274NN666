@@ -297,7 +297,7 @@ KDTree<FPType, N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin
     
     /*
     struct actRecord {
-        TreeNode** curNdPtr;
+        TreeNode** cur_ndPtr;
         std::size_t dim;
         RAI thisBeginIt, median, thisEndIt;
     };
@@ -305,14 +305,14 @@ KDTree<FPType, N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin
     actRecord st[static_cast<std::size_t>(log2(treeSize+1))];
     actRecord *it = st;
     bool hasChild = true;
-    TreeNode** curNdPtr = &root;
+    TreeNode** cur_ndPtr = &root;
     std::size_t dim = 0, nextDim = dim == N - 1 ? 0 : dim + 1;
     RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
     while (it != st || hasChild) {
         if (!hasChild) {
             hasChild = true;
             --it;
-            curNdPtr = it->curNdPtr;
+            cur_ndPtr = it->cur_ndPtr;
             dim = it->dim;
             thisBeginIt = it->thisBeginIt;
             thisEndIt = it->thisEndIt;
@@ -323,25 +323,25 @@ KDTree<FPType, N, ElemType, DT>::KDTree(RAI begin, RAI end) : treeSize(end-begin
                          [=](const std::pair<PointND<FPType, N>, ElemType>& p1,
                                    const std::pair<PointND<FPType, N>, ElemType>& p2) {
                                         return p1.first[dim] < p2.first[dim];});
-        *curNdPtr = new TreeNode(std::move(median->first),
+        *cur_ndPtr = new TreeNode(std::move(median->first),
                                  std::move(median->second));
         nextDim = dim == N - 1 ? 0 : dim + 1;
         
        if (median != thisBeginIt) {
             if (median + 1 != thisEndIt) {
-                *it++ = {&(*curNdPtr)->left, nextDim, thisBeginIt, thisBeginIt + (median-thisBeginIt)/2, median};
-                curNdPtr = &(*curNdPtr)->right;
+                *it++ = {&(*cur_ndPtr)->left, nextDim, thisBeginIt, thisBeginIt + (median-thisBeginIt)/2, median};
+                cur_ndPtr = &(*cur_ndPtr)->right;
                 thisBeginIt = median+1;
                 median = median + (thisEndIt-median+1)/2;
                 dim = nextDim;
             } else {
-                curNdPtr = &(*curNdPtr)->left;
+                cur_ndPtr = &(*cur_ndPtr)->left;
                 thisEndIt = median;
                 median = thisBeginIt + (median-thisBeginIt)/2;
                 dim = nextDim;
             }
        } else if (median + 1 != thisEndIt) {
-           curNdPtr = &(*curNdPtr)->right;
+           cur_ndPtr = &(*cur_ndPtr)->right;
            thisBeginIt = median+1;
            median = median + (thisEndIt-median+1)/2;
            dim = nextDim;
@@ -401,25 +401,25 @@ operator = (KDTree&& rhs) & noexcept {
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTree<FPType, N, ElemType, DT>::
-RangeCtorHelper(TreeNode*& curNdPtr, std::size_t dim, RAI begin,
+RangeCtorHelper(TreeNode*& cur_ndPtr, std::size_t dim, RAI begin,
                 RAI median, RAI end) {
     std::nth_element(begin, median, end, [=](const auto& nh1, const auto& nh2) {
         return nh1.key[dim] < nh2.key[dim];});
-    curNdPtr = new TreeNode(std::move(median->key),
+    cur_ndPtr = new TreeNode(std::move(median->key),
                             std::move(median->value));
     std::size_t nextDim = dim == N - 1 ? 0 : dim + 1;
     if (begin == median - 1) {
-        curNdPtr->left = new TreeNode(std::move(begin->key),
+        cur_ndPtr->left = new TreeNode(std::move(begin->key),
                                       std::move(begin->value));
     } else if (begin != median) {
-        RangeCtorHelper(curNdPtr->left, nextDim, begin,
+        RangeCtorHelper(cur_ndPtr->left, nextDim, begin,
                         begin + (median-begin)/2, median);
     }
     if (median + 1 == end - 1) {
-        curNdPtr->right = new TreeNode(std::move((median + 1)->key),
+        cur_ndPtr->right = new TreeNode(std::move((median + 1)->key),
                                        std::move((median+1)->value));
     } else if (median + 1 != end) {
-        RangeCtorHelper(curNdPtr->right, nextDim, median+1,
+        RangeCtorHelper(cur_ndPtr->right, nextDim, median+1,
                         median + (end-median+1)/2, end);
     }
 } 

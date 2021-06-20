@@ -22,14 +22,14 @@ void KDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* KDTSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    return loc_kdt_.kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt), 1);
+const SBLoc<FPType>* KDTSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+    return loc_kdt_.kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt), 1);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void KDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> loc_data_span) {
     std::for_each(loc_data_span.rbegin(), loc_data_span.rend(), [&](const SBLoc<FPType> &loc) mutable {
-        this->loc_kdt_.insert(loc.locToCart3DPt(), &loc);});
+        this->loc_kdt_.insert(loc.LocTo3dEucPt(), &loc);});
 }
 
 

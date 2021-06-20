@@ -11,11 +11,11 @@
 #include <algorithm>
 
 template <typename FPType>
-const SBLoc<FPType>* BFEUCPtSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    const auto testPt = SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt);
-    return &*Utility::MinElementGivenDistFunc(loc_data_span_.rbegin(), loc_data_span_.rend(),
-                                         [testPt](const SBLoc<FPType>& l) {
-                                            return testPt.template dist<PointND<FPType, 3>::DistType::EUCSQ>(l.locToCart3DPt());},
+const SBLoc<FPType>* BFEUCPtSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+    const auto test_pt = SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt);
+    return &*Utility::MinElementGivenDistFunc(this->loc_data_span_.rbegin(), this->loc_data_span_.rend(),
+                                         [test_pt](const SBLoc<FPType>& l) {
+                                            return test_pt.template dist<PointND<FPType, 3>::DistType::EUCSQ>(l.LocTo3dEucPt());},
                                          std::less<FPType>());
 }
 

@@ -296,7 +296,7 @@ KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI
     
     /*
      struct actRecord {
-         TreeNode** curNdPtr;
+         TreeNode** cur_ndPtr;
          RAI thisBeginIt, median, thisEndIt;
      };
      
@@ -306,7 +306,7 @@ KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI
      while (it != st || hasChild) {
          if (!hasChild) {
              hasChild = true;
-             *(--it)->curNdPtr = ndPoolPtr;
+             *(--it)->cur_ndPtr = ndPoolPtr;
              thisBeginIt = it->thisBeginIt;
              thisEndIt = it->thisEndIt;
              median = it->median;
@@ -327,22 +327,22 @@ KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI
                               return p1.first[dim] < p2.first[dim];});
          pool->construct(ndPoolPtr, dim, std::move(median->first),
                          std::move(median->second));
-         TreeNode* curNd = ndPoolPtr++;
+         TreeNode* cur_nd = ndPoolPtr++;
      
          if (thisBeginIt != median) {
              if (median + 1 != thisEndIt) {
-                 *it++ = {&curNd->right, median + 1,
+                 *it++ = {&cur_nd->right, median + 1,
                           median + (thisEndIt-median+1)/2, thisEndIt};
              }
-             bbox[dim*2+1] = curNd->key[dim];
+             bbox[dim*2+1] = cur_nd->key[dim];
              thisEndIt = median;
              median = thisBeginIt + (median-thisBeginIt)/2;
-             curNd->left = ndPoolPtr;
+             cur_nd->left = ndPoolPtr;
          } else if (median + 1 != thisEndIt) {
-             bbox[dim*2] = curNd->key[dim];
+             bbox[dim*2] = cur_nd->key[dim];
              thisBeginIt = median+1;
              median += (thisEndIt-median+1)/2;
-             curNd->right = ndPoolPtr;
+             cur_nd->right = ndPoolPtr;
          } else {
              hasChild = false;
          }
@@ -437,34 +437,34 @@ RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin, RAI end,
         return nh1.key[dim] < nh2.key[dim];});
     pool->construct(ndPoolPtr, dim, std::move(median->key),
                     std::move(median->value));
-    TreeNode* curNdPtr = ndPoolPtr;
+    TreeNode* cur_ndPtr = ndPoolPtr;
     
     if (begin == median - 1) {
-        //curNdPtr->dim_to_expand = static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::LEFT_CHILD);
-        curNdPtr->left = ++ndPoolPtr;
+        //cur_ndPtr->dim_to_expand = static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::LEFT_CHILD);
+        cur_ndPtr->left = ++ndPoolPtr;
         pool->construct(ndPoolPtr, static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::NO_CHILDREN), std::move(begin->key),
                         std::move(begin->value));
     } else if (begin != median) {
-        curNdPtr->left = ++ndPoolPtr;
-        auto prevDimHigh = bbox[dim*2+1];
-        bbox[dim*2+1] = curNdPtr->key[dim];
+        cur_ndPtr->left = ++ndPoolPtr;
+        auto prev_high_on_dim = bbox[dim*2+1];
+        bbox[dim*2+1] = cur_ndPtr->key[dim];
         //bbox[dim*2+1] = std::max_element(begin, median, [dim](const auto &p1, const auto&p2){return p1.first[dim] < p2.first[dim];})->first[dim];
         RangeCtorHelper(ndPoolPtr, begin, median, bbox);
-        bbox[dim*2+1] = prevDimHigh;
+        bbox[dim*2+1] = prev_high_on_dim;
     }
     
     if (median + 2 == end) {
-        //curNdPtr->dim_to_expand = dim;
-        curNdPtr->right = ++ndPoolPtr;
+        //cur_ndPtr->dim_to_expand = dim;
+        cur_ndPtr->right = ++ndPoolPtr;
         pool->construct(ndPoolPtr, static_cast<std::underlying_type_t<typename TreeNode::dimEnum>>(TreeNode::dimEnum::NO_CHILDREN), std::move((median+1)->key),
                         std::move((median+1)->value));
     } else if (median + 1 != end) {
-        curNdPtr->right = ++ndPoolPtr;
-        auto prevDimLow = bbox[dim*2];
-        bbox[dim*2] = curNdPtr->key[dim];
+        cur_ndPtr->right = ++ndPoolPtr;
+        auto prev_low_on_dim = bbox[dim*2];
+        bbox[dim*2] = cur_ndPtr->key[dim];
         //bbox[dim*2] = std::min_element(median + 1, end, [dim](const auto &p1, const auto &p2){return p1.first[dim] < p2.first[dim];})->first[dim];
         RangeCtorHelper(ndPoolPtr, median+1, end, bbox);
-        bbox[dim*2] = prevDimLow;
+        bbox[dim*2] = prev_low_on_dim;
     }
 }
 

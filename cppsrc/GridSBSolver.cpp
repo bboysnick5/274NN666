@@ -87,27 +87,27 @@ FPType lng, FPType lat, FPType &minDist, const SBLoc<FPType>* &best) const {
 }
 
 template <typename FPType>
-const SBLoc<FPType>* GridSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    auto idxPr = getIdx(geoSearchPt[1], geoSearchPt[0]);
+const SBLoc<FPType>* GridSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+    auto idxPr = getIdx(geo_search_pt[1], geo_search_pt[0]);
     std::size_t r0 = idxPr.first, c0 = idxPr.second;
     FPType minDist = FPType_MAX<FPType>;
     const SBLoc<FPType>* best = nullptr;
     // exact cell check
-    NNOneCell(grid_[r0][c0], geoSearchPt[1], geoSearchPt[0], minDist, best);
+    NNOneCell(grid_[r0][c0], geo_search_pt[1], geo_search_pt[0], minDist, best);
     
     // Spiral Search
     for (std::size_t d = 1; ; ++d) {
         for (int r = std::max(0,static_cast<int>(r0-d)); r <= std::min(static_cast<int>(r0+d), static_cast<int>(row_size_)-1); ++r) {
             if (c0-d >= 0)
-                NNOneCell(grid_[r][c0-d], geoSearchPt[1], geoSearchPt[0], minDist, best);
+                NNOneCell(grid_[r][c0-d], geo_search_pt[1], geo_search_pt[0], minDist, best);
             if (c0+d < col_size_)
-                NNOneCell(grid_[r][c0+d], geoSearchPt[1], geoSearchPt[0], minDist, best);
+                NNOneCell(grid_[r][c0+d], geo_search_pt[1], geo_search_pt[0], minDist, best);
         }
         for (int c = std::max(0, static_cast<int>(c0-d+1)); c < std::min(static_cast<int>(c0+d), static_cast<int>(col_size_)); c++) {
             if (r0 - d >= 0)
-                NNOneCell(grid_[r0-d][c], geoSearchPt[1], geoSearchPt[0], minDist, best);
+                NNOneCell(grid_[r0-d][c], geo_search_pt[1], geo_search_pt[0], minDist, best);
             if (r0 + d < row_size_)
-                NNOneCell(grid_[r0+d][c], geoSearchPt[1], geoSearchPt[0], minDist, best);
+                NNOneCell(grid_[r0+d][c], geo_search_pt[1], geo_search_pt[0], minDist, best);
         }
         if (minDist < d*side_len_*DISTORT_FACTOR)
             return best;

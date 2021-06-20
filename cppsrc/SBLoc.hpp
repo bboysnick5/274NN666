@@ -51,9 +51,9 @@ struct SBLoc {
     
     static FPType lngFromSameLatHavDist(FPType dist, FPType lng1, FPType lat);
     
-    PointND<FPType, 3> locToCart3DPt() const;
+    PointND<FPType, 3> LocTo3dEucPt() const;
     
-    static PointND<FPType, 3> geoPtToCart3DPt(const PointND<FPType, 2>&);
+    static PointND<FPType, 3> GeoPtTo3dEucPt(const PointND<FPType, 2>&);
     
     static FPType EUC3DDistFromLatDeltaLng(FPType lat1, FPType lat2, FPType deltaLng);
     
@@ -137,12 +137,12 @@ inline FPType SBLoc<FPType>::lngFromSameLatHavDist(FPType dist, FPType lng1, FPT
 }
 
 template <typename FPType>
-inline PointND<FPType, 3> SBLoc<FPType>::locToCart3DPt() const {
-    return geoPtToCart3DPt(geoPt);
+inline PointND<FPType, 3> SBLoc<FPType>::LocTo3dEucPt() const {
+    return GeoPtTo3dEucPt(geoPt);
 }
 
 template <typename FPType>
-inline PointND<FPType, 3> SBLoc<FPType>::geoPtToCart3DPt(const PointND<FPType, 2>& geoPt) {
+inline PointND<FPType, 3> SBLoc<FPType>::GeoPtTo3dEucPt(const PointND<FPType, 2>& geoPt) {
     return PointND<FPType, 3>{std::cos(geoPt[0])*std::cos(geoPt[1]), std::cos(geoPt[0])*sin(geoPt[1]), sin(geoPt[0])};
 }
 

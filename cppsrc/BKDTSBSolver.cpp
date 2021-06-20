@@ -30,8 +30,8 @@ void BKDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> l
     kdt_data_vec.reserve(loc_data_span.size());
     std::transform(loc_data_span.rbegin(), loc_data_span.rend(), std::back_inserter(kdt_data_vec),
                    [](const SBLoc<FPType>& l) -> typename KDT<KDTType, FPType>::node_type {
-                       return {l.locToCart3DPt(), &l};});
-    this->loc_kdt_ = KDT<KDTType, FPType>(kdt_data_vec.rbegin(), kdt_data_vec.rend());
+                       return {l.LocTo3dEucPt(), &l};});
+    this->loc_kdt_ = KDT<KDTType, FPType>(kdt_data_vec.begin(), kdt_data_vec.end());
 }
 
 
