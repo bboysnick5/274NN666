@@ -14,24 +14,24 @@
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void BKDTSBSolver<KDTType, FPType>::Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    GenerateKDT(locData);
+void BKDTSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    GenerateKDT(loc_data_span);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void BKDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
-    this->locKdt.PrintTreeInfo();
+    this->loc_kdt_.PrintTreeInfo();
 }
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void BKDTSBSolver<KDTType, FPType>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    std::vector<typename KDT<KDTType, FPType>::node_type> kdtData;
-    kdtData.reserve(locData->size());
-    std::transform(locData->crbegin(), locData->crend(), std::back_inserter(kdtData),
+void BKDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> loc_data_span) {
+    std::vector<typename KDT<KDTType, FPType>::node_type> kdt_data_vec;
+    kdt_data_vec.reserve(loc_data_span.size());
+    std::transform(loc_data_span.rbegin(), loc_data_span.rend(), std::back_inserter(kdt_data_vec),
                    [](const SBLoc<FPType>& l) -> typename KDT<KDTType, FPType>::node_type {
                        return {l.locToCart3DPt(), &l};});
-    this->locKdt = KDT<KDTType, FPType>(kdtData.rbegin(), kdtData.rend());
+    this->loc_kdt_ = KDT<KDTType, FPType>(kdt_data_vec.rbegin(), kdt_data_vec.rend());
 }
 
 

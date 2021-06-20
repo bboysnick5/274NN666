@@ -18,11 +18,11 @@
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-class UniCellBKDTGridSBSolver : public UniLatLngBKDTGridSBSolver<KDTType, FPType> {
+class UniCellBKDTGridSBSolver final : public UniLatLngBKDTGridSBSolver<KDTType, FPType> {
 public:
     UniCellBKDTGridSBSolver(FPType = 1.0, std::size_t = 1500);
-    //void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override final;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override final;
+    //void Build(std::span<const SBLoc<FPType>>) override final;
+    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     //virtual void PrintSolverInfo() const override;
     virtual ~UniCellBKDTGridSBSolver() override {}
 

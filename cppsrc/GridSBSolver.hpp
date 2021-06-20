@@ -19,22 +19,22 @@ template <typename FPType>
 class GridSBSolver : public SBSolver<FPType> {
     
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    void Build(std::span<const SBLoc<FPType>>) override;
     const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     GridSBSolver(FPType aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     
 protected:
-    void findKeyLngLat(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    void findKeyLngLat(std::span<const SBLoc<FPType>>);
     std::pair<std::size_t, std::size_t> getIdx(FPType lng, FPType lat) const;
 
-    void constructGrid(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
-    void fillGrid(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    void constructGrid(std::span<const SBLoc<FPType>>);
+    void fillGrid(std::span<const SBLoc<FPType>>);
     void NNOneCell(const std::unordered_set<const SBLoc<FPType>*>&,
                   FPType, FPType, FPType&, const SBLoc<FPType>*&) const;
     
     const FPType AVE_LOC_PER_CELL;
-    std::vector<std::vector<std::unordered_set<const SBLoc<FPType>*>>> grid;
+    std::vector<std::vector<std::unordered_set<const SBLoc<FPType>*>>> grid_;
     FPType side_len_, minLng, maxLng, minLat, maxLat, midLng, midLat;
     std::size_t row_size_, col_size_, numLocs = 0;
     

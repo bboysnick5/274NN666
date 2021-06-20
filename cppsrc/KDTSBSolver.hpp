@@ -15,6 +15,7 @@
 #include "KDTreeExpandLongest.hpp"
 #include "KDTreeExpandLongestVec.hpp"
 #include <stdio.h>
+#include <span>
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 using KDT = KDTType<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>;
@@ -22,15 +23,15 @@ using KDT = KDTType<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistTyp
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 class KDTSBSolver : public SBSolver<FPType> {
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    void Build(std::span<const SBLoc<FPType>>) override;
     const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual void PrintSolverInfo() const override;
     virtual ~KDTSBSolver() override {}
 
 
 protected:
-    KDT<KDTType, FPType> locKdt;
-    virtual void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>>&);
+    KDT<KDTType, FPType> loc_kdt_;
+    virtual void GenerateKDT(std::span<const SBLoc<FPType>>);
 };
 
 

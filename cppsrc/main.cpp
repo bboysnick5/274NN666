@@ -34,9 +34,12 @@
 #include <thread>
 #include <cstdlib>
 #include <cstdint>
+#include <utility>
 #include <map>
 #include <cassert>
-#include <execution>
+#include <concepts>
+#include <span>
+#include <ranges>
 
 
 
@@ -58,7 +61,7 @@ std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, std
 
 template <typename FPType>
 void accuracyTestFromRefFile() {
-    
+    std::views v;
 }
 
 
@@ -109,10 +112,9 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
 }
 
 template <typename FPType>
-void TimeBuild(const std::shared_ptr<std::vector<SBLoc<FPType>>> &loc_data_vec,
-               SBSolver<FPType> &solver) {
+void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, SBSolver<FPType> &solver) {
     std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-    solver.Build(loc_data_vec);
+    solver.Build(loc_data_span);
     std::chrono::duration<FPType> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
     std::cout << std::regex_replace(typeid(solver).name(), std::regex("[A-Z]?[0-9]+|.$"), "")
               << std::endl << "Build time: " << elapsed_time_in_secs.count() << std::endl;
@@ -165,11 +167,24 @@ void WriteResults(const char* argv[],
     outrefLocPtrPerSearchTimePairVecs.close();
 }
 
+template<typename FPType>
+std::vector<SBLoc<FPType>> ConstructLocDataVec(const char* loc_file_path, std::mt19937_64& mt) {
+    std::ifstream infilestream_locs(loc_file_path);
+    std::vector<SBLoc<FPType>> loc_data_vec;
+    //loc_data_vec.reserve(1 << 24); 
+    loc_data_vec.reserve(11569609); 
+    loc_data_vec.assign(std::istream_iterator<SBLoc<FPType>>(infilestream_locs),
+        std::istream_iterator<SBLoc<FPType>>());
+    assert(loc_data_vec.size() != 0);
+    //std::sort(locData->begin(), locData->end());
+    //locData->erase(std::unique(locData->begin(), locData->end()), locData->end());
+    loc_data_vec.shrink_to_fit();
+    std::shuffle(loc_data_vec.rbegin(), loc_data_vec.rend(), mt);
+    return loc_data_vec;
+}
 
 template <typename FPType>
 void MainContent(int argc, const char * argv[]) {
-    
-    std::ifstream infilestream_locs(argv[1]);
     FPType ave_actual_locs_per_cell = argc < 4 ? def::kDefalutAveActualLocsPerCell : std::stod(argv[3]);
     std::size_t max_cached_cell_vec_size = argc < 5 ? def::kDefaultMaxCacheCellVecSize : std::stoi(argv[4]);
     bool to_test_accuracy = argc < 6 ? def::kDefaultToTestAccuracy : std::tolower(argv[5][0]) == 'y';
@@ -200,18 +215,7 @@ void MainContent(int argc, const char * argv[]) {
     //maxCacheCellVecSize = (1 << 9ull);
     //aveActualLocsPerCell = 0.2;
     
-    const auto locData = std::make_shared<std::vector<SBLoc<FPType>>>();
-    locData->reserve(1 << 24);
-    locData->assign(std::istream_iterator<SBLoc<FPType>>(infilestream_locs),
-                    std::istream_iterator<SBLoc<FPType>>());
-    infilestream_locs.close();
-    assert(locData->size() != 0);
-    //std::sort(locData->begin(), locData->end());
-    //locData->erase(std::unique(locData->begin(), locData->end()), locData->end());
-    locData->shrink_to_fit();
-    std::shuffle(locData->rbegin(), locData->rend(), mt);
-    
-    
+    const std::vector<SBLoc<FPType>> loc_data_vec = ConstructLocDataVec<FPType>(argv[1], mt);
     
     /*
     if (numOfLocsToWriteToFile) {
@@ -257,7 +261,7 @@ void MainContent(int argc, const char * argv[]) {
         accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
-        TimeBuild(locData, *solvers[i]);
+        TimeBuild({loc_data_vec.cbegin(), loc_data_vec.cend()}, *solvers[i]);
         TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, seed, search_benchmark_duration_in_secs);
         if (to_test_accuracy) {
             AccuracyTestFromRefSolver(accuracy_test_lat_lng_pts, ref_locs, *solvers[i], accuracy_test_time_in_secs);

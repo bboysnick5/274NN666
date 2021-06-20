@@ -75,16 +75,16 @@ FPType BKDTGridSBSolver<KDTType, FPType>::xyzDistSqFromSideLen() {
 }
  
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void BKDTGridSBSolver<KDTType, FPType>::Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type> kdtData;
-    kdtData.reserve(locData->size());
-    std::transform(locData->begin(), locData->end(), std::back_inserter(kdtData),
+void BKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type> kdt_data_vec;
+    kdt_data_vec.reserve(loc_data_span.size());
+    std::transform(loc_data_span.rbegin(), loc_data_span.rend(), std::back_inserter(kdt_data_vec),
                    [&](const SBLoc<FPType>& loc) -> typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type { return
                        {SBLoc<FPType>::geoPtToCart3DPt(loc.geoPt), &loc};});
-    sbKdt = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>(kdtData.begin(), kdtData.end());
+    sbKdt = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>(kdt_data_vec.begin(), kdt_data_vec.end());
     this->numLocs = sbKdt.size();
-    this->findKeyLngLat(locData);
-    this->row_size_ = sqrt(locData->size()) / this->AVE_LOC_PER_CELL;
+    this->findKeyLngLat(loc_data_span);
+    this->row_size_ = sqrt(loc_data_span.size()) / this->AVE_LOC_PER_CELL;
     this->side_len_ = 
     SBLoc<FPType>::havDist({this->minLat, 0.0}, {this->maxLat, 0.0}) / this->row_size_;
     FPType lowestLatCircleRadius = SBLoc<FPType>::EARTH_RADIUS * std::cos(this->minLat < 0 ? 0 : this->minLat);

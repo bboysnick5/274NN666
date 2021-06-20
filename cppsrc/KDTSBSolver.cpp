@@ -11,25 +11,25 @@
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void KDTSBSolver<KDTType, FPType>::Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    GenerateKDT(locData);
+void KDTSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    GenerateKDT(loc_data_span);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void KDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
-    locKdt.PrintTreeInfo();
+    loc_kdt_.PrintTreeInfo();
 }
 
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 const SBLoc<FPType>* KDTSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
-    return locKdt.kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt), 1);
+    return loc_kdt_.kNNValue(SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt), 1);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void KDTSBSolver<KDTType, FPType>::GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    std::for_each(locData->cbegin(), locData->cend(), [&](const SBLoc<FPType> &loc) mutable {
-        this->locKdt.insert(loc.locToCart3DPt(), &loc);});
+void KDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> loc_data_span) {
+    std::for_each(loc_data_span.rbegin(), loc_data_span.rend(), [&](const SBLoc<FPType> &loc) mutable {
+        this->loc_kdt_.insert(loc.locToCart3DPt(), &loc);});
 }
 
 

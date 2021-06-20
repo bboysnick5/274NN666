@@ -16,11 +16,11 @@
 #include "KDTree.hpp"
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-class BKDTGridSBSolver : public GridSBSolver<FPType> {
+class BKDTGridSBSolver final : public GridSBSolver<FPType> {
 public:
     BKDTGridSBSolver(FPType aveLocPerCell = 1);
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    virtual void Build(std::span<const SBLoc<FPType>>) override;
+    virtual const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual ~BKDTGridSBSolver() override {}
 
     

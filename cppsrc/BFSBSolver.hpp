@@ -9,22 +9,25 @@
 #ifndef BFSBSolver_hpp
 #define BFSBSolver_hpp
 
-#include <memory>
-#include <vector>
 #include "SBSolver.hpp"
+#include "SBLoc.hpp"
+#include <memory>
+#include <span>
+#include <concepts>
+#include <ranges>
 
 
 template <typename FPType>
 class BFSBSolver : public SBSolver<FPType> {
 public:
+    virtual void Build(std::span<const SBLoc<FPType>>) override final;
     const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &sbData) override;
     void PrintSolverInfo() const override;
     
     virtual ~BFSBSolver() {}
     
 protected:
-    std::shared_ptr<std::vector<SBLoc<FPType>>> locData;
+    std::span<const SBLoc<FPType>> loc_data_span_;
 };
 
 

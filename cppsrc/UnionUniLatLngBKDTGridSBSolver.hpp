@@ -27,8 +27,8 @@ class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType> {
     
 public:
     UnionUniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    virtual void Build(std::span<const SBLoc<FPType>>) override;
+    virtual const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     virtual void PrintSolverInfo() const override final;
     virtual ~UnionUniLatLngBKDTGridSBSolver() override {}
     
@@ -300,9 +300,10 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
           typename FPType, def::ThreadingPolicy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(std::size_t idx_to_fill,
-              const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t thiscol_size_,
+              const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, 
+              std::size_t this_col_size,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt),
+    this->loc_kdt_.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt),
         diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     grid_cache_[idx_to_fill] = {pt_loc_vec, kMaxCacheCellVecSize_,
                             {idx_to_fill > 0 ? &grid_cache_[idx_to_fill - 1] : nullptr,
@@ -314,15 +315,15 @@ FillCacheCell(std::size_t idx_to_fill,
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-FillCacheCell(const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t thiscol_size_,
+FillCacheCell(const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t this_col_size,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
+    this->loc_kdt_.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt(thisCtrGeoPt), diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     auto size = this->grid_cache_.size();
     this->grid_cache_.emplace_back(pt_loc_vec, kMaxCacheCellVecSize_,
                                  std::initializer_list<const BitCell*>{
                                     size > 0 ? &this->grid_cache_.back() : nullptr,
-                                    size >= thiscol_size_ ? &this->grid_cache_[size - thiscol_size_] : nullptr,
-                                    size > thiscol_size_ ? &this->grid_cache_[size - thiscol_size_ - 1] : nullptr});
+                                    size >= this_col_size ? &this->grid_cache_[size - this_col_size] : nullptr,
+                                    size > this_col_size ? &this->grid_cache_[size - this_col_size - 1] : nullptr});
     pt_loc_vec.clear();
 }
 
@@ -339,7 +340,7 @@ EUC3DDistSqFromLatCosDeltaLng(FPType lat1, FPType lat2, FPType cosDeltaLng) {
  class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
  public:
  UnionUniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
- void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+ void Build(std::span<const SBLoc<FPType>>) override;
  const SBLoc<FPType>* FindNearestLoc(FPType lng, FPType lat) const override;
  virtual void PrintSolverInfo() const override final;
  

@@ -14,11 +14,12 @@
 #include <stdio.h>
 #include <vector>
 #include <memory>
+#include <span>
 
 template <typename FPType>
 class SBSolver {
 public:
-    virtual void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) = 0;
+    virtual void Build(std::span<const SBLoc<FPType>>) = 0;
     virtual const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const = 0;
     virtual void PrintSolverInfo() const = 0;
     virtual ~SBSolver() {}

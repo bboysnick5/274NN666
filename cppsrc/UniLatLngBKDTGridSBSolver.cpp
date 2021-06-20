@@ -36,7 +36,7 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
 FillCacheCell(FPType thisCtrLng, FPType thisCtrLat, FPType diagonalDistSq3DEUC,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
-    this->locKdt.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
+    this->loc_kdt_.NNsWithFence(SBLoc<FPType>::geoPtToCart3DPt({thisCtrLat, thisCtrLng}),
                                    diagonalDistSq3DEUC, std::back_inserter(pt_loc_vec));
     std::size_t locsSize = pt_loc_vec.size();
     this->totalNodeSize += locsSize;
@@ -58,7 +58,7 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 void UniLatLngBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
     col_size_ = row_size_;
     lng_inc_ = 2.0*def::kMathPi<FPType>/col_size_ + 2.0*def::kMathPi<FPType>/(col_size_*65536);
-    grid_cache_.reserve(this->locKdt.size()*1.2/AVE_LOC_PER_CELL);
+    grid_cache_.reserve(this->loc_kdt_.size()*1.2/AVE_LOC_PER_CELL);
     std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
     pt_loc_vec.reserve(kMaxCacheCellVecSize_);
     
@@ -76,21 +76,20 @@ void UniLatLngBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void UniLatLngBKDTGridSBSolver<KDTType, FPType>::calcSideLenFromAlpc() {
     FPType surfaceArea = 4*def::kMathPi<FPType>*SBLoc<FPType>::EARTH_RADIUS*SBLoc<FPType>::EARTH_RADIUS;
-    FPType numCells = this->locKdt.size()/AVE_LOC_PER_CELL;
+    FPType numCells = this->loc_kdt_.size()/AVE_LOC_PER_CELL;
     side_len_ = sqrt(surfaceArea/numCells);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
-Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    totalLocSize = locData->size();
-    BKDTSBSolver<KDTType, FPType>::GenerateKDT(locData);
+void UniLatLngBKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    totalLocSize = loc_data_span.size();
+    BKDTSBSolver<KDTType, FPType>::GenerateKDT(loc_data_span);
     calcSideLenFromAlpc();
     lat_inc_ = std::fabs(SBLoc<FPType>::deltaLatOnSameLngFromHavDist(side_len_));
     lat_inc_inverse_ = 1.0/lat_inc_;
     row_size_ = std::ceil(def::kMathPi<FPType>/lat_inc_);
     FillGridCache();
-    this->locKdt.Clear();
+    this->loc_kdt_.Clear();
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>

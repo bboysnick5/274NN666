@@ -73,7 +73,7 @@ public:
     KDTreeExpandLongestVec(RAI, RAI);
     
     template <std::random_access_iterator ConstRAI> requires def::const_iterator<ConstRAI>
-    //&& std::same_as<typename std::iterator_traits<ConstRAI>::value_type, typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::node_type const>
+    //&& std::same_as<typename std::iter_value_t<ConstRAI>, typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::node_type>
     KDTreeExpandLongestVec(ConstRAI, ConstRAI);
     
     // Destructor: ~KDTreeExpandLongestVec()
@@ -327,7 +327,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::DeAlloc() {
 
 template <typename FPType, std::size_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <std::random_access_iterator ConstRAI> requires def::const_iterator<ConstRAI>
-//&& std::same_as<typename std::iterator_traits<ConstRAI>::value_type, typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::node_type const>
+//&& std::same_as<typename std::iter_value_t<ConstRAI>, typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::node_type>
 KDTreeExpandLongestVec<FPType, N, ElemType, DT>::KDTreeExpandLongestVec(ConstRAI cbegin, ConstRAI cend) : size_(static_cast<uint32_t>(cend - cbegin)), cap_(size_) {
     std::vector<node_type> constructData(cbegin, cend);
     RangeCtorHelper(constructData.begin(), constructData.end());
@@ -764,7 +764,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
                                         | dpe_to_pe,
                                       pe_out_it);
                     std::ranges::copy(std::views::reverse(result_dpe_vec)
-                                        | std::views::reverse
+                                        | within_dist_plus_fence_sq_filter
                                         | dpe_to_pe,
                                       pe_out_it);
                     /*

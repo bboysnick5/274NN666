@@ -20,7 +20,7 @@ UniCellBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void UniCellBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
     thisRowStartIdx.reserve(this->row_size_);
-    this->grid_cache_.reserve(this->locKdt.size()*1.2/this->AVE_LOC_PER_CELL);
+    this->grid_cache_.reserve(this->loc_kdt_.size()*1.2/this->AVE_LOC_PER_CELL);
     std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
     pt_loc_vec.reserve(this->kMaxCacheCellVecSize_);
     //#pragma omp parallel for num_threads(std::thread::hardware_concurrency())\

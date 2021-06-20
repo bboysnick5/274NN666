@@ -13,8 +13,8 @@
 template <typename FPType>
 const SBLoc<FPType>* BFEUCPtSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geoSearchPt) const {
     const auto testPt = SBLoc<FPType>::geoPtToCart3DPt(geoSearchPt);
-    return &*Utility::MinElementGivenDistFunc(this->locData->cbegin(), this->locData->cend(),
-                                         [&testPt](const SBLoc<FPType>& l) {
+    return &*Utility::MinElementGivenDistFunc(loc_data_span_.rbegin(), loc_data_span_.rend(),
+                                         [testPt](const SBLoc<FPType>& l) {
                                             return testPt.template dist<PointND<FPType, 3>::DistType::EUCSQ>(l.locToCart3DPt());},
                                          std::less<FPType>());
 }

@@ -18,12 +18,12 @@ template <template <typename FPType, std::size_t N, class, typename PointND<FPTy
 class BKDTSBSolver : public KDTSBSolver<KDTType, FPType> {
     
 public:
-    void Build(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override;
+    virtual void Build(std::span<const SBLoc<FPType>>) override;
     virtual void PrintSolverInfo() const override;
     virtual ~BKDTSBSolver() {}
     
 protected:
-    void GenerateKDT(const std::shared_ptr<std::vector<SBLoc<FPType>>>&) override final;
+    virtual void GenerateKDT(std::span<const SBLoc<FPType>>) override final;
 };
 
 

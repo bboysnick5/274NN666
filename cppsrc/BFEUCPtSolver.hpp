@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 template <typename FPType>
-class BFEUCPtSBSolver : public BFSBSolver<FPType> {
+class BFEUCPtSBSolver final : public BFSBSolver<FPType> {
 public:
     const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
     void PrintSolverInfo() const override;

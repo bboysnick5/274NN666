@@ -151,23 +151,23 @@ LoopBodyThreadingPolicyDispatch() {
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::calcSideLenFromAlpc() {
     FPType surfaceArea = 4.0*def::kMathPi<FPType>*SBLoc<FPType>::EARTH_RADIUS*SBLoc<FPType>::EARTH_RADIUS;
-    FPType numCells = this->locKdt.size()/kAveActualLocsPerCell_;
+    FPType numCells = this->loc_kdt_.size()/kAveActualLocsPerCell_;
     side_len_ = sqrt(surfaceArea/numCells);
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-Build(const std::shared_ptr<std::vector<SBLoc<FPType>>> &locData) {
-    num_actual_locs_ = locData->size();
-    BKDTSBSolver<KDTType, FPType>::GenerateKDT(locData);
+Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    num_actual_locs_ = loc_data_span.size();
+    BKDTSBSolver<KDTType, FPType>::GenerateKDT(loc_data_span);
     calcSideLenFromAlpc();
     lat_inc_ = std::fabs(SBLoc<FPType>::deltaLatOnSameLngFromHavDist(side_len_));
     lat_inc_inverse_ = 1.0/lat_inc_;
     row_size_ = static_cast<std::size_t>(def::kMathPi<FPType>/lat_inc_) + 1; // equals std::ceil()
     FillGridCache();
-    //auto t = std::thread(&KDT<KDTType, FPType>::clear, this->locKdt);
+    //auto t = std::thread(&KDT<KDTType, FPType>::clear, this->loc_kdt_);
     //t.detach();
-    this->locKdt = {};
+    this->loc_kdt_ = {};
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
