@@ -284,7 +284,7 @@ inline const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, poli
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline const typename KDT<KDTType, FPType>::node_type*
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetLocPairs(uintptr_t ptr) {
-    return reinterpret_cast<typename KDT<KDTType, FPType>::node_type*>((static_cast<intptr_t>(ptr << 16) >> 16) & std::numeric_limits<uintptr_t>::max() - 1);
+    return reinterpret_cast<typename KDT<KDTType, FPType>::node_type*>((static_cast<intptr_t>(ptr << 16) >> 16) & (std::numeric_limits<uintptr_t>::max() - 1));
 }
 
 template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>

@@ -17,7 +17,7 @@
 #include "UnionUniLatLngBKDTGridSBSolver.hpp"
 #include "UnionUniCellBKDTGridSBSolver.hpp"
 
-
+//#include <benchmark/benchmark.h>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -39,7 +39,7 @@
 #include <cassert>
 #include <concepts>
 #include <span>
-#include <ranges>
+//#include <ranges>
 
 
 
@@ -61,7 +61,6 @@ std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, std
 
 template <typename FPType>
 void accuracyTestFromRefFile() {
-    std::views v;
 }
 
 
@@ -110,6 +109,7 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
                   << "Error in total hav dist diff is: " << std::fabs(test_dist_err_total - ref_dist_for_err_pts_total) << std::endl;
     }
 }
+
 
 template <typename FPType>
 void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, SBSolver<FPType> &solver) {
@@ -261,7 +261,7 @@ void MainContent(int argc, const char * argv[]) {
         accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
-        TimeBuild({loc_data_vec.cbegin(), loc_data_vec.cend()}, *solvers[i]);
+        TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), *solvers[i]);
         TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, seed, search_benchmark_duration_in_secs);
         if (to_test_accuracy) {
             AccuracyTestFromRefSolver(accuracy_test_lat_lng_pts, ref_locs, *solvers[i], accuracy_test_time_in_secs);

@@ -14,7 +14,6 @@
 #include <memory>
 #include <span>
 #include <concepts>
-#include <ranges>
 
 
 template <typename FPType>
