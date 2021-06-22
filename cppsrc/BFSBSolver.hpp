@@ -20,7 +20,7 @@ template <typename FPType>
 class BFSBSolver : public SBSolver<FPType> {
 public:
     virtual void Build(std::span<const SBLoc<FPType>>) override final;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
     void PrintSolverInfo() const override;
     
     virtual ~BFSBSolver() {}

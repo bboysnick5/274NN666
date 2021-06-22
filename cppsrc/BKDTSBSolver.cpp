@@ -13,18 +13,18 @@
 
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void BKDTSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
     GenerateKDT(loc_data_span);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void BKDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
     this->loc_kdt_.PrintTreeInfo();
 }
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void BKDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> loc_data_span) {
     std::vector<typename KDT<KDTType, FPType>::node_type> kdt_data_vec;
     kdt_data_vec.reserve(loc_data_span.size());

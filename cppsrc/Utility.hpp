@@ -41,7 +41,6 @@ public:
     template <class _ForwardIterator, class _GetDist, class _Compare>
     static _ForwardIterator
     MinElementGivenDistFunc_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-        /* requires OPENMP 4.0+
         if (__first == __last) [[unlikely]]
             return __first;
         auto __result = __first;
@@ -66,7 +65,7 @@ public:
             }
         }
         return __result;
-        */
+        /*
         if (__first == __last) [[unlikely]]
             return __first;
         std::ptrdiff_t __result_idx = 0;
@@ -91,7 +90,8 @@ public:
                 }
             }
         }
-        return __first + __result_idx;
+        return __first + __result_idx; // this version is compatible with openmp < 4.0, but requires RAI.
+         */
     }
 };
 #endif /* Utility_hpp */

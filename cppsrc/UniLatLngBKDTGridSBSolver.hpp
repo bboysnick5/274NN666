@@ -18,12 +18,12 @@
 #include <variant>
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType> {
 public:
     UniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
     void Build(std::span<const SBLoc<FPType>>) override final;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
     virtual void PrintSolverInfo() const override;
     virtual ~UniLatLngBKDTGridSBSolver() override {}
 

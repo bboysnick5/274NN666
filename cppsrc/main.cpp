@@ -18,6 +18,8 @@
 #include "UnionUniCellBKDTGridSBSolver.hpp"
 
 //#include <benchmark/benchmark.h>
+#include <absl/random/random.h>
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -44,8 +46,7 @@
 
 
 template <typename FPType>
-std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, std::mt19937_64& mt) {
-    std::uniform_real_distribution<FPType> dist(0.0, 1.0);
+std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, absl::BitGen &bitgen) {
     std::vector<PointND<FPType, 2>> test_lat_lng_pts;
     test_lat_lng_pts.reserve(num_tests + 4);
     test_lat_lng_pts.insert(test_lat_lng_pts.end(),
@@ -53,9 +54,9 @@ std::vector<PointND<FPType, 2>> GenerateTestLatLngPts(std::size_t num_tests, std
                      {-def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>},
                      {-def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
                      {def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>}});
-    std::generate_n(std::back_inserter(test_lat_lng_pts), num_tests, [&]()->PointND<FPType, 2> {
-        return {-0.5*def::kMathPi<FPType> + def::kMathPi<FPType>*dist(mt),
-                -def::kMathPi<FPType> + 2.0*def::kMathPi<FPType>*dist(mt)};});
+    std::generate_n(std::back_inserter(test_lat_lng_pts), num_tests, [&bitgen]()->PointND<FPType, 2> {
+        return {-0.5*def::kMathPi<FPType> + def::kMathPi<FPType>*absl::Uniform(absl::IntervalClosed, bitgen, 0.0, 1.0),
+                -def::kMathPi<FPType> + def::kMathPi<FPType>*absl::Uniform(absl::IntervalClosed, bitgen, 0.0, 2.0)};});
     return test_lat_lng_pts;
 }
 
@@ -123,9 +124,8 @@ void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, SBSolver<FPType> &s
 
 template <typename FPType>
 void TimeNNSearch(const SBSolver<FPType> &solver, std::vector<PointND<FPType, 2>> &test_lat_lng_pts,
-                  uint_fast64_t seed, std::chrono::duration<FPType> search_duration_in_secs) {
-    std::mt19937_64 mt(seed);
-    std::shuffle(test_lat_lng_pts.begin(), test_lat_lng_pts.end(), mt);
+                  std::chrono::duration<FPType> search_duration_in_secs, absl::BitGen &bitgen) {
+    std::shuffle(test_lat_lng_pts.begin(), test_lat_lng_pts.end(), bitgen);
     std::vector<std::chrono::duration<FPType, std::micro>> per_search_time_vec_in_micro_secs;
     std::chrono::duration<FPType, std::micro> total_elapsed_time_in_micro_secs, max_one_search_time_in_micro_secs{}, min_one_search_time_in_micro_secs(std::numeric_limits<FPType>::max());
     per_search_time_vec_in_micro_secs.reserve(test_lat_lng_pts.size());
@@ -168,7 +168,7 @@ void WriteResults(const char* argv[],
 }
 
 template<typename FPType>
-std::vector<SBLoc<FPType>> ConstructLocDataVec(const char* loc_file_path, std::mt19937_64& mt) {
+std::vector<SBLoc<FPType>> ConstructLocDataVec(const char* loc_file_path, absl::BitGen &bitgen) {
     std::ifstream infilestream_locs(loc_file_path);
     std::vector<SBLoc<FPType>> loc_data_vec;
     //loc_data_vec.reserve(1 << 24); 
@@ -179,7 +179,7 @@ std::vector<SBLoc<FPType>> ConstructLocDataVec(const char* loc_file_path, std::m
     //std::sort(locData->begin(), locData->end());
     //locData->erase(std::unique(locData->begin(), locData->end()), locData->end());
     loc_data_vec.shrink_to_fit();
-    std::shuffle(loc_data_vec.rbegin(), loc_data_vec.rend(), mt);
+    std::shuffle(loc_data_vec.rbegin(), loc_data_vec.rend(), bitgen);
     return loc_data_vec;
 }
 
@@ -203,19 +203,14 @@ void MainContent(int argc, const char * argv[]) {
     if (argc >= 8)
         outRefLatLngPtLocPairVec.open(argv[8]);
     
-        
-    std::random_device rd;
-    std::seed_seq seq{rd(), rd(), rd(), rd(), rd(), rd(), rd(), rd()};
-    std::mt19937_64 mt(seq);
-    //mt.seed(686868);
-
     
-    to_test_accuracy = true;
+    to_test_accuracy = false;
     //maxCacheCellVecSize = (1 << 16ull);
     //maxCacheCellVecSize = (1 << 9ull);
     //aveActualLocsPerCell = 0.2;
     
-    const std::vector<SBLoc<FPType>> loc_data_vec = ConstructLocDataVec<FPType>(argv[1], mt);
+    absl::BitGen bitgen;
+    const std::vector<SBLoc<FPType>> loc_data_vec = ConstructLocDataVec<FPType>(argv[1], bitgen);
     
     /*
     if (numOfLocsToWriteToFile) {
@@ -229,8 +224,8 @@ void MainContent(int argc, const char * argv[]) {
     
 
     std::unique_ptr<SBSolver<FPType>> solvers[] = {
-        //std::make_unique<BFSBSolver<FPType>>(),
-        //std::make_unique<BFEUCPtSBSolver<FPType>>(),
+        std::make_unique<BFSBSolver<FPType>>(),
+        std::make_unique<BFEUCPtSBSolver<FPType>>(),
         //std::make_unique<KDTSBSolver<KDTree,FPType>>(),
         //std::make_unique<BKDTSBSolver<KDTree, FPType>>(),
         //std::make_unique<BKDTSBSolver<FPType><KDTreeCusMem>>(),
@@ -253,16 +248,15 @@ void MainContent(int argc, const char * argv[]) {
         std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
-    uint_fast64_t seed = rd();
-    std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
+    std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, bitgen);
     std::vector<const SBLoc<FPType>*> ref_locs;
     std::vector<PointND<FPType, 2>> accuracy_test_lat_lng_pts;
     if (to_test_accuracy)
-        accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, mt);
+        accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, bitgen);
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
         TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), *solvers[i]);
-        TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, seed, search_benchmark_duration_in_secs);
+        TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, search_benchmark_duration_in_secs, bitgen);
         if (to_test_accuracy) {
             AccuracyTestFromRefSolver(accuracy_test_lat_lng_pts, ref_locs, *solvers[i], accuracy_test_time_in_secs);
         }

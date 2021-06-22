@@ -14,7 +14,7 @@
 
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 class BKDTSBSolver : public KDTSBSolver<KDTType, FPType> {
     
 public:

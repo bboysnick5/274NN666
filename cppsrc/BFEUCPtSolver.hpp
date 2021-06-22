@@ -17,7 +17,7 @@
 template <typename FPType>
 class BFEUCPtSBSolver final : public BFSBSolver<FPType> {
 public:
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
     void PrintSolverInfo() const override;
     virtual ~BFEUCPtSBSolver() override {}
 };

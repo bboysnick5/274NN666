@@ -21,14 +21,14 @@
 #include <new>
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType> {
     
 public:
     UnionUniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
     virtual void Build(std::span<const SBLoc<FPType>>) override;
-    virtual const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    virtual const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
     virtual void PrintSolverInfo() const override final;
     virtual ~UnionUniLatLngBKDTGridSBSolver() override {}
     
@@ -61,8 +61,8 @@ protected:
     /*
     struct CellAlloc {
         typedef Cell value_type;
-        value_type* allocate(std::size_t n) { return static_cast<value_type*>(::operator new(sizeof(value_type) * n)); }
-        void deallocate(value_type* p, std::size_t n) { return ::operator delete(static_cast<void*>(p)); }
+        value_type* allocate(std::uint_fast8_t N) { return static_cast<value_type*>(::operator new(sizeof(value_type) * n)); }
+        void deallocate(value_type* p, std::uint_fast8_t N) { return ::operator delete(static_cast<void*>(p)); }
         template<class U, class... Args>
         void construct(U* p, Args&&... args) { ::new(static_cast<void*>(p)) U{ std::forward<Args>(args)... }; }
     }; */
@@ -140,23 +140,23 @@ protected:
 };
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::BitCell(uintptr_t ptrVal) {
     SetPtr(ptrVal);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::BitCell(BitCell&& rhs) {
     SetPtr(rhs.GetPtr());
     rhs.SetPtr(0);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::BitCell(const BitCell& rhs) {
     SetPtr(rhs.GetPtr());
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline typename UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell&
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::operator=(BitCell&& rhs) noexcept {
     if (this != &rhs) [[likely]]{
@@ -167,7 +167,7 @@ UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::operator=(BitC
     return *this;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 typename UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell&
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::operator=(const BitCell& rhs) noexcept {
     if (this != &rhs) [[likely]] {
@@ -177,7 +177,7 @@ UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::operator=(cons
     return *this;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::
 BitCell(std::vector<typename KDT<KDTType, FPType>::node_type> &pt_loc_vec,
         std::size_t max_cache_vec_size, std::initializer_list<const BitCell*> prev_cells) {
@@ -206,7 +206,7 @@ BitCell(std::vector<typename KDT<KDTType, FPType>::node_type> &pt_loc_vec,
 }
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::DeAlloc() {
     if (uintptr_t cell_ptr_val = GetPtr();
         cell_ptr_val != 0) [[likely]] {
@@ -222,36 +222,36 @@ inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::De
 }
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::~BitCell() {
     DeAlloc();
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 template <typename T, typename std::enable_if_t<std::is_same<T, uintptr_t>::value, bool>>
 inline std::size_t UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetPtr() const {
     return ptr;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 template <typename T, typename std::enable_if_t<std::is_same<T, std::atomic<uintptr_t>>::value, bool>>
 inline std::size_t UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetPtr() const {
     return ptr.load(std::memory_order_relaxed);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 template <typename T, typename std::enable_if_t<std::is_same<T, uintptr_t>::value, bool>>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::SetPtr(uintptr_t ptr_to_set) {
     ptr = ptr_to_set;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 template <typename T, typename std::enable_if_t<std::is_same<T, std::atomic<uintptr_t>>::value, bool>>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::SetPtr(uintptr_t ptr_to_set) {
     ptr.store(ptr_to_set, std::memory_order_relaxed);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline std::size_t UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::size(uintptr_t ptr) {
     if (ptr) [[likely]] {
         if (std::uintptr_t size = ptr >> 48;
@@ -266,28 +266,28 @@ inline std::size_t UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitC
     // return ptr ? (ptr >> 48 ? ptr >> 48 : getCacheTree(ptr)->size()) : 0; attribute not working with ternary operator?
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline std::size_t UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::RawSizeBits(uintptr_t ptr) {
     return ptr >> 48;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline bool UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::IsUniqueVecLoc(uintptr_t ptr) {
     return ptr & 1ull;
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetSingleLoc(uintptr_t ptr) {
     return reinterpret_cast<const SBLoc<FPType>*>(static_cast<intptr_t>(ptr << 16) >> 16);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline const typename KDT<KDTType, FPType>::node_type*
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetLocPairs(uintptr_t ptr) {
     return reinterpret_cast<typename KDT<KDTType, FPType>::node_type*>((static_cast<intptr_t>(ptr << 16) >> 16) & (std::numeric_limits<uintptr_t>::max() - 1));
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 inline const KDT<KDTType, FPType>*
 UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetCacheTree(uintptr_t ptr) {
     return reinterpret_cast<const KDT<KDTType, FPType>*>(static_cast<intptr_t>(ptr << 16) >> 16);
@@ -296,7 +296,7 @@ UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::GetCacheTree(u
 
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(std::size_t idx_to_fill,
@@ -312,7 +312,7 @@ FillCacheCell(std::size_t idx_to_fill,
     pt_loc_vec.clear();
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC, std::size_t this_col_size,
@@ -327,7 +327,7 @@ FillCacheCell(const PointND<FPType, 2>& thisCtrGeoPt, FPType diagonalDistSq3DEUC
     pt_loc_vec.clear();
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 inline FPType UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 EUC3DDistSqFromLatCosDeltaLng(FPType lat1, FPType lat2, FPType cosDeltaLng) {
@@ -335,7 +335,7 @@ EUC3DDistSqFromLatCosDeltaLng(FPType lat1, FPType lat2, FPType cosDeltaLng) {
 }
 /*
  
- template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+ template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 
  class UnionUniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType> {
  public:

@@ -20,7 +20,7 @@ class GridSBSolver : public SBSolver<FPType> {
     
 public:
     void Build(std::span<const SBLoc<FPType>>) override;
-    const SBLoc<FPType>* FindNearestLoc(const PointND<FPType, 2>&) const override;
+    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
     GridSBSolver(FPType aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     

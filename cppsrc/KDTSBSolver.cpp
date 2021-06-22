@@ -10,23 +10,23 @@
 #include <algorithm>
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void KDTSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
     GenerateKDT(loc_data_span);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void KDTSBSolver<KDTType, FPType>::PrintSolverInfo() const {
     loc_kdt_.PrintTreeInfo();
 }
 
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* KDTSBSolver<KDTType, FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+const SBLoc<FPType>* KDTSBSolver<KDTType, FPType>::FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
     return loc_kdt_.kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt), 1);
 }
 
-template <template <typename FPType, std::size_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void KDTSBSolver<KDTType, FPType>::GenerateKDT(std::span<const SBLoc<FPType>> loc_data_span) {
     std::for_each(loc_data_span.rbegin(), loc_data_span.rend(), [&](const SBLoc<FPType> &loc) mutable {
         this->loc_kdt_.insert(loc.LocTo3dEucPt(), &loc);});

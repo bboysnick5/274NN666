@@ -87,7 +87,7 @@ FPType lng, FPType lat, FPType &minDist, const SBLoc<FPType>* &best) const {
 }
 
 template <typename FPType>
-const SBLoc<FPType>* GridSBSolver<FPType>::FindNearestLoc(const PointND<FPType, 2>& geo_search_pt) const {
+const SBLoc<FPType>* GridSBSolver<FPType>::FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
     auto idxPr = getIdx(geo_search_pt[1], geo_search_pt[0]);
     std::size_t r0 = idxPr.first, c0 = idxPr.second;
     FPType minDist = FPType_MAX<FPType>;

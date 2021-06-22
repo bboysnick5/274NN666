@@ -12,6 +12,17 @@
 		011CF6C021D91E070052024D /* UniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 011CF6BE21D91E070052024D /* UniCellBKDTGridSBSolver.cpp */; };
 		013D9B69221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 013D9B67221C4AB90001A4C7 /* UnionUniLatLngBKDTGridSBSolver.cpp */; };
 		013D9B6C221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 013D9B6A221D478B0001A4C7 /* UnionUniCellBKDTGridSBSolver.cpp */; };
+		82210E9E2681B555003488A7 /* libabsl_random_seed_gen_exception.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E932681B555003488A7 /* libabsl_random_seed_gen_exception.2103.0.1.dylib */; };
+		82210E9F2681B555003488A7 /* libabsl_random_internal_randen_hwaes.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E942681B555003488A7 /* libabsl_random_internal_randen_hwaes.2103.0.1.dylib */; };
+		82210EA02681B555003488A7 /* libabsl_random_internal_seed_material.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E952681B555003488A7 /* libabsl_random_internal_seed_material.2103.0.1.dylib */; };
+		82210EA12681B555003488A7 /* libabsl_random_internal_platform.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E962681B555003488A7 /* libabsl_random_internal_platform.2103.0.1.dylib */; };
+		82210EA22681B555003488A7 /* libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E972681B555003488A7 /* libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib */; };
+		82210EA32681B555003488A7 /* libabsl_random_internal_pool_urbg.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E982681B555003488A7 /* libabsl_random_internal_pool_urbg.2103.0.1.dylib */; };
+		82210EA42681B555003488A7 /* libabsl_random_internal_randen_slow.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E992681B555003488A7 /* libabsl_random_internal_randen_slow.2103.0.1.dylib */; };
+		82210EA52681B555003488A7 /* libabsl_random_internal_randen.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E9A2681B555003488A7 /* libabsl_random_internal_randen.2103.0.1.dylib */; };
+		82210EA62681B555003488A7 /* libabsl_random_internal_distribution_test_util.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E9B2681B555003488A7 /* libabsl_random_internal_distribution_test_util.2103.0.1.dylib */; };
+		82210EA72681B555003488A7 /* libabsl_random_distributions.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E9C2681B555003488A7 /* libabsl_random_distributions.2103.0.1.dylib */; };
+		82210EA82681B555003488A7 /* libabsl_random_seed_sequences.2103.0.1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 82210E9D2681B555003488A7 /* libabsl_random_seed_sequences.2103.0.1.dylib */; };
 		823641441E00C98B007AE0FD /* GridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 823641421E00C98B007AE0FD /* GridSBSolver.cpp */; };
 		82405F2D1E0C7FDD00028713 /* BKDTGridSBSolver.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 82405F2B1E0C7FDD00028713 /* BKDTGridSBSolver.cpp */; };
 		825CD4D1265516FE0069BBD1 /* libomp.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 825CD4D0265516FE0069BBD1 /* libomp.dylib */; };
@@ -61,6 +72,17 @@
 		016197E921E8F94C009F8E48 /* PoolAllocator.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = PoolAllocator.hpp; sourceTree = "<group>"; };
 		01A424D721E9852700F43C03 /* KDTreeCusMem.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = KDTreeCusMem.hpp; sourceTree = "<group>"; };
 		8200D42B265CD1E2001A60C5 /* Definition.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Definition.hpp; sourceTree = "<group>"; };
+		82210E932681B555003488A7 /* libabsl_random_seed_gen_exception.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_seed_gen_exception.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_seed_gen_exception.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E942681B555003488A7 /* libabsl_random_internal_randen_hwaes.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_randen_hwaes.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_randen_hwaes.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E952681B555003488A7 /* libabsl_random_internal_seed_material.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_seed_material.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_seed_material.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E962681B555003488A7 /* libabsl_random_internal_platform.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_platform.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_platform.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E972681B555003488A7 /* libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E982681B555003488A7 /* libabsl_random_internal_pool_urbg.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_pool_urbg.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_pool_urbg.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E992681B555003488A7 /* libabsl_random_internal_randen_slow.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_randen_slow.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_randen_slow.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E9A2681B555003488A7 /* libabsl_random_internal_randen.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_randen.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_randen.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E9B2681B555003488A7 /* libabsl_random_internal_distribution_test_util.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_internal_distribution_test_util.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_internal_distribution_test_util.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E9C2681B555003488A7 /* libabsl_random_distributions.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_distributions.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_distributions.2103.0.1.dylib; sourceTree = "<group>"; };
+		82210E9D2681B555003488A7 /* libabsl_random_seed_sequences.2103.0.1.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libabsl_random_seed_sequences.2103.0.1.dylib; path = ../../../../../usr/local/Cellar/abseil/20210324.2/lib/libabsl_random_seed_sequences.2103.0.1.dylib; sourceTree = "<group>"; };
 		8223DF2F267207C70029B47E /* 274F16NearestSB.profdata */ = {isa = PBXFileReference; lastKnownFileType = file; path = 274F16NearestSB.profdata; sourceTree = "<group>"; };
 		823641421E00C98B007AE0FD /* GridSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = GridSBSolver.cpp; sourceTree = "<group>"; };
 		823641431E00C98B007AE0FD /* GridSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = GridSBSolver.hpp; sourceTree = "<group>"; };
@@ -88,6 +110,17 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82210E9E2681B555003488A7 /* libabsl_random_seed_gen_exception.2103.0.1.dylib in Frameworks */,
+				82210E9F2681B555003488A7 /* libabsl_random_internal_randen_hwaes.2103.0.1.dylib in Frameworks */,
+				82210EA02681B555003488A7 /* libabsl_random_internal_seed_material.2103.0.1.dylib in Frameworks */,
+				82210EA12681B555003488A7 /* libabsl_random_internal_platform.2103.0.1.dylib in Frameworks */,
+				82210EA22681B555003488A7 /* libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib in Frameworks */,
+				82210EA32681B555003488A7 /* libabsl_random_internal_pool_urbg.2103.0.1.dylib in Frameworks */,
+				82210EA42681B555003488A7 /* libabsl_random_internal_randen_slow.2103.0.1.dylib in Frameworks */,
+				82210EA52681B555003488A7 /* libabsl_random_internal_randen.2103.0.1.dylib in Frameworks */,
+				82210EA62681B555003488A7 /* libabsl_random_internal_distribution_test_util.2103.0.1.dylib in Frameworks */,
+				82210EA72681B555003488A7 /* libabsl_random_distributions.2103.0.1.dylib in Frameworks */,
+				82210EA82681B555003488A7 /* libabsl_random_seed_sequences.2103.0.1.dylib in Frameworks */,
 				825CD4D1265516FE0069BBD1 /* libomp.dylib in Frameworks */,
 				82717C7D26537BEF00D90DE7 /* libtbb.12.2.dylib in Frameworks */,
 			);
@@ -107,6 +140,17 @@
 		82717C7A26537A5300D90DE7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				82210E9C2681B555003488A7 /* libabsl_random_distributions.2103.0.1.dylib */,
+				82210E9B2681B555003488A7 /* libabsl_random_internal_distribution_test_util.2103.0.1.dylib */,
+				82210E962681B555003488A7 /* libabsl_random_internal_platform.2103.0.1.dylib */,
+				82210E982681B555003488A7 /* libabsl_random_internal_pool_urbg.2103.0.1.dylib */,
+				82210E972681B555003488A7 /* libabsl_random_internal_randen_hwaes_impl.2103.0.1.dylib */,
+				82210E942681B555003488A7 /* libabsl_random_internal_randen_hwaes.2103.0.1.dylib */,
+				82210E992681B555003488A7 /* libabsl_random_internal_randen_slow.2103.0.1.dylib */,
+				82210E9A2681B555003488A7 /* libabsl_random_internal_randen.2103.0.1.dylib */,
+				82210E952681B555003488A7 /* libabsl_random_internal_seed_material.2103.0.1.dylib */,
+				82210E932681B555003488A7 /* libabsl_random_seed_gen_exception.2103.0.1.dylib */,
+				82210E9D2681B555003488A7 /* libabsl_random_seed_sequences.2103.0.1.dylib */,
 				825CD4D0265516FE0069BBD1 /* libomp.dylib */,
 				82717C7B26537A5300D90DE7 /* libtbb.12.2.dylib */,
 			);
@@ -425,6 +469,7 @@
 					/opt/intel/oneapi/tbb/latest/lib,
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
+					/usr/local/Cellar/abseil/20210324.2/lib,
 				);
 				LLVM_LTO = NO;
 				OTHER_CFLAGS = (
@@ -465,6 +510,7 @@
 					/opt/intel/oneapi/tbb/latest/lib,
 					/usr/local/lib,
 					/opt/intel/oneapi/tbb/2021.2.0/lib,
+					/usr/local/Cellar/abseil/20210324.2/lib,
 				);
 				LLVM_LTO = NO;
 				OTHER_CFLAGS = (
