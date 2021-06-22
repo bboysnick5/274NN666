@@ -21,6 +21,7 @@ public:
     BKDTGridSBSolver(FPType aveLocPerCell = 1);
     virtual void Build(std::span<const SBLoc<FPType>>) override;
     virtual const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
+    virtual void PrintSolverInfo() const override {}
     virtual ~BKDTGridSBSolver() override {}
 
     

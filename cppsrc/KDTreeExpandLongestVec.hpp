@@ -212,7 +212,7 @@ private:
     void RangeCtorHelper(RAI, RAI);
 
     template <class RAI>
-    void RangeCtorRecursionHelper(TreeNode*&, ElemType*&, RAI, RAI, std::array<FPType, N>&,
+    void RangeCtorRecursion(TreeNode*&, ElemType*&, RAI, RAI, std::array<FPType, N>&,
                                   std::array<FPType, N>&, std::array<FPType, N>&);
     
     template <class ConstRAI>
@@ -344,57 +344,68 @@ template <typename FPType, std::uint_fast8_t N, typename ElemType, typename Poin
 template <typename RAI, std::enable_if_t<!std::is_const_v<typename std::remove_pointer_t<typename std::iterator_traits<RAI>::pointer>>, int>>
 KDTreeExpandLongestVec<FPType, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begin, RAI end) :size_(static_cast<std::uint32_t>(end - begin)), cap_(size_) {
     RangeCtorHelper(begin, end);
-    
+}
+
+template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+//template <std::random_access_iterator RAI>
+template <typename RAI>
+void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin, RAI end) {
+    if (size_ == 0) [[unlikely]]
+        return;
+    nd_arr_ = new TreeNode[size_];
+    elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType), std::nothrow));
+    if (size_ == 1) [[unlikely]] {
+        *nd_arr_ = {0, N, std::move(begin->key)};
+        new (elem_arr_) ElemType(std::move(begin->value));
+        return;
+    }
+    auto [lows, highs, spans] = ComputeInitBBoxSpans(std::as_const(begin), std::as_const(end));
+    TreeNode* cur_nd = nd_arr_;
+    ElemType* cur_elem = elem_arr_;
+    RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, spans);
     
     /*
-    struct actRecord {
+    struct ActRecord {
         std::uint32_t ndIdxToAssignRightIdx;
-        std::uint32_t depth;
+        std::uint_fast8_t depth;
         RAI thisBeginIt, thisEndIt;
-    }; */
+    };
     
-    /*
-    
-    std::uint_fast8_t stackSize = static_cast<std::uint_fast8_t>(log2(size_+1));
+    constexpr std::uint_fast8_t kARStackSize = 32;
     //actRecord actSt[stackSize], *actStIt = actSt;
-    std::tuple<std::uint32_t, std::uint32_t, RAI, RAI> actSt[stackSize], *actStIt = actSt;
-    std::pair<FPType*, FPType> bboxChangeSt[stackSize], *curBboxChangeStIt = bboxChangeSt-1;
-    RAI thisBeginIt = begin, thisEndIt = end;
+    std::tuple<std::uint32_t, std::uint32_t, RAI, RAI> actSt[kARStackSize], *actStIt = actSt;
+    std::pair<FPType*, FPType> bboxChangeSt[kARStackSize], *curBboxChangeStIt = bboxChangeSt-1;
+    RAI this_begin_it = begin, this_end_it = end;
     std::uint32_t depth = 0;
     
     
     while (true) {
-        auto dim = static_cast<std::uint32_t>(std::distance(
-                           spans.cbegin(),std::max_element(spans.cbegin(), spans.cend())));
-        
-        TreeNode* cur_ndPtr = cur_nd;
-        RAI median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
-        std::nth_element(thisBeginIt, median, thisEndIt,
-                         [=](const auto& p1, const auto& p2) {
-                             return p1.key[dim] < p2.key[dim];});
-        new (cur_nd++) TreeNode {0, dim, median->key};
-        new (cur_obj++) ElemType (median->value);
+        std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
+        RAI median = this_begin_it + (this_end_it-this_begin_it)/2;
+        std::nth_element(this_begin_it, median, this_end_it, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
+        new (cur_nd++) TreeNode {0, dim, std::move(median->key)};
+        new (cur_elem++) ElemType (std::move(median->value));
      
-        auto numElems = thisEndIt - thisBeginIt;
-        if (numElems > 2) {
+        auto num_nds_this_iteration = this_end_it - this_begin_it;
+        if (num_nds_this_iteration > 2) {
             *++curBboxChangeStIt = {highs.data() + dim, highs[dim]};
-            highs[dim] = cur_ndPtr->key[dim];
+            highs[dim] = cur_nd->key[dim];
             //new (actStIt++) actRecord {static_cast<std::uint32_t>(cur_ndPtr-nd_arr_), depth++, median + 1, thisEndIt};
-            new (actStIt++) std::tuple<std::uint32_t, std::uint32_t, RAI, RAI> {static_cast<std::uint32_t>(cur_ndPtr-nd_arr_), depth++, median + 1, thisEndIt};
-            thisEndIt = median;
+            new (actStIt++) std::tuple<std::uint32_t, std::uint32_t, RAI, RAI> {static_cast<std::uint32_t>(cur_nd-nd_arr_), depth++, median + 1, this_end_it};
+            this_end_it = median;
         } else {
-            if (numElems == 2) {
-                new (cur_nd++) TreeNode {0, N, thisBeginIt->key};
-                new (cur_obj++) ElemType (thisBeginIt->value);
+            if (num_nds_this_iteration == 2) {
+                new (cur_nd++) TreeNode {0, N, std::move(this_begin_it->key)};
+                new (cur_elem++) ElemType (std::move(this_begin_it->value));
             }
         TRACEBACK:
             if (cur_nd - nd_arr_ == size_)
                 return;
             const auto &[ndIdxToAssignRightIdx, stDepth, stThisBeginIt, stThisEndIt] = *--actStIt;
             (nd_arr_ + ndIdxToAssignRightIdx)->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
-            if ((thisBeginIt = stThisBeginIt) + 1 == (thisEndIt = stThisEndIt)) {
-                new (cur_nd++) TreeNode {0, N, thisBeginIt->key};
-                new (cur_obj++) ElemType (thisBeginIt->value);
+            if ((this_begin_it = stThisBeginIt) + 1 == (this_end_it = stThisEndIt)) {
+                new (cur_nd++) TreeNode {0, N, this_begin_it->key};
+                new (cur_elem++) ElemType (this_begin_it->value);
                 goto TRACEBACK;
             }
             
@@ -422,25 +433,6 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begi
     */
 }
 
-template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-//template <std::random_access_iterator RAI>
-template <typename RAI>
-void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin, RAI end) {
-    if (size_ == 0) [[unlikely]]
-        return;
-    nd_arr_ = new TreeNode[size_];
-    elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType), std::nothrow));
-    if (size_ == 1) [[unlikely]] {
-        *nd_arr_ = {0, N, std::move(begin->key)};
-        new (elem_arr_) ElemType(std::move(begin->value));
-        return;
-    }
-    auto [lows, highs, spans] = ComputeInitBBoxSpans(std::as_const(begin), std::as_const(end));
-    auto cur_nd = nd_arr_;
-    auto cur_obj = elem_arr_;
-    RangeCtorRecursionHelper(cur_nd, cur_obj, begin, end, lows, highs, spans);
-}
-
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class ConstRAI>
@@ -464,7 +456,7 @@ ComputeInitBBoxSpans(ConstRAI cbegin, ConstRAI cend) {
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-RangeCtorRecursionHelper(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
+RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
                          std::array<FPType, N> &lows, std::array<FPType, N> &highs, std::array<FPType, N> &spans) {
     std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
     TreeNode* nd_ptr_this_iter = cur_nd;
@@ -474,14 +466,59 @@ RangeCtorRecursionHelper(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI e
 
     *cur_nd++ = {0, dim, std::move(median->key)};
     new (cur_obj++) ElemType (std::move(median->value));
-        
+    
+    
+    switch (std::uint_fast32_t num_items_this_iteration = static_cast<uint_fast32_t>(end - begin);
+            num_items_this_iteration) {
+        [[unlikely]] case 2: {
+            *cur_nd++ = {0, N, std::move(begin->key)};
+            new (cur_obj++) ElemType (std::move(begin->value));
+            break;
+        }
+        case 3: {
+            *cur_nd++ = {0, N, std::move(begin->key)};
+            *cur_nd = {0, N, std::move((median+1)->key)};
+            nd_ptr_this_iter->right_idx = static_cast<std::uint32_t>(cur_nd++ - nd_arr_);
+            new (cur_obj++) ElemType (std::move(begin->value));
+            new (cur_obj++) ElemType (std::move((median+1)->value));
+            break;
+        }
+        case 4: {
+            spans[dim] = nd_ptr_this_iter->key[dim] - lows[dim];
+            std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
+            RAI child_or_parent = (begin->key[dim] < (begin+1)->key[dim]) ? begin++ : begin+1;
+            *cur_nd++ = {0, dim, std::move(begin->key)};
+            new (cur_obj++) ElemType (std::move(begin->value));
+            *cur_nd++ = {0, N, std::move(child_or_parent->key)};
+            new (cur_obj++) ElemType (std::move(child_or_parent->value));
+            
+            nd_ptr_this_iter->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
+            *cur_nd++ = {0, N, std::move((median+1)->key)};
+            new (cur_obj++) ElemType (std::move((median+1)->value));
+            break;
+        }
+        [[likely]] default: {
+            FPType prev_high_low_on_dim = std::exchange(highs[dim], nd_ptr_this_iter->key[dim]);
+            spans[dim] = highs[dim] - lows[dim];
+            RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, spans);
+            highs[dim] = prev_high_low_on_dim;
+            spans[dim] = prev_high_low_on_dim - nd_ptr_this_iter->key[dim];
+            nd_ptr_this_iter->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
+            prev_high_low_on_dim = std::exchange(lows[dim], nd_ptr_this_iter->key[dim]);
+            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, spans);
+            lows[dim] = prev_high_low_on_dim;
+            spans[dim] = highs[dim] - prev_high_low_on_dim;
+            break;
+        }
+    }
+    /*
     if (begin == median - 1) {
         *cur_nd++ = {0, N, std::move(begin->key)};
         new (cur_obj++) ElemType (std::move(begin->value));
     } else {
         FPType prev_high_on_dim = std::exchange(highs[dim], nd_ptr_this_iter->key[dim]);
         spans[dim] = highs[dim] - lows[dim];
-        RangeCtorRecursionHelper(cur_nd, cur_obj, begin, median, lows, highs, spans);
+        RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, spans);
         highs[dim] = prev_high_on_dim;
         spans[dim] = prev_high_on_dim - lows[dim];
     }
@@ -494,11 +531,11 @@ RangeCtorRecursionHelper(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI e
         } else {
             FPType prev_low_on_dim = std::exchange(lows[dim], nd_ptr_this_iter->key[dim]);
             spans[dim] = highs[dim] - lows[dim];
-            RangeCtorRecursionHelper(cur_nd, cur_obj, median+1, end, lows, highs, spans);
+            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, spans);
             lows[dim] = prev_low_on_dim;
             spans[dim] = highs[dim] - prev_low_on_dim;
         }
-    }
+    } */
 }
 
 
