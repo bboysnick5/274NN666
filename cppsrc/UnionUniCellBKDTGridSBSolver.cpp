@@ -51,7 +51,7 @@ LoopBody(def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
 #pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
 firstprivate(pt_loc_vec) default(shared) schedule(dynamic, 1) 
     for (std::size_t idx = 0; idx < totalCacheCells; ++idx) {
-        const auto it = std::upper_bound(thisRowStartIdxThisLngIncInverseVec.cbegin(), thisRowStartIdxThisLngIncInverseVec.cend(), idx, [](const std::size_t &idx, const std::pair<std::size_t, FPType> &p){return idx < p.first;}) - 1;
+        const auto it = std::upper_bound(thisRowStartIdxThisLngIncInverseVec.cbegin(), thisRowStartIdxThisLngIncInverseVec.cend(), idx, [](std::size_t idx, const std::pair<std::size_t, FPType> &p){return idx < p.first;}) - 1;
         std::size_t r = it - thisRowStartIdxThisLngIncInverseVec.begin();
         std::size_t c = idx - it->first;
         FPType thisLngInc = 1.0/it->second;

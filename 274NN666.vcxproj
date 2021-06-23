@@ -38,7 +38,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>ClangCL</PlatformToolset>
     <UseInteloneTBB>true</UseInteloneTBB>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -107,8 +107,14 @@
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <OpenMP>GenerateParallelCode</OpenMP>
       <OpenMPSupport>true</OpenMPSupport>
-      <AdditionalOptions>/openmp:llvm %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-Xclang -fopenmp %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>libomp.lib;absl_random_distributions.lib;absl_random_internal_distribution_test_util.lib;absl_random_internal_platform.lib;absl_random_internal_pool_urbg.lib;absl_random_internal_randen.lib;absl_random_internal_randen_hwaes.lib;absl_random_internal_randen_hwaes_impl.lib;absl_random_internal_randen_slow.lib;absl_random_internal_seed_material.lib;absl_random_seed_gen_exception.lib;absl_random_seed_sequences.lib;absl_base.lib;absl_exponential_biased.lib;absl_log_severity.lib;absl_malloc_internal.lib;absl_periodic_sampler.lib;absl_raw_logging_internal.lib;absl_scoped_set_env.lib;absl_spinlock_wait.lib;absl_strerror.lib;absl_throw_delegate.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Debug\absl\random;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Debug\absl\base;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -126,15 +132,15 @@
       <FSYCLEarlyOptimizations>Yes</FSYCLEarlyOptimizations>
       <FSYCLDeadArgsOptimization>Yes</FSYCLDeadArgsOptimization>
       <UseMSVC>false</UseMSVC>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SpecifySyclFrontendTargetOptionsForOpenMP>
       </SpecifySyclFrontendTargetOptionsForOpenMP>
       <EnableModules>true</EnableModules>
       <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast </AdditionalOptions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>libomp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\random;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\base;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libomp.lib;absl_random_distributions.lib;absl_random_internal_distribution_test_util.lib;absl_random_internal_platform.lib;absl_random_internal_pool_urbg.lib;absl_random_internal_randen.lib;absl_random_internal_randen_hwaes.lib;absl_random_internal_randen_hwaes_impl.lib;absl_random_internal_randen_slow.lib;absl_random_internal_seed_material.lib;absl_random_seed_gen_exception.lib;absl_random_seed_sequences.lib;absl_base.lib;absl_exponential_biased.lib;absl_log_severity.lib;absl_malloc_internal.lib;absl_periodic_sampler.lib;absl_raw_logging_internal.lib;absl_scoped_set_env.lib;absl_spinlock_wait.lib;absl_strerror.lib;absl_throw_delegate.lib;</AdditionalDependencies>
       <ImportLibrary>
       </ImportLibrary>
       <SubSystem>Console</SubSystem>

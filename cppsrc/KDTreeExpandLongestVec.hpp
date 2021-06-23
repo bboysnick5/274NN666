@@ -217,7 +217,7 @@ private:
     
     template <class ConstRAI>
     static std::tuple<std::array<FPType, N>, std::array<FPType,N>, std::array<FPType, N>>
-           ComputeInitBBoxSpans(ConstRAI, ConstRAI);
+           ComputeInitBBoxHlSpread(ConstRAI, ConstRAI);
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
@@ -359,10 +359,10 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
         new (elem_arr_) ElemType(std::move(begin->value));
         return;
     }
-    auto [lows, highs, spans] = ComputeInitBBoxSpans(std::as_const(begin), std::as_const(end));
+    auto [lows, highs, hl_spread] = ComputeInitBBoxHlSpread(std::as_const(begin), std::as_const(end));
     TreeNode* cur_nd = nd_arr_;
     ElemType* cur_elem = elem_arr_;
-    RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, spans);
+    RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, hl_spread);
     
     /*
     struct ActRecord {
@@ -380,7 +380,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
     
     
     while (true) {
-        std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
+        std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
         RAI median = this_begin_it + (this_end_it-this_begin_it)/2;
         std::nth_element(this_begin_it, median, this_end_it, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
         new (cur_nd++) TreeNode {0, dim, std::move(median->key)};
@@ -437,8 +437,8 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class ConstRAI>
 std::tuple<std::array<FPType, N>, std::array<FPType, N>, std::array<FPType, N>> KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-ComputeInitBBoxSpans(ConstRAI cbegin, ConstRAI cend) {
-    std::array<FPType, N> lows, highs, spans;
+ComputeInitBBoxHlSpread(ConstRAI cbegin, ConstRAI cend) {
+    std::array<FPType, N> lows, highs, hl_spread;
     lows.fill(std::numeric_limits<FPType>::max());
     highs.fill(std::numeric_limits<FPType>::min());
     std::for_each(cbegin, cend, [&lows, &highs](const auto &nh) mutable {
@@ -449,16 +449,16 @@ ComputeInitBBoxSpans(ConstRAI cbegin, ConstRAI cend) {
             bbox_high = std::max(bbox_high, pt_val_on_dim);
         }
     });
-    std::transform(highs.cbegin(), highs.cend(), lows.cbegin(), spans.begin(), std::minus<FPType>());
-    return {lows, highs, spans};
+    std::transform(highs.cbegin(), highs.cend(), lows.cbegin(), hl_spread.begin(), std::minus<FPType>());
+    return {lows, highs, hl_spread};
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
-                         std::array<FPType, N> &lows, std::array<FPType, N> &highs, std::array<FPType, N> &spans) {
-    std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
+                         std::array<FPType, N> &lows, std::array<FPType, N> &highs, std::array<FPType, N> &hl_spread) {
+    std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
     TreeNode* nd_ptr_this_iter = cur_nd;
     RAI median = begin + (end - begin)/2;
     std::nth_element(begin, median, end, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
@@ -470,11 +470,6 @@ RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
     
     switch (std::uint_fast32_t num_items_this_iteration = static_cast<uint_fast32_t>(end - begin);
             num_items_this_iteration) {
-        [[unlikely]] case 2: {
-            *cur_nd++ = {0, N, std::move(begin->key)};
-            new (cur_obj++) ElemType (std::move(begin->value));
-            break;
-        }
         case 3: {
             *cur_nd++ = {0, N, std::move(begin->key)};
             *cur_nd = {0, N, std::move((median+1)->key)};
@@ -484,8 +479,8 @@ RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
             break;
         }
         case 4: {
-            spans[dim] = nd_ptr_this_iter->key[dim] - lows[dim];
-            std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(spans.cbegin(), std::max_element(spans.cbegin(), spans.cend())));
+            hl_spread[dim] = nd_ptr_this_iter->key[dim] - lows[dim];
+            std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
             RAI child_or_parent = (begin->key[dim] < (begin+1)->key[dim]) ? begin++ : begin+1;
             *cur_nd++ = {0, dim, std::move(begin->key)};
             new (cur_obj++) ElemType (std::move(begin->value));
@@ -495,19 +490,25 @@ RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
             nd_ptr_this_iter->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
             *cur_nd++ = {0, N, std::move((median+1)->key)};
             new (cur_obj++) ElemType (std::move((median+1)->value));
+            hl_spread[dim] = highs[dim] - lows[dim];
             break;
         }
-        [[likely]] default: {
+        case 5 ... std::numeric_limits<std::uint32_t>::max(): {
             FPType prev_high_low_on_dim = std::exchange(highs[dim], nd_ptr_this_iter->key[dim]);
-            spans[dim] = highs[dim] - lows[dim];
-            RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, spans);
+            hl_spread[dim] = highs[dim] - lows[dim];
+            RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, hl_spread);
             highs[dim] = prev_high_low_on_dim;
-            spans[dim] = prev_high_low_on_dim - nd_ptr_this_iter->key[dim];
+            hl_spread[dim] = prev_high_low_on_dim - nd_ptr_this_iter->key[dim];
             nd_ptr_this_iter->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
             prev_high_low_on_dim = std::exchange(lows[dim], nd_ptr_this_iter->key[dim]);
-            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, spans);
+            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, hl_spread);
             lows[dim] = prev_high_low_on_dim;
-            spans[dim] = highs[dim] - prev_high_low_on_dim;
+            hl_spread[dim] = highs[dim] - prev_high_low_on_dim;
+            break;
+        }
+        [[unlikely]] case 2: {
+            *cur_nd++ = { 0, N, std::move(begin->key) };
+            new (cur_obj++) ElemType(std::move(begin->value));
             break;
         }
     }
@@ -517,10 +518,10 @@ RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
         new (cur_obj++) ElemType (std::move(begin->value));
     } else {
         FPType prev_high_on_dim = std::exchange(highs[dim], nd_ptr_this_iter->key[dim]);
-        spans[dim] = highs[dim] - lows[dim];
-        RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, spans);
+        hl_spread[dim] = highs[dim] - lows[dim];
+        RangeCtorRecursion(cur_nd, cur_obj, begin, median, lows, highs, hl_spread);
         highs[dim] = prev_high_on_dim;
-        spans[dim] = prev_high_on_dim - lows[dim];
+        hl_spread[dim] = prev_high_on_dim - lows[dim];
     }
     
     if (median + 1 != end) {
@@ -530,10 +531,10 @@ RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
             new (cur_obj++) ElemType (std::move((median+1)->value));
         } else {
             FPType prev_low_on_dim = std::exchange(lows[dim], nd_ptr_this_iter->key[dim]);
-            spans[dim] = highs[dim] - lows[dim];
-            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, spans);
+            hl_spread[dim] = highs[dim] - lows[dim];
+            RangeCtorRecursion(cur_nd, cur_obj, median+1, end, lows, highs, hl_spread);
             lows[dim] = prev_low_on_dim;
-            spans[dim] = highs[dim] - prev_low_on_dim;
+            hl_spread[dim] = highs[dim] - prev_low_on_dim;
         }
     } */
 }

@@ -181,7 +181,7 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geoPt, const BitCell& cell
         return Utility::MinElementGivenDistFunc(cell.GetLocPairs(ptr), cell.GetLocPairs(ptr) + raw_cell_size,
                                                 [pt_3d = SBLoc<FPType>::GeoPtTo3dEucPt(geoPt)](const auto& nh) {return pt_3d.template
                                                     dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);},
-                                                std::less())->value;
+                                                std::less{})->value;
     } else [[unlikely]] {
         return cell.GetCacheTree(ptr)->kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geoPt), 1);
     }

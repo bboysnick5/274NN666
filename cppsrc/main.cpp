@@ -113,13 +113,16 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
 
 
 template <typename FPType>
-void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, SBSolver<FPType> &solver) {
-    std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
-    solver.Build(loc_data_span);
-    std::chrono::duration<FPType> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
-    std::cout << std::regex_replace(typeid(solver).name(), std::regex("[A-Z]?[0-9]+|.$"), "")
-              << std::endl << "Build time: " << elapsed_time_in_secs.count() << std::endl;
-    solver.PrintSolverInfo();
+void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, std::unique_ptr<SBSolver<FPType>>& solver, std::uint_fast8_t times = 1) {
+    for (std::uint_fast8_t ui = times; ui > 0; --ui) {
+        //solver = std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>();
+        std::chrono::time_point<std::chrono::steady_clock> start = std::chrono::steady_clock::now();
+        solver->Build(loc_data_span);
+        std::chrono::duration<FPType> elapsed_time_in_secs = std::chrono::steady_clock::now() - start;
+        std::cout << std::regex_replace(typeid(*solver).name(), std::regex("[A-Z]?[0-9]+|.$"), "")
+            << std::endl << "Build time: " << elapsed_time_in_secs.count() << std::endl;
+        solver->PrintSolverInfo();
+    }
 }
 
 template <typename FPType>
@@ -204,7 +207,7 @@ void MainContent(int argc, const char * argv[]) {
         outRefLatLngPtLocPairVec.open(argv[8]);
     
     
-    to_test_accuracy = false;
+    to_test_accuracy = true;
     //maxCacheCellVecSize = (1 << 16ull);
     //maxCacheCellVecSize = (1 << 9ull);
     //aveActualLocsPerCell = 0.2;
@@ -242,10 +245,10 @@ void MainContent(int argc, const char * argv[]) {
         // std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
     std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, bitgen);
@@ -255,7 +258,7 @@ void MainContent(int argc, const char * argv[]) {
         accuracy_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, bitgen);
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
-        TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), *solvers[i]);
+        TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), solvers[i]);
         TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, search_benchmark_duration_in_secs, bitgen);
         if (to_test_accuracy) {
             AccuracyTestFromRefSolver(accuracy_test_lat_lng_pts, ref_locs, *solvers[i], accuracy_test_time_in_secs);

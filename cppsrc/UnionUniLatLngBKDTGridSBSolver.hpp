@@ -197,7 +197,7 @@ BitCell(std::vector<typename KDT<KDTType, FPType>::node_type> &pt_loc_vec,
         }
         //auto *cacheLocs = static_cast<typename KDT<KDTType, FPType>::node_type*>(
           //                ::operator new(size*sizeof(typename KDT<KDTType, FPType>::node_type), std::nothrow));
-        auto *cacheLocs = static_cast<typename KDT<KDTType, FPType>::node_type*>(::operator new(size*sizeof(typename KDT<KDTType, FPType>::node_type), std::align_val_t{32}));
+        auto *cacheLocs = static_cast<typename KDT<KDTType, FPType>::node_type*>(::operator new(size*sizeof(typename KDT<KDTType, FPType>::node_type)));
         std::uninitialized_move(std::make_move_iterator(pt_loc_vec.begin()), std::make_move_iterator(pt_loc_vec.end()), cacheLocs);
         SetPtr((reinterpret_cast<std::uintptr_t>(cacheLocs) & MASK_OUT_16TH_BIT) | (size << 48) | 1ull);
     } else [[unlikely]] {
@@ -214,7 +214,7 @@ inline void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::BitCell::De
         if (size > 1 && (cell_ptr_val & 1ull)) [[likely]] {
             typename KDT<KDTType, FPType>::node_type *rawCacheLocPtr = reinterpret_cast<typename KDT<KDTType, FPType>::node_type*>((static_cast<intptr_t>(cell_ptr_val << 16) >> 16) & MASK_OUT_LEAST_SIG_BIT);
             std::destroy_n(rawCacheLocPtr, size);
-            ::operator delete(rawCacheLocPtr, std::align_val_t{32});
+            ::operator delete(rawCacheLocPtr);
         } else if (size == 0) [[unlikely]] {
             delete reinterpret_cast<KDT<KDTType, FPType>*>(static_cast<intptr_t>(cell_ptr_val << 16) >> 16);
         }
