@@ -12,6 +12,8 @@
 				"-g",
 				"${file}",
 				"-o",
+				"/usr/local/lib",
+				"-L/usr/local/lib/libabsl*.dylib",
 				"${fileDirname}/${fileBasenameNoExtension}"
 			],
 			"options": {

@@ -16,7 +16,7 @@
 
 #include "BoundedPQueue.hpp"
 
-
+#include <llama/llama.hpp>
 //#include <absl/container/fixed_array.h>
 //#include <oneapi/dpl/execution>
 //#include <oneapi/dpl/algorithm>
@@ -39,6 +39,7 @@
 #include <concepts>
 #include <cstdlib>
 #include <array>
+
 //#include <ranges>
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
@@ -186,22 +187,22 @@ public:
 private:
     
     
-    struct TreeNode {
+    struct MetaNode {
         std::uint32_t right_idx;
         std::uint_fast8_t dim_to_expand;
         PointND<FPType, N> key;
-        bool operator==(const TreeNode&) const = default;
-        bool operator!=(const TreeNode&) const = default;
+        bool operator==(const MetaNode&) const = default;
+        bool operator!=(const MetaNode&) const = default;
     };
     
-    TreeNode *nd_arr_;
+    MetaNode *nd_arr_;
     ElemType *elem_arr_;
     uint32_t size_;
     uint32_t cap_;
     
     // ----------------------------------------------------
     // Helper method for finding the height of a tree
-    std::uint_fast32_t heightHelper(const TreeNode *n) const;
+    std::uint_fast32_t heightHelper(const MetaNode *n) const;
     
     void DeAlloc();
     
@@ -212,7 +213,7 @@ private:
     void RangeCtorHelper(RAI, RAI);
 
     template <class RAI>
-    void RangeCtorRecursion(TreeNode*&, ElemType*&, RAI, RAI, std::array<FPType, N>&,
+    void RangeCtorRecursion(MetaNode*&, ElemType*&, RAI, RAI, std::array<FPType, N>&,
                                   std::array<FPType, N>&, std::array<FPType, N>&);
     
     template <class ConstRAI>
@@ -221,7 +222,7 @@ private:
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
-    void kNNValueHelper(TreeNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
+    void kNNValueHelper(MetaNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
                         BoundedPQueue<ElemType, FPType> &bpq) const;
     
     // ----------------------------------------------------
@@ -232,24 +233,24 @@ private:
     
     template <typename PointND<FPType, N>::DistType thisDt = DT,
     typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type = 0>
-    void NNValueHelper(TreeNode*, std::uint_fast8_t, const PointND<FPType, N>&,
+    void NNValueHelper(MetaNode*, std::uint_fast8_t, const PointND<FPType, N>&,
                        const ElemType *&, FPType&) const;
     
     template <typename PointND<FPType, N>::DistType thisDt = DT,
     typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type = 0>
-    void NNValueHelper(TreeNode*, std::uint_fast8_t, const PointND<FPType, N>&,
+    void NNValueHelper(MetaNode*, std::uint_fast8_t, const PointND<FPType, N>&,
                        const ElemType*&, FPType&) const;
     
     
-    // TreeNode** findNodePtr(const PointND<FPType, N>& pt);
-    // TreeNode*const* findNodePtr(const PointND<FPType, N>& pt) const;
-    // Usage: TreeNode **nodePtr = findNodePtr(pt);
+    // MetaNode** findNodePtr(const PointND<FPType, N>& pt);
+    // MetaNode*const* findNodePtr(const PointND<FPType, N>& pt) const;
+    // Usage: MetaNode **nodePtr = findNodePtr(pt);
     // ----------------------------------------------------
     // Returns the pointer pointing to the node address
     // corresponding to the given PointND. In this FPType pointing
     // fashion, we can construct a node at that location.
-    TreeNode** findNodePtr(const PointND<FPType, N>& pt);
-    TreeNode*const* findNodePtr(const PointND<FPType, N>& pt) const;
+    MetaNode** findNodePtr(const PointND<FPType, N>& pt);
+    MetaNode*const* findNodePtr(const PointND<FPType, N>& pt) const;
     
     FPType branchMin(const PointND<FPType, N>&, const PointND<FPType, N>&, std::uint_fast8_t) const;
     
@@ -272,7 +273,7 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>::KDTreeExpandLongestVec() {
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 KDTreeExpandLongestVec(const KDTreeExpandLongestVec& rhs) : size_(rhs.size_), cap_(rhs.cap_) {
-    nd_arr_ = new TreeNode[size_];
+    nd_arr_ = new MetaNode[size_];
     std::copy_n(rhs.nd_arr_, size_, nd_arr_);
     elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType), std::nothrow));
     std::uninitialized_copy_n(rhs.elem_arr_, size_, elem_arr_);
@@ -284,7 +285,7 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>::operator=(const KDTreeExpandLon
     if (this != &rhs) [[likely]] {
         DeAlloc();
         size_ = cap_ = rhs.size_;
-        nd_arr_ = new TreeNode[size_];
+        nd_arr_ = new MetaNode[size_];
         std::copy_n(rhs.nd_arr_, size_, nd_arr_);
         elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType)));
         std::uninitialized_copy_n(rhs.elem_arr_, size_, elem_arr_);
@@ -352,7 +353,7 @@ template <typename RAI>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin, RAI end) {
     if (size_ == 0) [[unlikely]]
         return;
-    nd_arr_ = new TreeNode[size_];
+    nd_arr_ = new MetaNode[size_];
     elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType), std::nothrow));
     if (size_ == 1) [[unlikely]] {
         *nd_arr_ = {0, N, std::move(begin->key)};
@@ -360,7 +361,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
         return;
     }
     auto [lows, highs, hl_spread] = ComputeInitBBoxHlSpread(std::as_const(begin), std::as_const(end));
-    TreeNode* cur_nd = nd_arr_;
+    MetaNode* cur_nd = nd_arr_;
     ElemType* cur_elem = elem_arr_;
     RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, hl_spread);
     
@@ -383,7 +384,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
         std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
         RAI median = this_begin_it + (this_end_it-this_begin_it)/2;
         std::nth_element(this_begin_it, median, this_end_it, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
-        new (cur_nd++) TreeNode {0, dim, std::move(median->key)};
+        new (cur_nd++) MetaNode {0, dim, std::move(median->key)};
         new (cur_elem++) ElemType (std::move(median->value));
      
         auto num_nds_this_iteration = this_end_it - this_begin_it;
@@ -395,7 +396,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
             this_end_it = median;
         } else {
             if (num_nds_this_iteration == 2) {
-                new (cur_nd++) TreeNode {0, N, std::move(this_begin_it->key)};
+                new (cur_nd++) MetaNode {0, N, std::move(this_begin_it->key)};
                 new (cur_elem++) ElemType (std::move(this_begin_it->value));
             }
         TRACEBACK:
@@ -404,7 +405,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
             const auto &[ndIdxToAssignRightIdx, stDepth, stThisBeginIt, stThisEndIt] = *--actStIt;
             (nd_arr_ + ndIdxToAssignRightIdx)->right_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
             if ((this_begin_it = stThisBeginIt) + 1 == (this_end_it = stThisEndIt)) {
-                new (cur_nd++) TreeNode {0, N, this_begin_it->key};
+                new (cur_nd++) MetaNode {0, N, this_begin_it->key};
                 new (cur_elem++) ElemType (this_begin_it->value);
                 goto TRACEBACK;
             }
@@ -421,11 +422,11 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
             *curBboxChangeStIt = {curBboxChangeStIt->first-1, rightVal};
         }
     }
-    
-     */
+    */
+     
      
     /*
-    std::for_each_n(nd_arr_, size_, [](const TreeNode& nd){
+    std::for_each_n(nd_arr_, size_, [](const MetaNode& nd){
         std::cout << nd.dim_to_expand << '\t' << nd.right_idx << '\t';
         std::copy(nd.key.begin(), nd.key.end(), std::ostream_iterator<FPType>(std::cout,","));
         std::cout << '\n';
@@ -456,10 +457,10 @@ ComputeInitBBoxHlSpread(ConstRAI cbegin, ConstRAI cend) {
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <class RAI>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-RangeCtorRecursion(TreeNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
+RangeCtorRecursion(MetaNode *&cur_nd, ElemType *&cur_obj, RAI begin, RAI end,
                          std::array<FPType, N> &lows, std::array<FPType, N> &highs, std::array<FPType, N> &hl_spread) {
     std::uint_fast8_t dim = static_cast<std::uint_fast8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
-    TreeNode* nd_ptr_this_iter = cur_nd;
+    MetaNode* nd_ptr_this_iter = cur_nd;
     RAI median = begin + (end - begin)/2;
     std::nth_element(begin, median, end, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim];});
     //oneapi::dpl::nth_element(oneapi::dpl::execution::par_unseq, begin, median, end, [dim](const auto& p1, const auto& p2) {return p1.key[dim] < p2.key[dim]; });
@@ -567,12 +568,12 @@ std::uint_fast32_t KDTreeExpandLongestVec<FPType, N, ElemType, DT>::cap() const 
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 std::uint_fast32_t KDTreeExpandLongestVec<FPType, N, ElemType, DT>::height() const {
-    const TreeNode *root = &nd_arr_[0];
+    const MetaNode *root = &nd_arr_[0];
     return heightHelper(root);
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-std::uint_fast32_t KDTreeExpandLongestVec<FPType, N, ElemType, DT>::heightHelper(const TreeNode *n) const {
+std::uint_fast32_t KDTreeExpandLongestVec<FPType, N, ElemType, DT>::heightHelper(const MetaNode *n) const {
     //return n ? 1 + std::max(heightHelper(n->left), heightHelper(n->right)) : -1;
     return 1;
 }
@@ -626,11 +627,11 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::ShrinkToFit() {
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 insert(const PointND<FPType, N>& pt, const ElemType& value) {
-    TreeNode **ndPtr = findNodePtr(pt);
+    MetaNode **ndPtr = findNodePtr(pt);
     if (*ndPtr) {
         //(*ndPtr)->object = value;
     } else {
-        //*ndPtr = new TreeNode(0, pt, value);
+        //*ndPtr = new MetaNode(0, pt, value);
         //treeSize++;
     }
 }
@@ -642,9 +643,9 @@ bool KDTreeExpandLongestVec<FPType, N, ElemType, DT>::contains(const PointND<FPT
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 ElemType& KDTreeExpandLongestVec<FPType, N, ElemType, DT>::operator[] (const PointND<FPType, N>& pt) {
-    TreeNode **ndPtr = findNodePtr(pt);
+    MetaNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
-        *ndPtr = new TreeNode(pt, ElemType());
+        *ndPtr = new MetaNode(pt, ElemType());
         //treeSize++;
     }
     return (*ndPtr)->object;
@@ -657,7 +658,7 @@ ElemType& KDTreeExpandLongestVec<FPType, N, ElemType, DT>::at(const PointND<FPTy
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 const ElemType& KDTreeExpandLongestVec<FPType, N, ElemType, DT>::at(const PointND<FPType, N>& pt) const {
-    TreeNode *const*n = findNodePtr(pt);
+    MetaNode *const*n = findNodePtr(pt);
     if (!*n) {
         //throw out_of_range("The point is out of range");
     }
@@ -665,16 +666,16 @@ const ElemType& KDTreeExpandLongestVec<FPType, N, ElemType, DT>::at(const PointN
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::TreeNode**
+typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::MetaNode**
 KDTreeExpandLongestVec<FPType, N, ElemType, DT>::findNodePtr(const PointND<FPType, N>& pt) {
-    return const_cast<TreeNode**>(static_cast<const KDTreeExpandLongestVec*>(this)->findNodePtr(pt));
+    return const_cast<MetaNode**>(static_cast<const KDTreeExpandLongestVec*>(this)->findNodePtr(pt));
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::TreeNode*const*
+typename KDTreeExpandLongestVec<FPType, N, ElemType, DT>::MetaNode*const*
 KDTreeExpandLongestVec<FPType, N, ElemType, DT>::findNodePtr(const PointND<FPType, N>& pt) const {
-    //TreeNode *const*n = &root;
-    TreeNode *const*n;
+    //MetaNode *const*n = &root;
+    MetaNode *const*n;
     for (std::uint_fast8_t dim = 0; *n && (*n)->key != pt; dim = dim == N - 1 ? 0 : dim+1){}
     //n = pt[dim] < (*n)->key[dim] ? &(*n)->left : &(*n)->right;
     return n;
@@ -731,16 +732,16 @@ kNNValue(const PointND<FPType, N>& pt, std::size_t k) const {
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, std::uint_fast8_t dim,
+void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::kNNValueHelper(MetaNode *cur, std::uint_fast8_t dim,
                                                              const PointND<FPType, N>& pt, BoundedPQueue<ElemType, FPType> &bpq) const {
     bpq.enqueue(cur->object, PointND<FPType, N>::template dist<DT>(cur->key, pt));
     std::uint_fast8_t next_dim = dim + 1 < N ? dim + 1 : 0;
-    TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
+    MetaNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
     if (next)
         kNNValueHelper(next, next_dim, pt, bpq);
     if (bpq.size() < bpq.maxSize()
         || branchMin(cur->key, pt, dim) < bpq.worst()) {
-        TreeNode *other = next == cur->left ? cur->right : cur->left;
+        MetaNode *other = next == cur->left ? cur->right : cur->left;
         if (other)
             kNNValueHelper(other, next_dim, pt, bpq);
     }
@@ -753,10 +754,10 @@ NdTypeOutIt KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_it) const {
     constexpr std::uint_fast8_t kMaxBalancedTreeHeight = 32;
     struct ActRecord {
-        FPType dist_sq;
-        const TreeNode* nd;
+        FPType nd_pt_search_pt_val_diff_sq_on_dim;
+        const MetaNode* nd;
     } act_record_stack[kMaxBalancedTreeHeight], *act_record_it = act_record_stack;
-    const TreeNode *cur_nd = nd_arr_;
+    const MetaNode *cur_nd = nd_arr_;
     FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, pt);
     FPType best_dist_plus_fence_sq = best_dist_sq + fence_sq + FPType(2.0)*sqrt(fence_sq*best_dist_sq);
     
@@ -792,7 +793,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
                     std::for_each(result_dpe_vec.rbegin(), result_dpe_vec.rend(), filter_transform_dpe_arr_to_pe_arr); 
                     return pe_out_it;
                 }
-            } while ((--act_record_it)->dist_sq > best_dist_plus_fence_sq);
+            } while ((--act_record_it)->nd_pt_search_pt_val_diff_sq_on_dim > best_dist_plus_fence_sq);
             cur_nd = act_record_it->nd;
         }
         
@@ -813,20 +814,20 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
 }
 
 template <typename FPType, std::uint_fast8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &pt) const {
-    
+ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &search_pt) const {
+    constexpr std::uint_fast8_t kMaxBalancedTreeHeight = 32;
     struct ActRecord {
-        FPType dist;
-        const TreeNode* nd;
-    } act_record_stack[32], *act_record_it = act_record_stack;
+        FPType nd_pt_search_pt_val_diff_sq_on_dim;
+        const MetaNode* nd;
+    } act_record_stack[kMaxBalancedTreeHeight], *act_record_it = act_record_stack;
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
-    const TreeNode *cur = nd_arr_, *best_node = nd_arr_;
-    FPType cur_dist, best_dist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+    const MetaNode *cur = nd_arr_, *best_node = nd_arr_;
+    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, search_pt);
     
     while (true) {
         if (std::uint32_t right_idx = cur->right_idx) {
             std::uint_fast8_t dim = cur->dim_to_expand;
-            FPType diff = pt[dim] - cur->key[dim];
+            FPType diff = search_pt[dim] - cur->key[dim];
             if (diff < 0.0) {
                 new(act_record_it++) ActRecord {diff*diff, nd_arr_ + right_idx};
                 ++cur;
@@ -838,12 +839,12 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             do {
                 if (act_record_it == act_record_stack)
                     return elem_arr_[best_node - nd_arr_];
-            } while ((--act_record_it)->dist >= best_dist);
+            } while ((--act_record_it)->nd_pt_search_pt_val_diff_sq_on_dim >= best_dist_sq);
             cur = act_record_it->nd;
         }
-        cur_dist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
-        if (cur_dist < best_dist) {
-            best_dist = cur_dist;
+        cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, search_pt);
+        if (cur_dist_sq < best_dist_sq) {
+            best_dist_sq = cur_dist_sq;
             best_node = cur;
         }
     }
@@ -854,7 +855,7 @@ template <typename FPType, std::uint_fast8_t N, typename ElemType, typename Poin
 template <typename PointND<FPType, N>::DistType thisDt,
 typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-NNValueHelper(TreeNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
+NNValueHelper(MetaNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template
     dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
@@ -864,7 +865,7 @@ NNValueHelper(TreeNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt
     }
     std::uint_fast8_t next_dim = dim == N - 1 ? 0 : dim + 1;
     FPType diff = pt[dim] - cur->key[dim];
-    TreeNode *next = diff < 0.0 ? cur->left : cur->right;
+    MetaNode *next = diff < 0.0 ? cur->left : cur->right;
     if (next)
         NNValueHelper(next, next_dim, pt, bestValue, bestDist);
     if (diff*diff < bestDist) {
@@ -878,7 +879,7 @@ template <typename FPType, std::uint_fast8_t N, typename ElemType, typename Poin
 template <typename PointND<FPType, N>::DistType thisDt,
 typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
-NNValueHelper(TreeNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
+NNValueHelper(MetaNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template dist<DT>(cur->key, pt);
     if (curDist < bestDist) {
@@ -886,7 +887,7 @@ NNValueHelper(TreeNode *cur, std::uint_fast8_t dim, const PointND<FPType, N> &pt
         bestValue = &cur->object;
     }
     std::uint_fast8_t next_dim = dim == N - 1 ? 0 : dim + 1;
-    TreeNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
+    MetaNode *next = pt[dim] < cur->key[dim] ? cur->left : cur->right;
     if (next)
         NNValueHelper(next, next_dim, pt, bestValue, bestDist);
     if (branchMin(cur->key, pt, dim) < bestDist) {
