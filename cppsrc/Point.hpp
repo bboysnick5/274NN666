@@ -21,11 +21,18 @@
 #include <utility>
 //#include <execution>
 
-
+namespace ns {
+    struct Point {};
+    struct X {};
+    struct Y {};
+    struct Z {};
+}
 
 template <typename FPType, std::uint_fast8_t N>
 class PointND {
 public:
+
+
 
     typedef PointND                                                        __self;
     typedef FPType                                                          value_type;
