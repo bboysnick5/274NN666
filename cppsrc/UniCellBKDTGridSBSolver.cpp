@@ -11,13 +11,13 @@
 //#include <omp.h>
 
 
-template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 UniCellBKDTGridSBSolver<KDTType, FPType>::
 UniCellBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
 : UniLatLngBKDTGridSBSolver<KDTType, FPType>(alpc, maxCacheCellVecSize) {}
 
 
-template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 void UniCellBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
     thisRowStartIdx.reserve(this->row_size_);
     this->grid_cache_.reserve(this->loc_kdt_.size()*1.2/this->AVE_LOC_PER_CELL);
@@ -45,7 +45,7 @@ void UniCellBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
     }
 }
 
-template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
 const SBLoc<FPType>* UniCellBKDTGridSBSolver<KDTType, FPType>::
 FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
     const auto &[startIdx, thisLngIncInverse] = thisRowStartIdx[(geo_search_pt[0]+0.5*def::kMathPi<FPType>)*this->lat_inc_inverse_];

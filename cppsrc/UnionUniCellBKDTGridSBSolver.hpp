@@ -17,7 +17,7 @@
 #include <iterator>
 
 
-template <template <typename FPType, std::uint_fast8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 class UnionUniCellBKDTGridSBSolver final : public UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy> {
 public:
