@@ -82,21 +82,20 @@ public:
      */
     PooledAllocator() { internal_init(); }
     
-    PooledAllocator(const PooledAllocator &other) = delete;
-    PooledAllocator& operator = (const PooledAllocator &other) & = delete;
+    PooledAllocator(const PooledAllocator &rhs) = delete;
+    PooledAllocator& operator = (const PooledAllocator &rhs) & = delete;
     
-    PooledAllocator(PooledAllocator &&other) noexcept
-    : remaining(other.remaining), base(other.base), loc(other.loc) {
-        other.base = nullptr;
+    PooledAllocator(PooledAllocator &&rhs) noexcept
+    : remaining(rhs.remaining), base(rhs.base), loc(rhs.loc) {
+        rhs.base = nullptr;
     }
     
-    PooledAllocator& operator = (PooledAllocator &&other) noexcept {
-        if (this != &other) {
+    PooledAllocator& operator = (PooledAllocator &&rhs) noexcept {
+        if (this != &rhs) {
             free_all();
-            remaining = other.remaining;
-            base = other.base;
-            loc = other.loc;
-            other.base = nullptr;
+            remaining = rhs.remaining;
+            base = std::exchange(rhs.base, nullptr);
+            loc = rhs.loc;
         }
         return *this;
     }

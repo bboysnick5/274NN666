@@ -318,14 +318,11 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>& KDTreeExpandLongestVec<FPType, 
 operator=(KDTreeExpandLongestVec&& rhs) noexcept {
     if (this != &rhs) [[likely]] {
         DeAlloc();
-        nd_arr_ = rhs.nd_arr_;
-        rhs.nd_arr_ = nullptr;
-        elem_arr_ = rhs.elem_arr_;
-        rhs.elem_arr_ = nullptr;
-        size_ = rhs.size_;
-        cap_ = rhs.cap_;
+        nd_arr_ = std::exchange(rhs.nd_arr_, nullptr);
+        elem_arr_ = std::exchange(rhs.elem_arr_, nullptr);
+        size_ = std::exchange(rhs.size_, 0);
+        cap_ = std::exchange(rhs.cap_, 0);
         height_ = rhs.height_;
-        rhs.size_ = rhs.cap_ = 0;
     }
     return *this;
 }
@@ -371,34 +368,34 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>::KDTreeExpandLongestVec(RAI begi
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 //template <std::random_access_iterator RAI>
 template <typename RAI>
-void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin, RAI end) {
+void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI data_begin, RAI data_end) {
     if (size_ == 0) [[unlikely]]
         return;
     nd_arr_ = new MetaNode[size_];
     elem_arr_ = static_cast<ElemType*>(::operator new(size_ * sizeof(ElemType), std::nothrow));
     if (size_ == 1) [[unlikely]] {
-        *nd_arr_ = {0, N, std::move(begin->key)};
-        new (elem_arr_) ElemType(std::move(begin->value));
+        *nd_arr_ = {0, N, std::move(data_begin->key)};
+        new (elem_arr_) ElemType(std::move(data_begin->value));
         return;
     }
-    auto [lows, highs, hl_spread] = ComputeInitBBoxHlSpread(std::as_const(begin), std::as_const(end));
+    auto [lows, highs, hl_spread] = ComputeInitBBoxHlSpread(std::as_const(data_begin), std::as_const(data_end));
     MetaNode* cur_nd = nd_arr_;
     ElemType* cur_elem = elem_arr_;
-    //RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, hl_spread);
+    RangeCtorRecursion(cur_nd, cur_elem, data_begin, data_end, lows, highs, hl_spread);
 
+    /*
     struct ActRecord {
-        std::uint8_t bool_traced_back;
         std::uint8_t dim;
-        std::uint32_t end_idx;
+        std::uint32_t end_idx_or_zero_as_traced; // use 0 to mark as traced
         FPType prev_high_low_on_dim;
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
     typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
-    RAI this_begin = begin, this_end = end;
+    RAI this_begin = data_begin, this_end = data_end;
     
     auto RevertOneNode = [&ar_it](auto& highs_or_lows, auto& hl_spread, auto& highs, auto& lows) {
-        auto &[bool_traced_back, dim_on_depth, end_idx_ignore, prev_high_low_on_dim] = *ar_it;
-        bool_traced_back = true;
+        auto &[dim_on_depth, end_idx_or_traced, prev_high_low_on_dim] = *ar_it;
+        end_idx_or_traced = 0;
         highs_or_lows[dim_on_depth] = prev_high_low_on_dim;
         hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
     };
@@ -420,35 +417,36 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
                 right_child_data_it != this_end) {
                 MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, right_child_data_it);
             } else if (nd_ptr_this_iter->right_idx = 0;
-                       (ar_it-1)->end_idx - static_cast<std::uint32_t>(this_end - begin) == 2) {
-                // traceback: single bottom right child up one level
+                       (ar_it-1)->end_idx_or_zero_as_traced
+                        - static_cast<std::uint32_t>(this_end - data_begin) == 2) {
+                // single bottom right child up one level
                 MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, ++this_end);
                 ++this_end;
-                // revert one left
+                // traceback: directly revert one left instead of set one right - revert one right
                 --ar_it;
                 RevertOneNode(highs, hl_spread, highs, lows);
             }
             // termination
-            if (this_end == end) [[unlikely]]
+            if (this_end == data_end) [[unlikely]]
                 return;
-            // traceback: revert right path lows
-            while ((--ar_it)->bool_traced_back)
+            // traceback: revert right path
+            while ((--ar_it)->end_idx_or_zero_as_traced == 0)
                 RevertOneNode(lows, hl_spread, highs, lows);
             // traceback: revert one left set one right on ancestor node
-            auto &[bool_traced_back, dim_on_depth, traced_back_end_idx, prev_high_low_on_dim] = *ar_it++;
-            bool_traced_back = true;
-            utility::swap(prev_high_low_on_dim, lows[dim_on_depth], highs[dim_on_depth]);
+            auto &[dim_on_depth, end_idx_or_traced, prev_high_low_on_dim] = *ar_it++;
+            utility::CycleSwap(prev_high_low_on_dim, lows[dim_on_depth], highs[dim_on_depth]);
             hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
             this_begin = this_end + 1;
-            this_end = begin + traced_back_end_idx;
+            this_end = data_begin + end_idx_or_traced;
+            end_idx_or_traced = 0;
         } else {
-            *ar_it++ = {false, dim, static_cast<std::uint32_t>(this_end - begin), highs[dim]};
+            *ar_it++ = {dim, static_cast<std::uint32_t>(this_end - data_begin), highs[dim]};
             highs[dim] = nd_ptr_this_iter->key[dim];
             hl_spread[dim] = highs[dim] - lows[dim];
             this_end = median;
         }
     }
-    
+    */
     /*
 DEBUG_PRINT:
     std::for_each_n(nd_arr_, size_, [](const MetaNode& nd){
@@ -886,7 +884,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
     struct ActRecord {
         FPType diff_on_dim_sq;
         const MetaNode* nd;
-    } ar_stack[kMaxBalancedTreeHeight], *ar_it = ar_stack;
+    } ar_stack[height_], *ar_it = ar_stack;
     const MetaNode *cur_nd = nd_arr_;
     FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, pt);
     FPType best_dist_plus_fence_sq = best_dist_sq + fence_sq + FPType(2.0)*sqrt(fence_sq*best_dist_sq);

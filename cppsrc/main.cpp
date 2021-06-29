@@ -115,10 +115,10 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
 
 
 template <typename FPType>
-void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, std::unique_ptr<SBSolver<FPType>>& solver, std::uint8_t num_builds = 40) {
+void TimeBuild(std::span<const SBLoc<FPType>> loc_data_span, std::unique_ptr<SBSolver<FPType>>& solver, std::uint8_t num_builds = 1) {
     std::chrono::duration<FPType> total_elapsed_time{0};
     for (std::uint8_t ui = num_builds; ui > 0; --ui) {
-        solver = std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>();
+        //solver = std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>();
         std::chrono::time_point<std::chrono::high_resolution_clock> start = std::chrono::high_resolution_clock::now();
         solver->Build(loc_data_span);
         std::chrono::duration<FPType> elapsed_time_in_secs = std::chrono::high_resolution_clock::now() - start;
@@ -258,10 +258,10 @@ void MainContent(int argc, const char * argv[]) {
         // std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
     std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts = GenerateTestLatLngPts<FPType>(def::kMaxTestLocs, bitgen);

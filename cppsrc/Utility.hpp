@@ -23,7 +23,7 @@ namespace utility {
 
 // cycle swap
 template<typename T>
-constexpr void swap(T& t1, T& t2, T& t3) {
+constexpr void CycleSwap(T& t1, T& t2, T& t3) {
     T temp(std::move(t1));
     t1 = std::move(t2);
     t2 = std::move(t3);

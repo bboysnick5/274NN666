@@ -27,11 +27,11 @@ struct SBLoc {
     SBLoc() = default;
     SBLoc(const PointND<FPType, 3>&);
     
-    bool operator<(const SBLoc<FPType> &other) const;
+    bool operator<(const SBLoc<FPType> &rhs) const;
     
-    bool operator==(const SBLoc<FPType> &other) const;
+    bool operator==(const SBLoc<FPType> &rhs) const;
     
-    bool operator!=(const SBLoc<FPType> &other) const;
+    bool operator!=(const SBLoc<FPType> &rhs) const;
     
     static FPType toRadians(FPType degree);
     
@@ -68,21 +68,21 @@ geoPt(std::asin(pt[2]), lng(std::asin(pt[1]/std::cos(std::asin(pt[2]))))), city(
 
 
 template <typename FPType>
-inline bool SBLoc<FPType>::operator<(const SBLoc<FPType> &other) const {
-    return geoPt[0] < other.geoPt[0];
+inline bool SBLoc<FPType>::operator<(const SBLoc<FPType> &rhs) const {
+    return geoPt[0] < rhs.geoPt[0];
 }
 
 template <typename FPType>
-inline bool SBLoc<FPType>::operator==(const SBLoc<FPType> &other) const {
-    if (geoPt == other.geoPt)
+inline bool SBLoc<FPType>::operator==(const SBLoc<FPType> &rhs) const {
+    if (geoPt == rhs.geoPt)
         return true;
-    return std::fabs(geoPt[0] - other.geoPt[0]) < static_cast<FPType>(0.000001) &&
-           std::fabs(geoPt[1] - other.geoPt[1]) < static_cast<FPType>(0.000001);
+    return std::fabs(geoPt[0] - rhs.geoPt[0]) < static_cast<FPType>(0.000001) &&
+           std::fabs(geoPt[1] - rhs.geoPt[1]) < static_cast<FPType>(0.000001);
 }
 
 template <typename FPType>
-inline bool SBLoc<FPType>::operator!=(const SBLoc<FPType> &other) const {
-    return !(*this == other);
+inline bool SBLoc<FPType>::operator!=(const SBLoc<FPType> &rhs) const {
+    return !(*this == rhs);
 }
 
 template <typename FPType>

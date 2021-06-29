@@ -27,7 +27,7 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::PrintSolverInfo() 
     std::size_t num_single_locs = 0, num_vec_locs = 0, num_tree_locs = 0, num_unique_vec_locs = 0;
     std::size_t total_num_tree_nodes = 0, total_num_vec_locs = 0;
     std::for_each(grid_cache_.cbegin(), grid_cache_.cend(), [&](const BitCell& cell) mutable {
-        auto cellPtr = cell.GetPtr();
+        auto cellPtr = cell.GetRawPtr();
         if (auto cellSize = cell.size(cellPtr);
             cellSize == 1) {
             num_single_locs++;
@@ -173,7 +173,7 @@ Build(std::span<const SBLoc<FPType>> loc_data_span) {
 template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geoPt, const BitCell& cell) const {
-    std::uintptr_t ptr = cell.GetPtr();
+    std::uintptr_t ptr = cell.GetRawPtr();
     if (std::size_t raw_cell_size = cell.RawSizeBits(ptr);
         raw_cell_size == 1) {
         return cell.GetSingleLoc(ptr);
