@@ -100,7 +100,7 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geo_search_pt,
         case 0: {
             const auto p = SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt);
             const auto &vec = std::get<0>(v);
-            return Utility::MinElementGivenDistFunc(vec.cbegin(), vec.cend(),
+            return utility::MinElementGivenDistFunc(vec.cbegin(), vec.cend(),
                                                [&p](const auto& nh){return p.template
                                                     dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);}, std::less{}
                                                )->value;

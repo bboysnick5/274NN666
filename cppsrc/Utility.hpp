@@ -16,55 +16,63 @@
 /*
  Allow pass-in value calculation formula and store the computed data
  to save up one value computation as it were two times
- as if provided via comparator. 
+ as if provided via comparator.
  */
 
-class Utility {
-    
-public:
-    template <class _ForwardIterator, class _GetDist, class _Compare>
-    static _ForwardIterator
-    MinElementGivenDistFunc(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-        if (__first != __last) [[likely]] {
-            _ForwardIterator __i = __first;
-            auto __bestDist = __distFunc(*__first);
-            while (++__i != __last) {
-                if (auto __dist = __distFunc(*__i); __comp(__dist, __bestDist)) {
-                    __bestDist = __dist;
-                    __first = __i;
-                }
+namespace utility {
+
+// cycle swap
+template<typename T>
+constexpr void swap(T& t1, T& t2, T& t3) {
+    T temp(std::move(t1));
+    t1 = std::move(t2);
+    t2 = std::move(t3);
+    t3 = std::move(temp);
+}
+
+template <class _ForwardIterator, class _GetDist, class _Compare>
+static _ForwardIterator
+MinElementGivenDistFunc(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
+    if (__first != __last) [[likely]] {
+        _ForwardIterator __i = __first;
+        auto __bestDist = __distFunc(*__first);
+        while (++__i != __last) {
+            if (auto __dist = __distFunc(*__i); __comp(__dist, __bestDist)) {
+                __bestDist = __dist;
+                __first = __i;
             }
         }
-        return __first;
     }
-    
-    template <class _ForwardIterator, class _GetDist, class _Compare>
-    static _ForwardIterator
-    MinElementGivenDistFunc_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-        if (__first == __last) [[unlikely]]
-            return __first;
-        auto __result = __first;
-        auto __bestDist = __distFunc(*__first++);
-        #pragma omp parallel
-        {
-            auto this_thread_best_dist = __bestDist;
-            _ForwardIterator this_thread_best_it = __first;
-            #pragma omp for
-            for (_ForwardIterator __i = __first; __i < __last; ++__i) {
-                if (auto this_dist = __distFunc(*__i); __comp(this_dist, this_thread_best_dist)) {
-                    this_thread_best_dist = this_dist;
-                    this_thread_best_it = __i;
-                }
-            }
-            #pragma omp critical
-            {
-                if (__comp(this_thread_best_dist, __bestDist)) {
-                    __bestDist = this_thread_best_dist;
-                    __result = this_thread_best_it;
-                }
+    return __first;
+}
+
+template <class _ForwardIterator, class _GetDist, class _Compare>
+static _ForwardIterator
+MinElementGivenDistFunc_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
+    if (__first == __last) [[unlikely]]
+        return __first;
+    auto __result = __first;
+    auto __bestDist = __distFunc(*__first++);
+    #pragma omp parallel
+    {
+        auto this_thread_best_dist = __bestDist;
+        _ForwardIterator this_thread_best_it = __first;
+        #pragma omp for
+        for (_ForwardIterator __i = __first; __i < __last; ++__i) {
+            if (auto this_dist = __distFunc(*__i); __comp(this_dist, this_thread_best_dist)) {
+                this_thread_best_dist = this_dist;
+                this_thread_best_it = __i;
             }
         }
-        return __result;
+        #pragma omp critical
+        {
+            if (__comp(this_thread_best_dist, __bestDist)) {
+                __bestDist = this_thread_best_dist;
+                __result = this_thread_best_it;
+            }
+        }
+    }
+    return __result;
         /*
         if (__first == __last) [[unlikely]]
             return __first;

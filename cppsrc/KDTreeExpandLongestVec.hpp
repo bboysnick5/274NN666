@@ -10,6 +10,7 @@
 #define KDTreeExpandLongestVec_hpp
 
 #include "Point.hpp"
+#include "Utility.hpp"
 //#include "PoolAllocator.hpp"
 
 
@@ -207,7 +208,7 @@ private:
     std::uint32_t height_;
     
     constexpr static std::uint8_t kMaxBalancedTreeHeight = 32;
-    
+        
     void DeAlloc();
     
     // ----------------------------------------------------
@@ -220,9 +221,14 @@ private:
     void RangeCtorRecursion(MetaNode*&, ElemType*&, RAI, RAI, std::array<FPType, N>&,
                                   std::array<FPType, N>&, std::array<FPType, N>&);
     
+    template <typename RAI>
+    void MvConstructOneNdIncIter(MetaNode*& cur_nd, ElemType*& cur_elem,
+                                 std::uint32_t right_idx, std::uint8_t dim, RAI nh_it);
+    
     template <class ConstRAI>
     static std::tuple<std::array<FPType, N>, std::array<FPType,N>, std::array<FPType, N>>
            ComputeInitBBoxHlSpread(ConstRAI, ConstRAI);
+    
     
     // ----------------------------------------------------
     // Helper method for kNNValue search
@@ -330,6 +336,15 @@ KDTreeExpandLongestVec<FPType, N, ElemType, DT>::~KDTreeExpandLongestVec() {
 }
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename RAI>
+void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
+MvConstructOneNdIncIter(MetaNode*& cur_nd, ElemType*& cur_elem,
+                        std::uint32_t right_idx, std::uint8_t dim, RAI nh_it) {
+    *cur_nd++ = {right_idx, dim, std::move(nh_it->key)};
+    new (cur_elem++) ElemType (std::move(nh_it->value));
+}
+
+template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::DeAlloc() {
     delete[] nd_arr_;
     std::destroy_n(elem_arr_, size_);
@@ -371,84 +386,71 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI begin,
     ElemType* cur_elem = elem_arr_;
     //RangeCtorRecursion(cur_nd, cur_elem, begin, end, lows, highs, hl_spread);
 
-    struct AncestorNodeRecord {
-        std::uint8_t depth;
-        std::uint32_t end_idx;
-    };
-    struct PrevHighLowRecord {
-        FPType prev_high_low_on_dim;
+    struct ActRecord {
+        std::uint8_t bool_traced_back;
         std::uint8_t dim;
+        std::uint32_t end_idx;
+        FPType prev_high_low_on_dim;
     };
-    std::array<AncestorNodeRecord, kMaxBalancedTreeHeight> ancestor_stack;
-    typename std::array<AncestorNodeRecord, kMaxBalancedTreeHeight>::iterator as_it = ancestor_stack.begin();
-    std::array<PrevHighLowRecord, kMaxBalancedTreeHeight> prev_high_low_each_depth;
-    typename std::array<PrevHighLowRecord, kMaxBalancedTreeHeight>::iterator hl_it = prev_high_low_each_depth.begin();
-
-    std::uint8_t cur_depth = 0;
+    std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
     RAI this_begin = begin, this_end = end;
+    
+    auto RevertOneNode = [&ar_it](auto& highs_or_lows, auto& hl_spread, auto& highs, auto& lows) {
+        auto &[bool_traced_back, dim_on_depth, end_idx_ignore, prev_high_low_on_dim] = *ar_it;
+        bool_traced_back = true;
+        highs_or_lows[dim_on_depth] = prev_high_low_on_dim;
+        hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
+    };
+    
     while (true) {
-        std::uint8_t dim = static_cast<std::uint8_t>(std::distance(hl_spread.cbegin(), std::max_element(hl_spread.cbegin(), hl_spread.cend())));
+        std::uint8_t dim = static_cast<std::uint8_t>(std::max_element(hl_spread.cbegin(), hl_spread.cend())
+                                                     - hl_spread.cbegin());
         std::ptrdiff_t left_branch_size = (this_end - this_begin)/2;
         MetaNode* nd_ptr_this_iter = cur_nd;
         RAI median = this_begin + left_branch_size;
-        std::nth_element(this_begin, median, this_end, [dim](const auto& nh1, const auto& nh2) {return nh1.key[dim] < nh2.key[dim];});
-        *cur_nd++ = {static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_branch_size + 1), dim, std::move(median->key)};
-        new (cur_elem++) ElemType (std::move(median->value));
+        std::nth_element(this_begin, median, this_end,
+                         [dim](const auto& nh1, const auto& nh2) {return nh1.key[dim] < nh2.key[dim];});
+        MvConstructOneNdIncIter(cur_nd, cur_elem,
+                                static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_branch_size + 1), dim, median);
         
         if (left_branch_size == 1) {
-            *cur_nd++ = {0, N, std::move(this_begin->key)};
-            new (cur_elem++) ElemType (std::move(this_begin->value));
-            if (median + 1 != this_end) {
-                *cur_nd++ = {0, N, std::move((median+1)->key)};
-                new (cur_elem++) ElemType (std::move((median+1)->value));
-            } else {
-                nd_ptr_this_iter->right_idx = 0;
+            MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, this_begin);
+            if (RAI right_child_data_it = median + 1;
+                right_child_data_it != this_end) {
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, right_child_data_it);
+            } else if (nd_ptr_this_iter->right_idx = 0;
+                       (ar_it-1)->end_idx - static_cast<std::uint32_t>(this_end - begin) == 2) {
+                // traceback: single bottom right child up one level
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, ++this_end);
+                ++this_end;
+                // revert one left
+                --ar_it;
+                RevertOneNode(highs, hl_spread, highs, lows);
             }
-            // ------ traceback ------
-            switch(std::distance(this_end, end)) {
-                case 2:
-                    *cur_nd++ = {0, N, std::move(this_begin->key)};
-                    new (cur_elem++) ElemType (std::move(this_begin->value));
-                    [[fallthrough]];
-                case 0:
-                    return;
-            }
-            this_begin = this_end + 1;
-            // single bottom right child
-            if ((--as_it)->end_idx - static_cast<std::uint32_t>(this_end - begin) == 2) {
-                *cur_nd++ = {0, N, std::move(this_begin->key)};
-                new (cur_elem++) ElemType (std::move(this_begin->value));
-                // revert 1 high along left path
-                auto[prev_high_on_dim, dim_on_depth] = *--hl_it;
-                highs[dim_on_depth] = prev_high_on_dim;
-                hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
-                this_begin += 2;
-                --cur_depth;
-                --as_it;
-            }
-            // revert right path lows
-            auto[ancestor_depth, ancestor_end_idx] = *as_it;
-            for (std::uint8_t _ = cur_depth - ancestor_depth - 1; _--;) {
-                auto[prev_low_on_dim, dim_on_depth] = *--hl_it;
-                lows[dim_on_depth] = prev_low_on_dim;
-                hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
-            }
-            // revert one left set one right of ancestor node
-            auto[prev_high_on_dim, dim_on_depth] = *--hl_it;
-            hl_it++->prev_high_low_on_dim = lows[dim_on_depth];
-            lows[dim_on_depth] = std::exchange(highs[dim_on_depth], prev_high_on_dim);
+            // termination
+            if (this_end == end) [[unlikely]]
+                return;
+            // traceback: revert right path lows
+            while ((--ar_it)->bool_traced_back)
+                RevertOneNode(lows, hl_spread, highs, lows);
+            // traceback: revert one left set one right on ancestor node
+            auto &[bool_traced_back, dim_on_depth, traced_back_end_idx, prev_high_low_on_dim] = *ar_it++;
+            bool_traced_back = true;
+            utility::swap(prev_high_low_on_dim, lows[dim_on_depth], highs[dim_on_depth]);
             hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
-            this_end = begin + ancestor_end_idx;
-            cur_depth = ancestor_depth + 1;
+            this_begin = this_end + 1;
+            this_end = begin + traced_back_end_idx;
         } else {
-            *as_it++ = {cur_depth++, static_cast<std::uint32_t>(this_end - begin)};
-            *hl_it++ = {highs[dim], dim};
+            *ar_it++ = {false, dim, static_cast<std::uint32_t>(this_end - begin), highs[dim]};
             highs[dim] = nd_ptr_this_iter->key[dim];
             hl_spread[dim] = highs[dim] - lows[dim];
             this_end = median;
         }
     }
+    
     /*
+DEBUG_PRINT:
     std::for_each_n(nd_arr_, size_, [](const MetaNode& nd){
         std::cout << "right_idx: " << nd.right_idx << '\t' << "dim_to_expand: " << static_cast<std::uint32_t>(nd.dim_to_expand)  << '\t';
         std::cout << "pt coord: ";

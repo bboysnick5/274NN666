@@ -178,7 +178,7 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geoPt, const BitCell& cell
         raw_cell_size == 1) {
         return cell.GetSingleLoc(ptr);
     } else if (raw_cell_size != 0) {
-        return Utility::MinElementGivenDistFunc(cell.GetLocPairs(ptr), cell.GetLocPairs(ptr) + raw_cell_size,
+        return utility::MinElementGivenDistFunc(cell.GetLocPairs(ptr), cell.GetLocPairs(ptr) + raw_cell_size,
                                                 [pt_3d = SBLoc<FPType>::GeoPtTo3dEucPt(geoPt)](const auto& nh) {return pt_3d.template
                                                     dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);},
                                                 std::less{})->value;
