@@ -53,7 +53,7 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::PrintSolverInfo() 
               << "Ave vec loc size: " << static_cast<FPType>(total_num_vec_locs)/num_vec_locs << std::endl
               << "Kd-tree loc cells: " << num_tree_locs << std::endl
               << "Ave tree size : " << static_cast<FPType>(total_num_tree_nodes)/num_tree_locs << std::endl
-              << "Ave tree height: " << log2(static_cast<FPType>(total_num_tree_nodes)/num_tree_locs + 1.0) + 1.0 << std::endl;
+              << "Ave tree height: " << std::log2(static_cast<FPType>(total_num_tree_nodes)/num_tree_locs + 1.0) + 1.0 << std::endl;
 }
 
 template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,

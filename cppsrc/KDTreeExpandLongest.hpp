@@ -300,7 +300,8 @@ KDTreeExpandLongest<FPType, N, ElemType, DT>::KDTreeExpandLongest(RAI begin, RAI
          RAI thisBeginIt, median, thisEndIt;
      };
      
-     actRecord st[static_cast<std::size_t>(log2(treeSize))], *it = st;
+     actRecord st[static_cast<std::size_t>(
+     (treeSize))], *it = st;
      bool hasChild = true;
      RAI thisBeginIt = begin, thisEndIt = end, median = thisBeginIt + (thisEndIt-thisBeginIt)/2;
      while (it != st || hasChild) {

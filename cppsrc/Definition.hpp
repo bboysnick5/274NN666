@@ -22,6 +22,7 @@ namespace def {
     inline constexpr double kDefalutAveActualLocsPerCell = 0.4;
 
     inline constexpr bool kDefaultToTestAccuracy = false;
+    inline constexpr bool kDefaultToTestSearchTime = true;
     inline constexpr std::size_t kDefaultAccuracyTestDurationInSecs = 10;
     inline constexpr std::size_t kDefaultSearchBenchDurationInSecs = 10;
     inline constexpr std::size_t kMaxTestLocs = 1 << 24;
