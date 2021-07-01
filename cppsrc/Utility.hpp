@@ -12,6 +12,7 @@
 #include <stdio.h>
 //#include <execution>
 #include <omp.h>
+#include <utility>
 
 /*
  Allow pass-in value calculation formula and store the computed data
@@ -28,6 +29,29 @@ constexpr void CycleSwap(T& t1, T& t2, T& t3) {
     t1 = std::move(t2);
     t2 = std::move(t3);
     t3 = std::move(temp);
+}
+
+template <class _Compare, class _ForwardIterator>
+void Sort3(_ForwardIterator __x, _ForwardIterator __y, _ForwardIterator __z, _Compare __c)
+{
+    if (!__c(*__y, *__x))          // if x <= y
+    {
+        if (!__c(*__z, *__y))      // if y <= z
+            return;                // x <= y && y <= z
+                                   // x <= y && y > z
+        std::swap(*__y, *__z);          // x <= z && y < z
+        if (__c(*__y, *__x))       // if x > y
+            std::swap(*__x, *__y);      // x < y && y <= z
+        return;
+    }
+    if (__c(*__z, *__y)) {         // x > y, if y > z
+        std::swap(*__x, *__z);          // x < y && y < z
+        return;
+    }
+    std::swap(*__x, *__y);              // x > y && y <= z
+                                   // x < y && x <= z
+    if (__c(*__z, *__y))           // if y > z
+        std::swap(*__y, *__z);          // x <= y && y < z
 }
 
 template <class _ForwardIterator, class _GetDist, class _Compare>

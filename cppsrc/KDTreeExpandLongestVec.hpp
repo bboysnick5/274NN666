@@ -193,7 +193,6 @@ public:
     
 private:
     
-
     struct MetaNode {
         std::uint32_t right_idx;
         std::uint8_t dim_to_expand;
@@ -450,7 +449,6 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI data_b
         }
     } */
 
-        
     struct ActRecord {
         std::uint8_t dim;
         std::uint32_t end_idx_or_zero_as_traced; // use 0 to mark as traced
@@ -458,7 +456,7 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI data_b
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
     typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator leaf_ar_it = ar_stack.begin() + (height_ > 1 ? height_ - 1 : 0);
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator leaf_prt_ar_it = ar_stack.begin() + (height_ > 2 ? height_ - 2 : 0);
     RAI this_begin = data_begin, this_end = data_end;
 
     auto RevertOneNode = [&ar_it](auto& highs_or_lows, auto& hl_spread, auto& highs, auto& lows) {
@@ -466,40 +464,44 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI data_b
         highs_or_lows[dim_on_depth] = prev_high_low_on_dim;
         hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
     };
-
+    
     std::uint32_t leaf_prt_idx = 0;
-    const MetaNode* nd_end_sentinel = nd_arr_ + size_;
-    while (cur_nd != nd_end_sentinel) { [[likely]]
-        std::ptrdiff_t left_branch_size = this_end - this_begin;
-        RAI median;
-        for (; ar_it != leaf_ar_it; ++ar_it) {
+    while (true) {
+        std::ptrdiff_t left_subtree_size = (this_end - this_begin)/2;
+        RAI median = this_begin + left_subtree_size;
+        for (; ar_it != leaf_prt_ar_it; ++ar_it) {
             std::uint8_t dim = static_cast<std::uint8_t>(std::max_element(hl_spread.cbegin(), hl_spread.cend())
                 - hl_spread.cbegin());
-            left_branch_size /= 2;
-            MetaNode* nd_ptr_this_iter = cur_nd;
-            median = this_begin + left_branch_size;
             std::nth_element(this_begin, median, this_end,
                 [dim](const auto& nh1, const auto& nh2) {return nh1.key[dim] < nh2.key[dim]; });
             MvConstructOneNdIncIter(cur_nd, cur_elem,
-                static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_branch_size + 1), dim, median);
-            *ar_it = {dim, static_cast<std::uint32_t>(this_end - data_begin), std::exchange(highs[dim], nd_ptr_this_iter->key[dim])};
+                static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_subtree_size + 1), dim, median);
+            *ar_it = {dim, static_cast<std::uint32_t>(this_end - data_begin), std::exchange(highs[dim], (cur_nd-1)->key[dim])};
             hl_spread[dim] = highs[dim] - lows[dim];
-            this_end = median;
+            left_subtree_size /= 2;
+            this_end = std::exchange(median, this_begin + left_subtree_size);
         }
-        median = this_begin + left_branch_size;
-
-        if (left_branch_size == 1) {
-            MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, this_begin);
-            if (RAI right_child_data_it = median + 1;
-                right_child_data_it != this_end) {
-                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, right_child_data_it);
-            } else {
-                (cur_nd - 2)->right_idx = 0;
-            }
+        
+        if (left_subtree_size == 0) {
+            MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, median);
         } else {
-            (cur_nd - 1)->right_idx = 0;
-            (cur_nd - 1)->dim_to_expand = N;
+            std::uint8_t dim = static_cast<std::uint8_t>(std::max_element(hl_spread.cbegin(), hl_spread.cend())
+                - hl_spread.cbegin());
+            if (median + 1 == this_end) {
+                if (this_begin->key[dim] >= median->key[dim])
+                    std::swap(this_begin, median);
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, dim, median);
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, this_begin);
+            } else {
+                utility::Sort3(this_begin, median, median+1, [dim](const auto& nh1, const auto& nh2) {return nh1.key[dim] < nh2.key[dim]; });
+                MvConstructOneNdIncIter(cur_nd, cur_elem, static_cast<std::uint32_t>(cur_nd - nd_arr_ + 2), dim, median);
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, this_begin);
+                MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, median+1);
+            }
         }
+        
+        if (this_end == data_end) [[unlikely]]
+            return;
 
         for (std::uint32_t i = std::countr_zero(++leaf_prt_idx); i != 0; --i) {
             --ar_it;
@@ -511,25 +513,16 @@ void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::RangeCtorHelper(RAI data_b
         hl_spread[dim_on_depth] = highs[dim_on_depth] - lows[dim_on_depth];
         this_begin = this_end + 1;
         this_end = data_begin + end_idx_or_traced;
-
-
-
-        std::for_each(nd_arr_, cur_nd, [](const MetaNode& nd) {
-            std::cout << "right_idx: " << nd.right_idx << '\t' << "dim_to_expand: " << static_cast<std::uint32_t>(nd.dim_to_expand) << '\t';
-            std::cout << "pt coord: ";
-            std::copy(nd.key.cbegin(), nd.key.cend(), std::ostream_iterator<FPType>(std::cout, ","));
-            std::cout << '\n';
-            });
+        ++ar_it;
     } 
-
+/*
 DEBUG_PRINT:
     std::for_each_n(nd_arr_, size_, [](const MetaNode& nd){
         std::cout << "right_idx: " << nd.right_idx << '\t' << "dim_to_expand: " << static_cast<std::uint32_t>(nd.dim_to_expand)  << '\t';
         std::cout << "pt coord: ";
         std::copy(nd.key.cbegin(), nd.key.cend(), std::ostream_iterator<FPType>(std::cout,","));
         std::cout << '\n';
-    });
-    
+    }); */
 }
 
 
@@ -565,7 +558,7 @@ RangeCtorRecursion(MetaNode *&cur_nd, ElemType *&cur_elem, RAI begin, RAI end,
     std::ptrdiff_t left_branch_size = (end - begin)/2;
     RAI median = begin + left_branch_size;
     std::nth_element(begin, median, end, [dim](const auto& nh1, const auto& nh2) {return nh1.key[dim] < nh2.key[dim];});
-    MvConstructOneNdIncIter(cur_nd, cur_elem, static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_branch_size + 1), dim, median)
+    MvConstructOneNdIncIter(cur_nd, cur_elem, static_cast<std::uint32_t>(cur_nd - nd_arr_ + left_branch_size + 1), dim, median);
     
     if (left_branch_size == 1) {
         MvConstructOneNdIncIter(cur_nd, cur_elem, 0, N, begin);
