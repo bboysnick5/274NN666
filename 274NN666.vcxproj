@@ -108,7 +108,7 @@
       <OpenMP>GenerateParallelCode</OpenMP>
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalOptions>-Xclang -fopenmp %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;C:\Users\Nick\source\repos\llama-0.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;C:\Users\Nick\source\repos\llama-0.3\include;C:\Users\Nick\source\repos\eigen;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Link>
@@ -132,11 +132,12 @@
       <FSYCLEarlyOptimizations>Yes</FSYCLEarlyOptimizations>
       <FSYCLDeadArgsOptimization>Yes</FSYCLDeadArgsOptimization>
       <UseMSVC>false</UseMSVC>
-      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;C:\Users\Nick\source\repos\llama-0.3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\include;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\windows\include;C:\Program Files\boost\boost_1_76_0;C:\Program Files\dyno\include;C:\Users\Nick\source\repos\abseil-cpp;C:\Users\Nick\source\repos\llama-0.3\include;C:\Users\Nick\source\repos\eigen;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <SpecifySyclFrontendTargetOptionsForOpenMP>
       </SpecifySyclFrontendTargetOptionsForOpenMP>
       <EnableModules>true</EnableModules>
-      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast </AdditionalOptions>
+      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast</AdditionalOptions>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\random;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\base;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

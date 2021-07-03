@@ -218,7 +218,7 @@ void MainContent(int argc, const char * argv[]) {
         outRefLatLngPtLocPairVec.open(argv[8]);
     
     
-    to_test_accuracy = true;
+    to_test_accuracy = false;
     to_test_search_time = true;
     //maxCacheCellVecSize = (1 << 16ull);
     //maxCacheCellVecSize = (1 << 9ull);
@@ -260,10 +260,10 @@ void MainContent(int argc, const char * argv[]) {
         // std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
     std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts;
