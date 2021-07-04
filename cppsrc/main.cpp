@@ -93,12 +93,12 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
             if (testLoc != refLoc
                 && (std::fabs((test_dist = testLoc->havDist(test_lat_lng_pt))
                               - (ref_dist = refLoc->havDist(test_lat_lng_pt))))
-                    > static_cast<FPType>(0.000001)) {
+                    > std::numeric_limits<FPType>::epsilon()) {
                 test_dist_err_total += testLoc->havDist(test_lat_lng_pt);
                 ref_dist_for_err_pts_total += refLoc->havDist(test_lat_lng_pt);
                 ++errot_count;
                 auto[test_lat, test_lng] = test_lat_lng_pt.dataArray();
-                std::cout << "Test solver this one search time is: " << this_search_duration.count() << "μs" << std::endl
+                std::cout << "Test solver this one search time is: " << this_search_duration.count() << "us" << std::endl
                           << (test_dist < ref_dist ? "Test" : "Ref") << " dist is closer" << std::endl
                           << "Test PointND: Lat: " << SBLoc<FPType>::toDegree(test_lat)
                           << ", Lng: " << SBLoc<FPType>::toDegree(test_lng) << std::endl
@@ -218,7 +218,7 @@ void MainContent(int argc, const char * argv[]) {
         outRefLatLngPtLocPairVec.open(argv[8]);
     
     
-    to_test_accuracy = false;
+    to_test_accuracy = true;
     to_test_search_time = true;
     //maxCacheCellVecSize = (1 << 16ull);
     //maxCacheCellVecSize = (1 << 9ull);
@@ -260,10 +260,10 @@ void MainContent(int argc, const char * argv[]) {
         // std::make_unique<UniCellBKDTGridSBSolver<FPType><KDTreeCusMem>>(aveLocPerCell, maxCacheCellVecSize),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
         //std::make_unique<UniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType>>(aveLocPerCell, kMaxCacheCellVecSize_),
-        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
-        std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
+        //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongestVec, FPType, def::ThreadingPolicy::kMultiOmp>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
     };
     
     std::vector<PointND<FPType, 2>> search_bench_test_lat_lng_pts;
