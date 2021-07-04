@@ -245,7 +245,7 @@ void MainContent(int argc, const char * argv[]) {
         //std::make_unique<KDTSBSolver<KDTree,FPType>>(),
         //std::make_unique<BKDTSBSolver<KDTree, FPType>>(),
         //std::make_unique<BKDTSBSolver<FPType><KDTreeCusMem>>(),
-        //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, FPType>>(),
+        std::make_unique<BKDTSBSolver<KDTreeExpandLongest, FPType>>(),
         //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongest, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
         //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
         std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>(),

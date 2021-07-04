@@ -904,6 +904,7 @@ auto pt_ndPtr_soa_view = llama::allocView(llama::mapping::SoA<llama::ArrayDims<N
 pt_ndPtr_soa_view(0ull, 0ull, 0ull)(ns::NodePtr{}) = nd_arr_;
 */
 
+static std::size_t search_times = 0, check_count = 0;
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &search_pt) const {
@@ -923,7 +924,14 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             best_dist_sq = cur_dist_sq;
             best_node = nd;
         }
+        check_count++;
     };
+    search_times++;
+    if (search_times > 22000) {
+        std::cout << check_count << '\n';
+        assert(false);
+    }
+
 
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
@@ -949,6 +957,35 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         }
     }
     return elem_arr_[best_node - nd_arr_];
+
+    /*
+    while (true) {
+        for (; ar_it != leaf_prt_ar_it; ++ar_it) {
+            auto& [right_idx, dim, nd_pt] = *cur_nd;
+            FPType diff = search_pt[dim] - nd_pt[dim];
+            if (diff < 0.0) {
+                *ar_it = {diff*diff, right_idx};
+                ++cur_nd;
+            } else {
+                *ar_it = {diff*diff, static_cast<std::uint32_t>(cur_nd-nd_arr_+1)};
+                cur_nd = nd_arr_ + right_idx;
+            }
+            CheckOneNd(cur_nd);
+        }
+        if (cur_nd->dim_to_expand != N) {
+            CheckOneNd(++cur_nd);
+            if (cur_nd->right_idx != 0)
+                CheckOneNd(++cur_nd);
+        }
+        do {
+            if (ar_it == ar_stack.begin())
+                return elem_arr_[best_node - nd_arr_];
+        } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
+        cur_nd = nd_arr_ + ar_it->on_stack_idx;
+        CheckOneNd(cur_nd);
+    }
+    return elem_arr_[best_node - nd_arr_]; */
+
 } 
 
 /*
