@@ -137,7 +137,7 @@
       <SpecifySyclFrontendTargetOptionsForOpenMP>
       </SpecifySyclFrontendTargetOptionsForOpenMP>
       <EnableModules>true</EnableModules>
-      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast /arch:AVX2</AdditionalOptions>
+      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast /arch:AVX2  /arch:AVX</AdditionalOptions>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
