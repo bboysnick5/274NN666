@@ -850,6 +850,22 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
     *result_dpe_arr_it++ = {best_dist_sq, &nd_arr_->key, elem_arr_};
     std::vector<DistPtElem> result_dpe_vec;
    
+    auto CheckOneNd = [&](const auto& nd) {
+        cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, pt);
+        if (cur_dist_sq < best_dist_plus_fence_sq) {
+            if (cur_dist_sq < best_dist_sq) {
+                best_dist_sq = cur_dist_sq;
+                best_dist_plus_fence_sq = best_dist_sq + fence_sq + FPType(2.0)*sqrt(fence_sq*best_dist_sq);
+            }
+            *result_dpe_arr_it++ = {cur_dist_sq, &nd->key, &elem_arr_[nd-nd_arr_]};
+            if (result_dpe_arr_it == result_dpe_arr.end()) [[unlikely]] {
+                result_dpe_arr_it = result_dpe_arr.begin();
+                result_dpe_vec.insert(result_dpe_vec.end(), result_dpe_arr.begin(), result_dpe_arr.end());
+            }
+        }
+    };
+
+    
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
             std::uint8_t dim = cur_nd->dim_to_expand;
@@ -861,7 +877,10 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
                 *ar_it++ = {diff*diff, static_cast<std::uint32_t>(cur_nd - nd_arr_ + 1)};
                 cur_nd = nd_arr_ + right_idx;
             }
-        } else if (cur_nd++->dim_to_expand == N) {
+            CheckOneNd(cur_nd);
+        } else {
+            if (cur_nd->dim_to_expand != N)
+                CheckOneNd(++cur_nd);
             do {
                 if (ar_it == ar_stack) [[unlikely]] {
                     auto filter_transform_dpe_arr_to_pe_arr = [&pe_out_it, best_dist_plus_fence_sq](const auto &dpe) mutable {
@@ -875,19 +894,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
                 }
             } while ((--ar_it)->diff_on_dim_sq >= best_dist_plus_fence_sq);
             cur_nd = nd_arr_ + ar_it->on_stack_idx;
-        }
-        
-        cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, pt);
-        if (cur_dist_sq < best_dist_plus_fence_sq) {
-            if (cur_dist_sq < best_dist_sq) {
-                best_dist_sq = cur_dist_sq;
-                best_dist_plus_fence_sq = best_dist_sq + fence_sq + FPType(2.0)*sqrt(fence_sq*best_dist_sq);
-            }
-            *result_dpe_arr_it++ = {cur_dist_sq, &cur_nd->key, &elem_arr_[cur_nd-nd_arr_]};
-            if (result_dpe_arr_it == result_dpe_arr.end()) [[unlikely]] {
-                result_dpe_arr_it = result_dpe_arr.begin();
-                result_dpe_vec.insert(result_dpe_vec.end(), result_dpe_arr.begin(), result_dpe_arr.end());
-            }
+            CheckOneNd(cur_nd);
         }
     }
     return pe_out_it;
@@ -904,8 +911,8 @@ auto pt_ndPtr_soa_view = llama::allocView(llama::mapping::SoA<llama::ArrayDims<N
 pt_ndPtr_soa_view(0ull, 0ull, 0ull)(ns::NodePtr{}) = nd_arr_;
 */
 
-static std::size_t search_times = 0, check_count = 0;
-
+//static std::size_t search_times = 0, check_count = 0;
+/*
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &search_pt) const {
     struct ActRecord {
@@ -913,10 +920,11 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         std::uint32_t on_stack_idx;
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator
+        ar_it = ar_stack.begin(), leaf_prt_ar_it = ar_stack.begin() + (height_ > 2 ? height_ - 2 : 0);
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode *cur_nd = nd_arr_, *best_node = nd_arr_;
-    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
     
     auto CheckOneNd = [&](const auto& nd) {
         if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, search_pt);
@@ -924,15 +932,16 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             best_dist_sq = cur_dist_sq;
             best_node = nd;
         }
-        check_count++;
-    };
+        //check_count++;
+    }; */
+    /*
     search_times++;
     if (search_times > 22000) {
         std::cout << check_count << '\n';
         assert(false);
-    }
+    }*/
 
-
+/*
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
             std::uint8_t dim = cur_nd->dim_to_expand;
@@ -957,7 +966,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         }
     }
     return elem_arr_[best_node - nd_arr_];
-
+*/
     /*
     while (true) {
         for (; ar_it != leaf_prt_ar_it; ++ar_it) {
@@ -972,21 +981,36 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             }
             CheckOneNd(cur_nd);
         }
-        if (cur_nd->dim_to_expand != N) {
+        if (cur_nd->right_idx) {
             CheckOneNd(++cur_nd);
-            if (cur_nd->right_idx != 0)
-                CheckOneNd(++cur_nd);
+            CheckOneNd(++cur_nd);
+        } else if (cur_nd->dim_to_expand != N) {
+            CheckOneNd(++cur_nd);
         }
         do {
-            if (ar_it == ar_stack.begin())
+            if (ar_it == ar_stack.begin()) [[unlikely]]
                 return elem_arr_[best_node - nd_arr_];
-        } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
-        cur_nd = nd_arr_ + ar_it->on_stack_idx;
-        CheckOneNd(cur_nd);
+            auto& [diff_on_dim_sq, on_stack_idx] = *--ar_it;
+            if (diff_on_dim_sq < best_dist_sq) {
+                cur_nd = nd_arr_ + on_stack_idx;
+                CheckOneNd(cur_nd);
+                if (cur_nd->right_idx != 0) {
+                    if ((cur_nd + 1)->dim_to_expand != N) {
+                        break;
+                    } else {
+                        CheckOneNd(++cur_nd);
+                        CheckOneNd(++cur_nd);
+                        return elem_arr_[best_node - nd_arr_];
+                    }
+                } else if (cur_nd->dim_to_expand != N) {
+                    CheckOneNd(++cur_nd);
+                }
+            }
+        } while (true);
     }
-    return elem_arr_[best_node - nd_arr_]; */
-
-} 
+    return elem_arr_[best_node - nd_arr_];
+*/ /*
+} */
 
 /*
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
@@ -997,13 +1021,13 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         std::uint32_t cand_nd_idx;
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator cand_nd_ar_it = ar_stack.begin();
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator prev_ar_it = ar_it;
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator
+        ar_it = ar_stack.begin() + 1, cand_nd_ar_it, prev_ar_it = ar_stack.begin();
 
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode* cur_nd = nd_arr_;
-    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = std::numeric_limits<FPType>::max();
+    prev_ar_it->cand_nd_idx = 0;
     std::uint32_t best_nd_idx = 0;
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
@@ -1018,16 +1042,16 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         } else { 
             cand_nd_ar_it = ar_it;
             if (cur_nd->dim_to_expand != N)
-                cand_nd_ar_it++->cand_nd_idx = ++cur_nd - nd_arr_;
+                cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(++cur_nd - nd_arr_);
             std::for_each(std::make_reverse_iterator(cand_nd_ar_it), std::make_reverse_iterator(prev_ar_it), [&](const auto& ar) {
-                if (cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>((nd_arr_ + ar.cand_nd_idx)->key, search_pt);
+                if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>((nd_arr_ + ar.cand_nd_idx)->key, search_pt);
                     cur_dist_sq < best_dist_sq) {
                     best_dist_sq = cur_dist_sq;
                     best_nd_idx = ar.cand_nd_idx;
                 }
             });
             do {
-                if (ar_it == ar_stack.begin())
+                if (ar_it == ar_stack.begin() + 1)
                     return elem_arr_[best_nd_idx];
             } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
             prev_ar_it = ar_it - 1;
@@ -1038,56 +1062,6 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     return elem_arr_[best_nd_idx];
 }
 */
-
-/*
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>& search_pt) const {
-    struct ActRecord {
-        FPType diff_on_dim_sq;
-        std::uint32_t on_stack_nd_idx;
-        std::uint32_t cand_nd_idx;
-    };
-    std::array<FPType, kMaxBalancedTreeHeight> dist_sq_arr;
-    typename std::array<FPType, kMaxBalancedTreeHeight>::iterator dist_sq_arr_it = dist_sq_arr.begin();
-    std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator cand_nd_ar_it = ar_stack.begin();
-    // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
-    const MetaNode* cur = nd_arr_;
-    std::uint32_t best_nd_idx = 0;
-    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, search_pt);    
-
-    while (true) {
-        if (std::uint32_t right_idx = cur->right_idx) {
-            std::uint8_t dim = cur->dim_to_expand;
-            FPType diff = search_pt[dim] - cur->key[dim];
-            ar_it->diff_on_dim_sq = diff * diff;
-            if (diff < 0.0) {
-                ar_it++->on_stack_nd_idx = right_idx;
-                ++cur;
-            } else {
-                ar_it++->on_stack_nd_idx = static_cast<std::uint32_t>(cur - nd_arr_ + 1);
-                cur = nd_arr_ + right_idx;
-            }
-        } else if (cur++->dim_to_expand == N) {
-            auto min_dist_sq_it = std::min_element(dist_sq_arr.begin(), dist_sq_arr_it);
-            if (*min_dist_sq_it < best_dist_sq) {
-                best_dist_sq = *min_dist_sq_it;
-                best_nd_idx = ar_stack[min_dist_sq_it - dist_sq_arr.begin()].cand_nd_idx;
-            }
-            dist_sq_arr_it = dist_sq_arr.begin();
-            cand_nd_ar_it = ar_stack.begin();
-            do {
-                if (ar_it == ar_stack.begin())
-                    return elem_arr_[best_nd_idx];
-            } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
-            cur = nd_arr_ + ar_it->on_stack_nd_idx;
-        }
-        *dist_sq_arr_it++ = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, search_pt);
-        cand_nd_ar_it++->cand_nd_idx = cur - nd_arr_;
-    }
-    return elem_arr_[best_nd_idx];
-} */
 
 /*
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
@@ -1108,7 +1082,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     const MetaNode* cur_nd = nd_arr_;
     std::uint32_t best_idx = 0;
     FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
-    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.dataArray().data()));
+    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
             std::uint8_t dim = cur_nd->dim_to_expand;
@@ -1139,7 +1113,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
             cur_nd = nd_arr_ + ar_it->on_stack_nd_idx;
         }
-        cand_pts_matrix.row(lane_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(cur_nd->key.dataArray().data()));
+        cand_pts_matrix.row(lane_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(cur_nd->key.DataArray().data()));
         cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
         if (lane_idx == num_lanes) {
             if (FPType best_dist_sq_this_iter = (cand_pts_matrix.rowwise() - search_pt_v)
@@ -1156,59 +1130,65 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
 } */
 
 
-/*
+
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &search_pt) const {
+ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>& search_pt) const {
     struct ActRecord {
         FPType diff_on_dim_sq;
-        std::uint32_t on_stack_nd_idx;
+        std::uint32_t on_stack_idx;
         std::uint32_t cand_nd_idx;
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator cand_nd_ar_it = ar_stack.begin();
-
-    Eigen::Matrix<FPType, kMaxBalancedTreeHeight, N> cand_pts_matrix;
-    std::uint32_t cand_pts_matrix_idx = 0;
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator
+        ar_it = ar_stack.begin() + 1, cand_nd_ar_it, prev_ar_it = ar_stack.begin();
 
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
-    const MetaNode *cur_nd = nd_arr_;
-    std::uint32_t best_idx = 0;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
-    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.dataArray().data()));
+    const MetaNode* cur_nd = nd_arr_;
+    FPType best_dist_sq = std::numeric_limits<FPType>::max();
+    prev_ar_it->cand_nd_idx = 0;
+    std::uint32_t best_nd_idx = 0;
+    
+    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
+    Eigen::Matrix<FPType, kMaxBalancedTreeHeight, N> cand_pts_matrix;
+    std::uint32_t cand_pts_matrix_idx = 0;
+    
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
             std::uint8_t dim = cur_nd->dim_to_expand;
             FPType diff = search_pt[dim] - cur_nd->key[dim];
-            ar_it->diff_on_dim_sq = diff * diff;
             if (diff < 0.0) {
-                ar_it++->on_stack_nd_idx = right_idx;
-                ++cur_nd;
+                *ar_it++ = {diff*diff, right_idx, static_cast<std::uint32_t>(++cur_nd-nd_arr_)};
             } else {
-                ar_it++->on_stack_nd_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_ + 1);
+                *ar_it++ = {diff*diff, static_cast<std::uint32_t>(cur_nd-nd_arr_+1), right_idx};
                 cur_nd = nd_arr_ + right_idx;
             }
-        } else if (cur_nd++->dim_to_expand == N) {
+        } else {
+            cand_nd_ar_it = ar_it;
+            if (cur_nd->dim_to_expand != N)
+                cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(++cur_nd - nd_arr_);
+            std::for_each(std::make_reverse_iterator(cand_nd_ar_it), std::make_reverse_iterator(prev_ar_it), [&](const auto& ar) {
+                cand_pts_matrix.row(cand_pts_matrix_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>((nd_arr_ + ar.cand_nd_idx)->key.DataArray().data()));
+            });
             if (FPType best_dist_sq_this_iter =
                 (cand_pts_matrix(Eigen::seq(0, cand_pts_matrix_idx - 1), Eigen::all).rowwise() - search_pt_v)
                 .rowwise().squaredNorm().minCoeff(&cand_pts_matrix_idx);
                 best_dist_sq_this_iter < best_dist_sq) {
                 best_dist_sq = best_dist_sq_this_iter;
-                best_idx = ar_stack[cand_pts_matrix_idx].cand_nd_idx;
+                best_nd_idx = (std::make_reverse_iterator(cand_nd_ar_it) + cand_pts_matrix_idx)->cand_nd_idx;
             }
             cand_pts_matrix_idx = 0;
-            cand_nd_ar_it = ar_stack.begin();
             do {
-                if (ar_it == ar_stack.begin()) [[unlikely]]
-                    return *(elem_arr_ + best_idx);
+                if (ar_it == ar_stack.begin() + 1)
+                    return elem_arr_[best_nd_idx];
             } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
-            cur_nd = nd_arr_ + ar_it->on_stack_nd_idx;
+            prev_ar_it = ar_it - 1;
+            prev_ar_it->cand_nd_idx = ar_it->on_stack_idx;
+            cur_nd = nd_arr_ + ar_it->on_stack_idx;
         }
-        cand_pts_matrix.row(cand_pts_matrix_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(cur_nd->key.dataArray().data()));
-        cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
     }
-    return *(elem_arr_ + best_idx);
-} */
+    return elem_arr_[best_nd_idx];
+}
+
 
 /*
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
@@ -1229,7 +1209,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     const MetaNode *cur_nd = nd_arr_;
     std::uint32_t best_idx = 0;
     FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
-    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.dataArray().data()));
+    Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
             std::uint8_t dim = cur_nd->dim_to_expand;
@@ -1258,7 +1238,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             } while ((--ar_it)->diff_on_dim_sq >= best_dist_sq);
             cur_nd = nd_arr_ + ar_it->on_stack_nd_idx;
         }
-        cand_pts_matrix.row(cand_pts_matrix_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(cur_nd->key.dataArray().data()));
+        cand_pts_matrix.row(cand_pts_matrix_idx++) = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(cur_nd->key.DataArray().data()));
         cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(cur_nd - nd_arr_);
     }
     return *(elem_arr_ + best_idx);

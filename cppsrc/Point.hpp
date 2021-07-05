@@ -84,8 +84,8 @@ public:
     const value_type* data() const;
     value_type* data();
     
-    const std::array<FPType, N>& dataArray() const;
-    std::array<FPType, N>& dataArray();
+    const std::array<FPType, N>& DataArray() const;
+    std::array<FPType, N>& DataArray();
     
     // static FPType eulDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two);
     // Usage: FPType d = Distance(one, two);
@@ -161,12 +161,12 @@ FPType* PointND<FPType, N>::data() {
 }
 
 template <typename FPType, std::uint8_t N>
-const std::array<FPType, N>& PointND<FPType, N>::dataArray() const {
+const std::array<FPType, N>& PointND<FPType, N>::DataArray() const {
     return coords_;
 }
 
 template <typename FPType, std::uint8_t N>
-std::array<FPType, N>& PointND<FPType, N>::dataArray() {
+std::array<FPType, N>& PointND<FPType, N>::DataArray() {
     return coords_;
 }
 

@@ -97,7 +97,7 @@ void AccuracyTestFromRefSolver(const std::vector<PointND<FPType, 2>> &test_lat_l
                 test_dist_err_total += testLoc->havDist(test_lat_lng_pt);
                 ref_dist_for_err_pts_total += refLoc->havDist(test_lat_lng_pt);
                 ++errot_count;
-                auto[test_lat, test_lng] = test_lat_lng_pt.dataArray();
+                auto[test_lat, test_lng] = test_lat_lng_pt.DataArray();
                 std::cout << "Test solver this one search time is: " << this_search_duration.count() << "us" << std::endl
                           << (test_dist < ref_dist ? "Test" : "Ref") << " dist is closer" << std::endl
                           << "Test PointND: Lat: " << SBLoc<FPType>::toDegree(test_lat)
@@ -245,7 +245,7 @@ void MainContent(int argc, const char * argv[]) {
         //std::make_unique<KDTSBSolver<KDTree,FPType>>(),
         //std::make_unique<BKDTSBSolver<KDTree, FPType>>(),
         //std::make_unique<BKDTSBSolver<FPType><KDTreeCusMem>>(),
-        std::make_unique<BKDTSBSolver<KDTreeExpandLongest, FPType>>(),
+        //std::make_unique<BKDTSBSolver<KDTreeExpandLongest, FPType>>(),
         //std::make_unique<UnionUniLatLngBKDTGridSBSolver<KDTreeExpandLongest, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
         //std::make_unique<UnionUniCellBKDTGridSBSolver<KDTreeExpandLongest, FPType, def::ThreadingPolicy::kSingle>>(ave_actual_locs_per_cell, max_cached_cell_vec_size),
         std::make_unique<BKDTSBSolver<KDTreeExpandLongestVec, FPType>>(),
