@@ -49,6 +49,7 @@
     <UseInteloneTBB>true</UseInteloneTBB>
     <InstrumentInteloneTBB>true</InstrumentInteloneTBB>
     <UseInteloneMKL>Parallel</UseInteloneMKL>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -137,9 +138,10 @@
       <SpecifySyclFrontendTargetOptionsForOpenMP>
       </SpecifySyclFrontendTargetOptionsForOpenMP>
       <EnableModules>true</EnableModules>
-      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast /arch:AVX2  /arch:AVX</AdditionalOptions>
+      <AdditionalOptions>-Xclang -fopenmp -Xclang -Ofast /arch:AVX2 </AdditionalOptions>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>C:\Program Files\LLVM\lib;C:\Program Files %28x86%29\Intel\oneAPI\tbb\2021.2.0\lib\intel64/vc14;C:\Program Files %28x86%29\Intel\oneAPI\dpl\2021.2.0\lib;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\random;C:\Users\Nick\source\repos\abseil-cpp\out\build\x64-Release\absl\base;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
