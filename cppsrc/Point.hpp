@@ -236,7 +236,7 @@ FPType PointND<FPType, N>::EucDist(const PointND<FPType, N>& one, const PointND<
 
 template <typename FPType, std::uint8_t N>
 FPType PointND<FPType, N>::EucSqDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
-    return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), 0.0, std::plus<FPType>(),
+    return std::transform_reduce(one.cbegin(), one.cend(), two.cbegin(), FPType(0), std::plus<FPType>(),
                                  [](FPType a, FPType b){return (a-b)*(a-b);});
     /*
     FPType diff = one[0] - two[0], result = diff*diff;
@@ -250,13 +250,13 @@ FPType PointND<FPType, N>::EucSqDist(const PointND<FPType, N>& one, const PointN
 
 template <typename FPType, std::uint8_t N>
 FPType PointND<FPType, N>::HavDist(const PointND<FPType, N>& one, const PointND<FPType, N>& two, FPType radius) {
-    return 2.0 * std::asin(std::sqrt(HavDistCompCalcA(one, two))) * radius;
+    return FPType(2.0) * std::asin(std::sqrt(HavDistCompCalcA(one, two))) * radius;
 }
 
 template <typename FPType, std::uint8_t N>
 FPType PointND<FPType, N>::HavDistCompCalcA(const PointND<FPType, N>& one, const PointND<FPType, N>& two) {
-    FPType dLatOneHalf = 0.5*(one[0] - two[0]);
-    FPType dLonOneHalf = 0.5*(one[1] - two[1]);
+    FPType dLatOneHalf = FPType(0.5)*(one[0] - two[0]);
+    FPType dLonOneHalf = FPType(0.5)*(one[1] - two[1]);
     return sin(dLatOneHalf) * sin(dLatOneHalf) +
            sin(dLonOneHalf) * sin(dLonOneHalf) * std::cos(one[0]) * std::cos(two[0]);
 }

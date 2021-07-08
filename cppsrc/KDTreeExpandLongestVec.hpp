@@ -866,18 +866,18 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
         }
     };
 
-    std::uint32_t cur_nd_idx = 0;
+    std::uint32_t cur_nd_idx = 0, right_idx;
     while (true) {
-        if (cur_nd->right_idx) {            
+        if ((right_idx = cur_nd->right_idx)) {
             ++cur_nd_idx;
             FPType diff = pt[cur_nd->dim_to_expand] - cur_nd->key[cur_nd->dim_to_expand];
             if (diff < 0.0) {
-                *ar_it = {diff*diff, cur_nd->right_idx};
+                *ar_it = {diff*diff, right_idx};
                 ++cur_nd;
             } else {
                 *ar_it = {diff*diff, cur_nd_idx};
-                cur_nd_idx = cur_nd->right_idx;
-                cur_nd = nd_arr_ + cur_nd->right_idx;
+                cur_nd_idx = right_idx;
+                cur_nd = nd_arr_ + right_idx;
             }
             ++ar_it;
             CheckOneNd(cur_nd); 
@@ -1017,18 +1017,18 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>& search_pt) const {
+    
+    const MetaNode* cur_nd = nd_arr_;
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    std::uint32_t best_nd_idx = 0, cur_nd_idx = 0, right_idx;
     struct ActRecord {
         FPType diff_on_dim_sq;
         std::uint32_t on_stack_idx;
     };
     std::array<ActRecord, kMaxBalancedTreeHeight> ar_stack;
-    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator
-        ar_it = ar_stack.begin(), leaf_prt_ar_it = ar_stack.begin() + (height_ > 2 ? height_ - 2 : 0);
+    typename std::array<ActRecord, kMaxBalancedTreeHeight>::iterator ar_it = ar_stack.begin();
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
-    const MetaNode* cur_nd = nd_arr_;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
-    std::uint32_t best_nd_idx = 0, cur_nd_idx = 0;
-
+    
     auto CheckOneNd = [&](const auto& nd, const std::uint32_t& cur_nd_idx) {
         if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, search_pt);
             cur_dist_sq < best_dist_sq) {
@@ -1037,16 +1037,16 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         }
     };
     while (true) {
-        if (cur_nd->right_idx) {
+        if ((right_idx = cur_nd->right_idx)) {
             ++cur_nd_idx;
             FPType diff = search_pt[cur_nd->dim_to_expand] - cur_nd->key[cur_nd->dim_to_expand];
             if (diff < 0.0) {
-                *ar_it = {diff*diff, cur_nd->right_idx};
+                *ar_it = {diff*diff, right_idx};
                 ++cur_nd;
             } else {
                 *ar_it = {diff*diff, cur_nd_idx};
-                cur_nd_idx = cur_nd->right_idx;
-                cur_nd = nd_arr_ + cur_nd->right_idx;
+                cur_nd_idx = right_idx;
+                cur_nd = nd_arr_ + right_idx;
             }
             ++ar_it;
             CheckOneNd(cur_nd, cur_nd_idx);
