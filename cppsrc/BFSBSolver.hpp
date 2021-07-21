@@ -16,11 +16,11 @@
 #include <concepts>
 
 
-template <typename FPType>
-class BFSBSolver : public SBSolver<FPType> {
+template <typename FPType, def::ThreadingPolicy policy>
+class BFSBSolver : public SBSolver<FPType, policy> {
 public:
     virtual void Build(std::span<const SBLoc<FPType>>) override final;
-    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
+    const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
     void PrintSolverInfo() const override;
     
     virtual ~BFSBSolver() {}

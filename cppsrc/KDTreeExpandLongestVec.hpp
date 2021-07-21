@@ -245,12 +245,12 @@ private:
     ElemType NNValue(const PointND<FPType, N>& key) const;
     
     template <typename PointND<FPType, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type = 0>
+    typename std::enable_if<thisDt == PointND<FPType, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(MetaNode*, std::uint8_t, const PointND<FPType, N>&,
                        const ElemType *&, FPType&) const;
     
     template <typename PointND<FPType, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type = 0>
+    typename std::enable_if<thisDt != PointND<FPType, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(MetaNode*, std::uint8_t, const PointND<FPType, N>&,
                        const ElemType*&, FPType&) const;
     
@@ -837,7 +837,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
         std::uint32_t on_stack_idx;
     } ar_stack[kMaxBalancedTreeHeight], *ar_it = ar_stack;
     const MetaNode *cur_nd = nd_arr_;
-    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, pt);
+    FPType cur_dist_sq, best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, pt);
     FPType best_dist_plus_fence_sq = best_dist_sq + fence_sq + FPType(2.0)*sqrt(fence_sq*best_dist_sq);
     
     constexpr std::uint_fast16_t kMaxDpeSizeOnStack = 1152;
@@ -852,7 +852,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence_sq, NdTypeOutIt pe_out_i
     std::vector<DistPtElem> result_dpe_vec;
    
     auto CheckOneNd = [&](const auto& nd) {
-        cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, pt);
+        cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(nd->key, pt);
         if (cur_dist_sq < best_dist_plus_fence_sq) {
             if (cur_dist_sq < best_dist_sq) {
                 best_dist_sq = cur_dist_sq;
@@ -927,10 +927,10 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
         ar_it = ar_stack.begin(), leaf_prt_ar_it = ar_stack.begin() + (height_ > 2 ? height_ - 2 : 0);
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode *cur_nd = nd_arr_, *best_node = nd_arr_;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, search_pt);
     
     auto CheckOneNd = [&](const auto& nd) {
-        if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, search_pt);
+        if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(nd->key, search_pt);
             cur_dist_sq < best_dist_sq) {
             best_dist_sq = cur_dist_sq;
             best_node = nd;
@@ -1019,7 +1019,7 @@ template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<F
 ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>& search_pt) const {
     
     const MetaNode* cur_nd = nd_arr_;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, search_pt);
     std::uint32_t best_nd_idx = 0, cur_nd_idx = 0, right_idx;
     struct ActRecord {
         FPType diff_on_dim_sq;
@@ -1030,7 +1030,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     
     auto CheckOneNd = [&](const auto& nd, const std::uint32_t& cur_nd_idx) {
-        if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(nd->key, search_pt);
+        if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(nd->key, search_pt);
             cur_dist_sq < best_dist_sq) {
             best_dist_sq = cur_dist_sq;
             best_nd_idx = cur_nd_idx;
@@ -1096,7 +1096,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
             if (cur_nd->dim_to_expand != N)
                 cand_nd_ar_it++->cand_nd_idx = static_cast<std::uint32_t>(++cur_nd - nd_arr_);
             std::for_each(std::make_reverse_iterator(cand_nd_ar_it), std::make_reverse_iterator(prev_ar_it), [&](const auto& ar) {
-                if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>((nd_arr_ + ar.cand_nd_idx)->key, search_pt);
+                if (FPType cur_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>((nd_arr_ + ar.cand_nd_idx)->key, search_pt);
                     cur_dist_sq < best_dist_sq) {
                     best_dist_sq = cur_dist_sq;
                     best_nd_idx = ar.cand_nd_idx;
@@ -1133,7 +1133,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode* cur_nd = nd_arr_;
     std::uint32_t best_idx = 0;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, search_pt);
     Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
@@ -1260,7 +1260,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode *cur_nd = nd_arr_;
     std::uint32_t best_idx = 0;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, search_pt);
     Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
@@ -1322,7 +1322,7 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
     // BIG ASSUMPTION TREE IS BALANCED, otherwise stackoverflow
     const MetaNode* cur_nd = nd_arr_;
     std::uint32_t best_idx = 0;
-    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur_nd->key, search_pt);
+    FPType best_dist_sq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur_nd->key, search_pt);
     Eigen::Matrix<FPType, 1, N> search_pt_v = Eigen::Map<Eigen::Matrix<FPType, 1, N>>(const_cast<FPType*>(search_pt.DataArray().data()));
     while (true) {
         if (std::uint32_t right_idx = cur_nd->right_idx) {
@@ -1380,12 +1380,12 @@ ElemType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::NNValue(const PointND<
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt == PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 NNValueHelper(MetaNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template
-    dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+    dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -1404,7 +1404,7 @@ NNValueHelper(MetaNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt != PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeExpandLongestVec<FPType, N, ElemType, DT>::
 NNValueHelper(MetaNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
@@ -1428,11 +1428,11 @@ template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<F
 FPType KDTreeExpandLongestVec<FPType, N, ElemType, DT>::branchMin(const PointND<FPType, N> &trPt,
                                                           const PointND<FPType, N> &searchPt, std::uint8_t dim) const {
     switch (DT) {
-        case PointND<FPType, N>::DistType::EUC:
-        case PointND<FPType, N>::DistType::MAN:
+        case PointND<FPType, N>::DistType::kEuc:
+        case PointND<FPType, N>::DistType::kMan:
             return std::fabs(trPt[dim] - searchPt[dim]);
             /*
-             case DistType::HAV:
+             case DistType::kHav:
              PointND<FPType, N> pt;
              pt[idx] = searchPt[idx];
              pt[1-idx] = trPt[1-idx];

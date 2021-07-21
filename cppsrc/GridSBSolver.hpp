@@ -15,12 +15,12 @@
 #include "SBSolver.hpp"
 
 
-template <typename FPType>
-class GridSBSolver : public SBSolver<FPType> {
+template <typename FPType, def::ThreadingPolicy policy>
+class GridSBSolver : public SBSolver<FPType, policy> {
     
 public:
     void Build(std::span<const SBLoc<FPType>>) override;
-    const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2> geo_search_pt) const override;
+    const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
     GridSBSolver(FPType aveLocPerCell = 1);
     virtual ~GridSBSolver() override {}
     

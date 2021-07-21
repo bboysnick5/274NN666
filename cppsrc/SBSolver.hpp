@@ -17,11 +17,17 @@
 #include <span>
 
 template <typename FPType>
-class SBSolver {
+class SBSolverWrapper {
 public:
     virtual void Build(std::span<const SBLoc<FPType>>) = 0;
-    virtual const SBLoc<FPType>* FindNearestLoc(PointND<FPType, 2>) const = 0;
+    virtual const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType) const = 0;
     virtual void PrintSolverInfo() const = 0;
+    virtual ~SBSolverWrapper() {}
+};
+
+template <typename FPType, def::ThreadingPolicy>
+class SBSolver : public SBSolverWrapper<FPType> {
+public:
     virtual ~SBSolver() {}
 };
 

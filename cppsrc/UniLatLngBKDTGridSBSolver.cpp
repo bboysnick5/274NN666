@@ -10,15 +10,15 @@
 #include "Utility.hpp"
 //#include <omp.h>
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 UniLatLngBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
-: BKDTSBSolver<KDTType, FPType>(), AVE_LOC_PER_CELL(alpc),
+: BKDTSBSolver<KDTType, FPType, policy>(), AVE_LOC_PER_CELL(alpc),
   kMaxCacheCellVecSize_(maxCacheCellVecSize) {}
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::PrintSolverInfo() const {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::PrintSolverInfo() const {
     std::cout << "Total cache locs: " << totalNodeSize
     << "\nAve tree size: " << totalNodeSize/grid_cache_.size()
     << "\nAve tree height: "
@@ -32,8 +32,8 @@ void UniLatLngBKDTGridSBSolver<KDTType, FPType>::PrintSolverInfo() const {
 }
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
 FillCacheCell(FPType thisCtrLng, FPType thisCtrLat, FPType diagonalDistSq3DEUC,
               std::vector<typename KDT<KDTType, FPType>::node_type>& pt_loc_vec) {
     this->loc_kdt_.NNsWithFence(SBLoc<FPType>::GeoPtTo3dEucPt({thisCtrLat, thisCtrLng}),
@@ -54,8 +54,8 @@ FillCacheCell(FPType thisCtrLng, FPType thisCtrLat, FPType diagonalDistSq3DEUC,
 }
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::FillGridCache() {
     col_size_ = row_size_;
     lng_inc_ = 2.0*def::kMathPi<FPType>/col_size_ + 2.0*def::kMathPi<FPType>/(col_size_*65536);
     grid_cache_.reserve(this->loc_kdt_.size()*1.2/AVE_LOC_PER_CELL);
@@ -73,17 +73,17 @@ void UniLatLngBKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
     }
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::calcSideLenFromAlpc() {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::calcSideLenFromAlpc() {
     FPType surfaceArea = 4*def::kMathPi<FPType>*SBLoc<FPType>::EARTH_RADIUS*SBLoc<FPType>::EARTH_RADIUS;
     FPType numCells = this->loc_kdt_.size()/AVE_LOC_PER_CELL;
     side_len_ = sqrt(surfaceArea/numCells);
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void UniLatLngBKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
     totalLocSize = loc_data_span.size();
-    BKDTSBSolver<KDTType, FPType>::GenerateKDT(loc_data_span);
+    BKDTSBSolver<KDTType, FPType, policy>::GenerateKDT(loc_data_span);
     calcSideLenFromAlpc();
     lat_inc_ = std::fabs(SBLoc<FPType>::deltaLatOnSameLngFromHavDist(side_len_));
     lat_inc_inverse_ = 1.0/lat_inc_;
@@ -92,9 +92,9 @@ void UniLatLngBKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPT
     this->loc_kdt_.Clear();
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType>::
-ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geo_search_pt,
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+ReturnNNLocFromCacheVariant(const typename SBLoc<FPType>::GeoPtType& geo_search_pt,
                             const std::variant<std::vector<typename KDT<KDTType, FPType>::node_type>, const SBLoc<FPType>*, KDT<KDTType, FPType>>& v) const {
     switch (v.index()) {
         case 0: {
@@ -102,7 +102,7 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geo_search_pt,
             const auto &vec = std::get<0>(v);
             return utility::MinElementGivenDistFunc(vec.cbegin(), vec.cend(),
                                                [&p](const auto& nh){return p.template
-                                                    dist<PointND<FPType, 3>::DistType::EUCSQ>(nh.key);}, std::less{}
+                                                    dist<PointND<FPType, 3>::DistType::kEucSq>(nh.key);}, std::less{}
                                                )->value;
         }
         case 1:
@@ -113,24 +113,24 @@ ReturnNNLocFromCacheVariant(const PointND<FPType, 2>& geo_search_pt,
 }
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType>::
-FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+const SBLoc<FPType>* UniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
     return ReturnNNLocFromCacheVariant(geo_search_pt, grid_cache_[static_cast<std::size_t>
     ((geo_search_pt[0]+0.5*def::kMathPi<FPType>)*lat_inc_inverse_)*col_size_+ static_cast<std::size_t>((geo_search_pt[1]+def::kMathPi<FPType>)/lng_inc_)]);
 }
 
 
 
-template class UniLatLngBKDTGridSBSolver<KDTree, double>;
-template class UniLatLngBKDTGridSBSolver<KDTree, float>;
+template class UniLatLngBKDTGridSBSolver<KDTree, double, def::ThreadingPolicy::kSingle>;
+template class UniLatLngBKDTGridSBSolver<KDTree, float, def::ThreadingPolicy::kSingle>;
 
-template class UniLatLngBKDTGridSBSolver<KDTreeCusMem, double>;
-template class UniLatLngBKDTGridSBSolver<KDTreeCusMem, float>;
+template class UniLatLngBKDTGridSBSolver<KDTreeCusMem, double, def::ThreadingPolicy::kSingle>;
+template class UniLatLngBKDTGridSBSolver<KDTreeCusMem, float, def::ThreadingPolicy::kSingle>;
 
-template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, double>;
-template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, float>;
+template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, double, def::ThreadingPolicy::kSingle>;
+template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongest, float, def::ThreadingPolicy::kSingle>;
 
-template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, double>;
-template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, float>;
+template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, double, def::ThreadingPolicy::kSingle>;
+template class UniLatLngBKDTGridSBSolver<KDTreeExpandLongestVec, float, def::ThreadingPolicy::kSingle>;
 

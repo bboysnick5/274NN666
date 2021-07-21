@@ -31,7 +31,7 @@
 
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT
-= PointND<FPType, N>::DistType::EUC>
+= PointND<FPType, N>::DistType::kEuc>
 class KDTreeExpandLongest {
 public:
     
@@ -231,12 +231,12 @@ private:
     ElemType NNValue(const PointND<value_type, N>& key) const;
     
     template <typename PointND<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt == PointND<value_type, N>::DistType::EUC, int>::type = 0>
+    typename std::enable_if<thisDt == PointND<value_type, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType *&, value_type&) const;
     
     template <typename PointND<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::EUC, int>::type = 0>
+    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType*&, value_type&) const;
     
@@ -686,7 +686,7 @@ NNsWithFence(const PointND<FPType, N>& pt, FPType fence, OutputIter returnIt) co
     const TreeNode *cur = root;
    
     while (true) {
-        FPType curDistSq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+        FPType curDistSq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
@@ -743,7 +743,7 @@ ElemType KDTreeExpandLongest<FPType, N, ElemType, DT>::NNValue(const PointND<FPT
     */
     
     while (true) {
-        FPType curDist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+        FPType curDist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
@@ -804,12 +804,12 @@ ElemType KDTreeExpandLongest<FPType, N, ElemType, DT>::NNValue(const PointND<FPT
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt == PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeExpandLongest<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template
-    dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+    dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -828,7 +828,7 @@ NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt != PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeExpandLongest<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
@@ -852,11 +852,11 @@ template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<F
 FPType KDTreeExpandLongest<FPType, N, ElemType, DT>::branchMin(const PointND<FPType, N> &trPt,
                                                 const PointND<FPType, N> &searchPt, std::size_t idx) const {
     switch (DT) {
-        case PointND<FPType, N>::DistType::EUC:
-        case PointND<FPType, N>::DistType::MAN:
+        case PointND<FPType, N>::DistType::kEuc:
+        case PointND<FPType, N>::DistType::kMan:
             return std::fabs(trPt[idx] - searchPt[idx]);
             /*
-             case DistType::HAV:
+             case DistType::kHav:
              PointND<FPType, N> pt;
              pt[idx] = searchPt[idx];
              pt[1-idx] = trPt[1-idx];

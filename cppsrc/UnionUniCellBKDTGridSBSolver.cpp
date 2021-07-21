@@ -22,7 +22,7 @@ UnionUniCellBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
 template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, FPType, policy>::
-LoopBody(def::Policy_Tag<def::ThreadingPolicy::kSingle>) {
+LoopBody(def::PolicyTag<def::ThreadingPolicy::kSingle>) {
     std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
     pt_loc_vec.reserve(this->kMaxCacheCellVecSize_);
     this->grid_cache_.reserve(totalCacheCells);
@@ -42,7 +42,7 @@ LoopBody(def::Policy_Tag<def::ThreadingPolicy::kSingle>) {
 template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
           typename FPType, def::ThreadingPolicy policy>
 void UnionUniCellBKDTGridSBSolver<KDTType, FPType, policy>::
-LoopBody(def::Policy_Tag<def::ThreadingPolicy::kMultiOmp>) {
+LoopBody(def::PolicyTag<def::ThreadingPolicy::kMultiOmp>) {
     this->grid_cache_.resize(totalCacheCells, 0);
     FPType initCtrLat = 0.5*this->lat_inc_ - 0.5*def::kMathPi<FPType>;
     FPType initLat1 = - 0.5*def::kMathPi<FPType>;
@@ -89,8 +89,8 @@ void UnionUniCellBKDTGridSBSolver<KDTType, FPType, policy>::FillGridCache() {
 
 template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
 const SBLoc<FPType>* UnionUniCellBKDTGridSBSolver<KDTType, FPType, policy>::
-FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
-  //  return UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::FindNearestLoc(geoPt);
+FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
+  //  return UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::FindNearestLoc(geo_pt);
     const auto &[startIdx, thisLngIncInverse] = thisRowStartIdxThisLngIncInverseVec[(geo_search_pt[0]+0.5*def::kMathPi<FPType>)*this->lat_inc_inverse_];
     return UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::ReturnNNLocFromCacheVariant(geo_search_pt,
         this->grid_cache_[startIdx + static_cast<std::size_t>((geo_search_pt[1]+def::kMathPi<FPType>)*thisLngIncInverse)]);

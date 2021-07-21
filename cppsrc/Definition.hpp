@@ -40,18 +40,21 @@ namespace def {
 
     enum class ThreadingPolicy {
         kSingle,
+        kSimd,
         kMultiOmp,
-        kMultiHand
+        kMultiHand,
+        kSimdMultiOmp,
+        kSimdMultiHand
     };
 
     template <def::ThreadingPolicy = def::ThreadingPolicy::kSingle>
-    struct Policy_Tag {};
+    struct PolicyTag {};
 
     template <>
-    struct Policy_Tag<def::ThreadingPolicy::kMultiOmp> {};
+    struct PolicyTag<def::ThreadingPolicy::kMultiOmp> {};
 
     template <>
-    struct Policy_Tag<def::ThreadingPolicy::kMultiHand> {};
+    struct PolicyTag<def::ThreadingPolicy::kMultiHand> {};
 
 }
 

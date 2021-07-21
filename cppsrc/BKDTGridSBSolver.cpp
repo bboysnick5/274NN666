@@ -1,5 +1,5 @@
 //
-//  BKDTGridSBSolver<KDTType, FPType>.cpp
+//  BKDTGridSBSolver<KDTType, FPType, policy>.cpp
 //  274F16NearestSB
 //
 //  Created by Yunlong Liu on 12/23/16.
@@ -17,13 +17,13 @@
 //#include <omp.h>
 #include "BKDTGridSBSolver.hpp"
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-BKDTGridSBSolver<KDTType, FPType>::BKDTGridSBSolver(FPType alpc) : GridSBSolver<FPType>(alpc) {}
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+BKDTGridSBSolver<KDTType, FPType, policy>::BKDTGridSBSolver(FPType alpc) : GridSBSolver<FPType, policy>(alpc) {}
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type>::iterator
-BKDTGridSBSolver<KDTType, FPType>::cacheAllPossibleLocsOneCell(std::size_t r0, std::size_t c0, FPType diffSq,
-                                                                  typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type>::iterator begin) {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>::node_type>::iterator
+BKDTGridSBSolver<KDTType, FPType, policy>::cacheAllPossibleLocsOneCell(std::size_t r0, std::size_t c0, FPType diffSq,
+                                                                  typename std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>::node_type>::iterator begin) {
     FPType rowDistCellCtrGridCtr = ((r0+ 0.5 - this->row_size_/2 )*this->side_len_),
            colDistCellCtrGridCtr = ((c0 + 0.5 -this->col_size_/2)*this->side_len_);
     FPType cellCtrLat = this->midLat + SBLoc<FPType>::deltaLatOnSameLngFromHavDist(rowDistCellCtrGridCtr),
@@ -33,12 +33,12 @@ BKDTGridSBSolver<KDTType, FPType>::cacheAllPossibleLocsOneCell(std::size_t r0, s
         cellCtrLng}), diffSq, begin);
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void BKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
-    gridTreeCache = std::vector<KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>>
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void BKDTGridSBSolver<KDTType, FPType, policy>::FillGridCache() {
+    gridTreeCache = std::vector<KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>>
                     (this->row_size_*this->col_size_);
     gridSingleCache = std::vector<const SBLoc<FPType>*>(this->row_size_*this->col_size_);
-    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type> pt_loc_vec(this->numLocs);
+    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>::node_type> pt_loc_vec(this->numLocs);
     std::size_t totalTreeSize = 0, singleLocs = 0;
     FPType diffSq = xyzDistSqFromSideLen();
 //#pragma omp parallel for num_threads(std::thread::hardware_concurrency()) \
@@ -51,7 +51,7 @@ void BKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
                                                        pt_loc_vec.begin());
             std::size_t locsSize = locsEnd - pt_loc_vec.begin();
             if (locsSize > 1) {
-                gridTreeCache[idx] = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>
+                gridTreeCache[idx] = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>
                     (pt_loc_vec.begin(), locsEnd);
             } else {
                 gridSingleCache[idx] = pt_loc_vec[0].value;
@@ -66,22 +66,22 @@ void BKDTGridSBSolver<KDTType, FPType>::FillGridCache() {
               << "\nMulti-loc cells:" << multiLocs << std::endl;
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-FPType BKDTGridSBSolver<KDTType, FPType>::xyzDistSqFromSideLen() {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+FPType BKDTGridSBSolver<KDTType, FPType, policy>::xyzDistSqFromSideLen() {
     FPType lat2 = SBLoc<FPType>::deltaLatOnSameLngFromHavDist(this->side_len_*sqrt(2));
     return PointND<FPType, 3>::template
-    dist<PointND<FPType, 3>::DistType::EUCSQ>(SBLoc<FPType>::GeoPtTo3dEucPt({0.0, 0.0}),
+    dist<PointND<FPType, 3>::DistType::kEucSq>(SBLoc<FPType>::GeoPtTo3dEucPt({0.0, 0.0}),
                                              SBLoc<FPType>::GeoPtTo3dEucPt({lat2, 0.0}));
 }
  
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-void BKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
-    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type> kdt_data_vec;
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+void BKDTGridSBSolver<KDTType, FPType, policy>::Build(std::span<const SBLoc<FPType>> loc_data_span) {
+    std::vector<typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>::node_type> kdt_data_vec;
     kdt_data_vec.reserve(loc_data_span.size());
     std::transform(loc_data_span.rbegin(), loc_data_span.rend(), std::back_inserter(kdt_data_vec),
-                   [&](const SBLoc<FPType>& loc) -> typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>::node_type { return
-                       {SBLoc<FPType>::GeoPtTo3dEucPt(loc.geoPt), &loc};});
-    sbKdt = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::EUC>(kdt_data_vec.begin(), kdt_data_vec.end());
+                   [&](const SBLoc<FPType>& loc) -> typename KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>::node_type { return
+                       {SBLoc<FPType>::GeoPtTo3dEucPt(loc.geo_pt), &loc};});
+    sbKdt = KDTree<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>(kdt_data_vec.begin(), kdt_data_vec.end());
     this->numLocs = sbKdt.size();
     this->findKeyLngLat(loc_data_span);
     this->row_size_ = sqrt(loc_data_span.size()) / this->AVE_LOC_PER_CELL;
@@ -94,8 +94,8 @@ void BKDTGridSBSolver<KDTType, FPType>::Build(std::span<const SBLoc<FPType>> loc
     FillGridCache();
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-const SBLoc<FPType>* BKDTGridSBSolver<KDTType, FPType>::FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+const SBLoc<FPType>* BKDTGridSBSolver<KDTType, FPType, policy>::FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
     auto idxPr = this->getIdx(geo_search_pt[1], geo_search_pt[0]);
     std::size_t idx = idxPr.first*this->col_size_+idxPr.second;
     auto singleLoc = gridSingleCache[idx];
@@ -104,8 +104,8 @@ const SBLoc<FPType>* BKDTGridSBSolver<KDTType, FPType>::FindNearestLoc(PointND<F
 }
 
 
-template class BKDTGridSBSolver<KDTree, double>;
-template class BKDTGridSBSolver<KDTree, float>;
+template class BKDTGridSBSolver<KDTree, double, def::ThreadingPolicy::kSingle>;
+template class BKDTGridSBSolver<KDTree, float, def::ThreadingPolicy::kSingle>;
 
 /*
 template class BKDTGridSBSolver<KDTreeCusMem, double>;

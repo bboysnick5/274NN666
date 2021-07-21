@@ -31,7 +31,7 @@
 
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT
-= PointND<FPType, N>::DistType::EUC>
+= PointND<FPType, N>::DistType::kEuc>
 class KDTreeCusMem {
 public:
     
@@ -223,12 +223,12 @@ private:
     ElemType NNValue(const PointND<value_type, N>& key) const;
     
     template <typename PointND<value_type, N>::DistType thisDt = DT,
-              typename std::enable_if<thisDt == PointND<value_type, N>::DistType::EUC, int>::type = 0>
+              typename std::enable_if<thisDt == PointND<value_type, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType *&, value_type&) const;
     
     template <typename PointND<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::EUC, int>::type = 0>
+    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType*&, value_type&) const;
     
@@ -704,7 +704,7 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPT
             hasNext = true;
         }
         curDistSq = PointND<FPType, N>::template
-        dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+        dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
@@ -748,7 +748,7 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPT
  FPType diff, std::vector<std::pair<FPType,
  std::pair<PointND<FPType, N>, ElemType>>> &distKVPairs,
  FPType& bestDistSq, FPType&bestDistDiffSq) const {
- auto distSq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+ auto distSq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
  if (distSq < bestDistDiffSq) {
  if (distSq < bestDistSq) {
  bestDistSq = distSq;
@@ -807,7 +807,7 @@ ElemType KDTreeCusMem<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>
             hasNext = true;
         }
         next_dim = dim == N - 1 ? 0 : dim + 1;
-        curDist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+        curDist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
@@ -872,12 +872,12 @@ ElemType KDTreeCusMem<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt == PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt == PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template
-    dist<PointND<FPType, N>::DistType::EUCSQ>(cur->key, pt);
+    dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -896,7 +896,7 @@ NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
 
 template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
 template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt != PointND<FPType, N>::DistType::EUC, int>::type>
+typename std::enable_if<thisDt != PointND<FPType, N>::DistType::kEuc, int>::type>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
@@ -920,11 +920,11 @@ template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<F
 FPType KDTreeCusMem<FPType, N, ElemType, DT>::branchMin(const PointND<FPType, N> &trPt,
                                           const PointND<FPType, N> &searchPt, std::size_t idx) const {
     switch (DT) {
-        case PointND<FPType, N>::DistType::EUC:
-        case PointND<FPType, N>::DistType::MAN:
+        case PointND<FPType, N>::DistType::kEuc:
+        case PointND<FPType, N>::DistType::kMan:
             return std::fabs(trPt[idx] - searchPt[idx]);
             /*
-             case DistType::HAV:
+             case DistType::kHav:
              PointND<FPType, N> pt;
              pt[idx] = searchPt[idx];
              pt[1-idx] = trPt[1-idx];

@@ -14,8 +14,8 @@
 
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-class BKDTSBSolver : public KDTSBSolver<KDTType, FPType> {
+template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
+class BKDTSBSolver : public KDTSBSolver<KDTType, FPType, policy> {
     
 public:
     virtual void Build(std::span<const SBLoc<FPType>>) override;

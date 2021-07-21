@@ -22,7 +22,7 @@ link_directories( /usr/local/lib/)
 
 find_package(absl REQUIRED)
 find_package(OpenMP)
-
+find_package(Vc)
 
 file(GLOB all_SRCS
         "${PROJECT_SOURCE_DIR}/cppsrc/*.h"
@@ -32,6 +32,7 @@ file(GLOB all_SRCS
         )
 
 add_executable(274NN666 ${all_SRCS})
+target_link_libraries(274NN666 PUBLIC Vc::Vc)
 target_link_libraries(274NN666 PUBLIC absl::random_random)
 if(OpenMP_CXX_FOUND)
     target_link_libraries(274NN666 PUBLIC OpenMP::OpenMP_CXX)

@@ -9,10 +9,12 @@
 #ifndef Utility_hpp
 #define Utility_hpp
 
+#include "Definition.hpp"
 #include <stdio.h>
 //#include <execution>
 #include <omp.h>
 #include <utility>
+
 
 /*
  Allow pass-in value calculation formula and store the computed data
@@ -31,99 +33,111 @@ constexpr void CycleSwap(T& t1, T& t2, T& t3) {
     t3 = std::move(temp);
 }
 
-template <class _Compare, class _ForwardIterator>
-void Sort3(_ForwardIterator __x, _ForwardIterator __y, _ForwardIterator __z, _Compare __c)
+template <class Compare, class ForwardIterator>
+void Sort3(ForwardIterator x, ForwardIterator y, ForwardIterator z, Compare c)
 {
-    if (!__c(*__y, *__x))          // if x <= y
+    if (!c(*y, *x))             // if x <= y
     {
-        if (!__c(*__z, *__y))      // if y <= z
-            return;                // x <= y && y <= z
-                                   // x <= y && y > z
-        std::swap(*__y, *__z);          // x <= z && y < z
-        if (__c(*__y, *__x))       // if x > y
-            std::swap(*__x, *__y);      // x < y && y <= z
+        if (!c(*z, *y))         // if y <= z
+            return;             // x <= y && y <= z
+                                // x <= y && y > z
+        std::swap(*y, *z);      // x <= z && y < z
+        if (c(*y, *x))          // if x > y
+            std::swap(*x, *y);  // x < y && y <= z
         return;
     }
-    if (__c(*__z, *__y)) {         // x > y, if y > z
-        std::swap(*__x, *__z);          // x < y && y < z
+    if (c(*z, *y)) {            // x > y, if y > z
+        std::swap(*x, *z);      // x < y && y < z
         return;
     }
-    std::swap(*__x, *__y);              // x > y && y <= z
-                                   // x < y && x <= z
-    if (__c(*__z, *__y))           // if y > z
-        std::swap(*__y, *__z);          // x <= y && y < z
+    std::swap(*x, *y);          // x > y && y <= z
+                                // x < y && x <= z
+    if (c(*z, *y))              // if y > z
+        std::swap(*y, *z);      // x <= y && y < z
 }
 
-template <class _ForwardIterator, class _GetDist, class _Compare>
-static _ForwardIterator
-MinElementGivenDistFunc(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-    if (__first != __last) [[likely]] {
-        _ForwardIterator __i = __first;
-        auto __bestDist = __distFunc(*__first);
-        while (++__i != __last) {
-            if (auto __dist = __distFunc(*__i); __comp(__dist, __bestDist)) {
-                __bestDist = __dist;
-                __first = __i;
+
+template <class ForwardIterator, class GetDist, class Compare>
+static ForwardIterator
+MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp,
+                        def::PolicyTag<def::ThreadingPolicy::kSingle>) {
+    if (first != last) [[likely]] {
+        ForwardIterator i = first;
+        auto bestDist = distFunc(*first);
+        while (++i != last) {
+            if (auto dist = distFunc(*i); comp(dist, bestDist)) {
+                bestDist = dist;
+                first = i;
             }
         }
     }
-    return __first;
+    return first;
 }
 
-template <class _ForwardIterator, class _GetDist, class _Compare>
-static _ForwardIterator
-MinElementGivenDistFunc_p(_ForwardIterator __first, _ForwardIterator __last, _GetDist __distFunc, _Compare __comp) {
-    if (__first == __last) [[unlikely]]
-        return __first;
-    auto __result = __first;
-    auto __bestDist = __distFunc(*__first++);
+template <class ForwardIterator, class GetDist, class Compare>
+static ForwardIterator
+MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp,
+                        def::PolicyTag<def::ThreadingPolicy::kMultiOmp>) {
+    if (first == last) [[unlikely]]
+        return first;
+    auto result = first;
+    auto bestDist = distFunc(*first++);
     #pragma omp parallel
     {
-        auto this_thread_best_dist = __bestDist;
-        _ForwardIterator this_thread_best_it = __first;
+        auto this_thread_best_dist = bestDist;
+        ForwardIterator this_thread_best_it = first;
         #pragma omp for
-        for (_ForwardIterator __i = __first; __i < __last; ++__i) {
-            if (auto this_dist = __distFunc(*__i); __comp(this_dist, this_thread_best_dist)) {
+        for (ForwardIterator i = first; i < last; ++i) {
+            if (auto this_dist = distFunc(*i); comp(this_dist, this_thread_best_dist)) {
                 this_thread_best_dist = this_dist;
-                this_thread_best_it = __i;
+                this_thread_best_it = i;
             }
         }
         #pragma omp critical
         {
-            if (__comp(this_thread_best_dist, __bestDist)) {
-                __bestDist = this_thread_best_dist;
-                __result = this_thread_best_it;
+            if (comp(this_thread_best_dist, bestDist)) {
+                bestDist = this_thread_best_dist;
+                result = this_thread_best_it;
             }
         }
     }
-    return __result;
-        /*
-        if (__first == __last) [[unlikely]]
-            return __first;
-        std::ptrdiff_t __result_idx = 0;
-        auto __bestDist = __distFunc(*__first++);
-        auto __last_idx = __last - __first;
-        #pragma omp parallel
+    return result;
+    /*
+    if (first == last) [[unlikely]]
+        return first;
+    std::ptrdiff_t result_idx = 0;
+    auto bestDist = distFunc(*first++);
+    auto last_idx = last - first;
+    #pragma omp parallel
+    {
+        auto this_thread_best_dist = bestDist;
+        std::ptrdiff_t this_thread_best_idx = 0;
+        #pragma omp for
+        for (std::ptrdiff_t i = 0; i < last_idx; ++i) {
+            if (auto this_dist = distFunc(*(first+i)); comp(this_dist, this_thread_best_dist)) {
+                this_thread_best_dist = this_dist;
+                this_thread_best_idx = i;
+            }
+        }
+        #pragma omp critical
         {
-            auto this_thread_best_dist = __bestDist;
-            std::ptrdiff_t this_thread_best_idx = 0;
-            #pragma omp for
-            for (std::ptrdiff_t __i = 0; __i < __last_idx; ++__i) {
-                if (auto this_dist = __distFunc(*(__first+__i)); __comp(this_dist, this_thread_best_dist)) {
-                    this_thread_best_dist = this_dist;
-                    this_thread_best_idx = __i;
-                }
-            }
-            #pragma omp critical
-            {
-                if (__comp(this_thread_best_dist, __bestDist)) {
-                    __bestDist = this_thread_best_dist;
-                    __result_idx = this_thread_best_idx;
-                }
+            if (comp(this_thread_best_dist, bestDist)) {
+                bestDist = this_thread_best_dist;
+                result_idx = this_thread_best_idx;
             }
         }
-        return __first + __result_idx; // this version is compatible with openmp < 4.0, but requires RAI.
-         */
     }
+    return first + result_idx; // this version is compatible with openmp < 4.0, but requires RAI.
+    */
+}
+
+
+template <def::ThreadingPolicy policy = def::ThreadingPolicy::kSingle,
+          class ForwardIterator, class GetDist, class Compare>
+static ForwardIterator
+MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp) {
+    return MinElementGivenDistFunc(first, last, distFunc, comp, def::PolicyTag<policy>{});
+}
+
 };
 #endif /* Utility_hpp */

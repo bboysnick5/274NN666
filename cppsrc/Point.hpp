@@ -9,6 +9,7 @@
 #ifndef POINTND_INCLUDED
 #define POINTND_INCLUDED
 
+#include <Vc/Vc>
 //#include <oneapi/dpl/execution>
 #include <cmath>
 #include <stdlib.h>
@@ -28,10 +29,11 @@ namespace ns {
     struct Z {};
 }
 
+using namespace Vc;
+
 template <typename FPType, std::uint8_t N>
 class PointND {
 public:
-
 
 
     typedef PointND                                                        __self;
@@ -48,11 +50,11 @@ public:
     typedef std::reverse_iterator<const_iterator>                        const_reverse_iterator;
     
     enum class DistType {
-        EUC = 0,
-        EUCSQ,
-        MAN,
-        HAV,
-        HAVCOMP
+        kEuc = 0,
+        kEucSq,
+        kMan,
+        kHav,
+        kHavComp
     };
     
     
@@ -132,6 +134,9 @@ private:
 
 };
 
+template <typename FPType, std::uint8_t N>
+using PointNDV = Vc::simdize<PointND<FPType, N>>;
+
 /** PointND class implementation details */
 
 
@@ -194,16 +199,16 @@ template <typename FPType, std::uint8_t N>
 template <typename PointND<FPType, N>::DistType DT, typename... VArgs>
 FPType PointND<FPType, N>::dist(const PointND<FPType, N>& one, const PointND<FPType, N>& two, VArgs... args) {
     switch (DT) {
-        case DistType::EUC:
+        case DistType::kEuc:
             return EucDist(one, two);
-        case DistType::EUCSQ:
+        case DistType::kEucSq:
             return EucSqDist(one, two);
-        case DistType::MAN:
+        case DistType::kMan:
             return ManDist(one, two);
-        case DistType::HAV:
+        case DistType::kHav:
             // TODO type-safe
             return HavDist(one, two, {args...});
-        case DistType::HAVCOMP:
+        case DistType::kHavComp:
             return HavDistCompCalcA(one, two);
         }
 }

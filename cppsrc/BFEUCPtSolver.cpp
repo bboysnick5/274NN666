@@ -10,18 +10,19 @@
 #include "Utility.hpp"
 #include <algorithm>
 
-template <typename FPType>
-const SBLoc<FPType>* BFEUCPtSBSolver<FPType>::FindNearestLoc(PointND<FPType, 2> geo_search_pt) const {
-    return &*utility::MinElementGivenDistFunc_p(this->loc_data_span_.rbegin(), this->loc_data_span_.rend(),
+template <typename FPType, def::ThreadingPolicy policy>
+const SBLoc<FPType>* BFEUCPtSBSolver<FPType, policy>::
+FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
+    return &*utility::MinElementGivenDistFunc<policy>(this->loc_data_span_.rbegin(), this->loc_data_span_.rend(),
                                               [test_pt = SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt)](const SBLoc<FPType>& l) {
-                                                  return test_pt.template dist<PointND<FPType, 3>::DistType::EUCSQ>(l.LocTo3dEucPt());},
+                                                  return test_pt.template dist<PointND<FPType, 3>::DistType::kEucSq>(l.LocTo3dEucPt());},
                                               std::less<FPType>());
 }
 
-template <typename FPType>
-void BFEUCPtSBSolver<FPType>::PrintSolverInfo() const {
+template <typename FPType, def::ThreadingPolicy policy>
+void BFEUCPtSBSolver<FPType, policy>::PrintSolverInfo() const {
     std::cout << "This is brute force solver using converted euclidean distance metric.\n";
 }
 
-template class BFEUCPtSBSolver<double>;
-template class BFEUCPtSBSolver<float>;
+template class BFEUCPtSBSolver<double, def::ThreadingPolicy::kSingle>;
+template class BFEUCPtSBSolver<float, def::ThreadingPolicy::kSingle>;
