@@ -7,40 +7,125 @@
     },
     "configurePresets": [
         {
-            "name": "windows-llvm-debug",
-            "displayName": "windows-llvm-debug",
-            "description": "windows llvm debug preset",
+            "name": "base",
+            "description": "common params",
+            "hidden": true,
             "generator": "Ninja",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "installDir": "${sourceDir}/out/install/${presetName}",
+            "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+            "environment": {
+                "VCPKG_FEATURE_FLAGS": "manifests,versions,binarycaching,registries"
+            }
+        },
+        {
+            "name": "windows",
+            "hidden": true,
+            "description": "windows common",
+            "inherits": "base",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
             },
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Windows"
+            }
+        },
+        {
+            "name": "x64-windows-llvm-release",
+            "displayName": "x64-windows-llvm-release",
+            "description": "x64 windows llvm release",
+            "inherits": "windows",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
-                "toolchainFile": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 "VCPKG_TARGET_TRIPLET": "x64-windows-llvm",
-                "installDir": "${sourceDir}/out/install/${presetName}"
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x64-windows-llvm-debug",
+            "displayName": "x64-windows-llvm-debug",
+            "description": "x64 windows llvm debug",
+            "inherits": "x64-windows-llvm-release",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "mac",
+            "hidden": true,
+            "description": "mac common",
+            "inherits": "base",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Darwin"
+            }
+        },
+        {
+            "name": "x64-mac-debug-gcc",
+            "displayName": "x64-mac-gcc-debug",
+            "description": "x64 mac gcc debug",
+            "inherits": "mac",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "gcc",
+                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x64-mac-release-gcc",
+            "displayName": "x64-mac-release-gcc",
+            "description": "x64 mac debug gcc",
+            "inherits": "x64-mac-debug-gcc",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "windows-llvm-debug",
-            "configurePreset": "windows-llvm-debug"
+            "name": "default-build-mac",
+            "displayName": "Default",
+            "configurePreset": "x64-mac-debug-gcc",
+            "description": "Vanilla mac debug build with gcc"
+        },
+        {
+            "name": "default-build-windows",
+            "displayName": "Default",
+            "configurePreset": "x64-windows-llvm-debug",
+            "description": "Vanilla windows debug build with llvm"
+        },
+        {
+            "name": "verbose-build-windows-debug-llvm",
+            "displayName": "verbose-build-windows-debug-llvm",
+            "description": "Passes -v to Ninja",
+            "configurePreset": "x64-windows-llvm-debug",
+            "nativeToolOptions": [
+                "-v"
+            ]
+        },
+        {
+            "name": "verbose-build-mac-debug-gcc",
+            "displayName": "verbose-build-windows-debug-llvm",
+            "configurePreset": "x64-mac-debug-gcc",
+            "inherits": "verbose-build-windows-debug-llvm"
         }
     ],
     "testPresets": [
         {
-            "name": "default",
-            "configurePreset": "default",
+            "name": "core-test-mac",
+            "description": "Enable output on failure",
+            "configurePreset": "x64-mac-debug-gcc",
             "output": {
                 "outputOnFailure": true
-            },
-            "execution": {
-                "noTestsAction": "error",
-                "stopOnFailure": true
             }
+        },
+        {
+            "name": "core-test-windows",
+            "inherits": "core-test-mac",
+            "configurePreset": "x64-windows-debug-llvm"
         }
-    ],
+    ]
 }
