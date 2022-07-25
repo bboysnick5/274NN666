@@ -5,8 +5,7 @@ project(274NN666 VERSION 0.1.0)
 set(OpenMP_CXX_FLAGS "-fopenmp")
 set(OpenMP_CXX_LIB_NAMES "libomp")
 
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED True)
+set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 
 include_directories(
         ${PROJECT_SOURCE_DIR}/cppsrc
@@ -29,6 +28,7 @@ file(GLOB all_SRCS
 add_executable(274NN666 ${all_SRCS})
 target_link_libraries(274NN666 PUBLIC Vc::Vc)
 target_link_libraries(274NN666 PUBLIC absl::random_random)
+target_compile_features(274NN666 PRIVATE cxx_std_23)
 
 if(OpenMP_CXX_FOUND)
         target_link_libraries(274NN666 PUBLIC OpenMP::OpenMP_CXX)
