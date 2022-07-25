@@ -9,6 +9,7 @@
 #ifndef Definition_hpp
 #define Definition_hpp
 
+#include <concepts>
 #include <stdio.h>
 #include <numbers>
 #include <iterator>
