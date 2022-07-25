@@ -14,8 +14,8 @@
 #include "BFSBSolver.hpp"
 #include <stdio.h>
 
-template <typename FPType, def::ThreadingPolicy policy>
-class BFEUCPtSBSolver final : public BFSBSolver<FPType, policy> {
+template <typename FPType, def::ThreadingPolicy Policy>
+class BFEUCPtSBSolver final : public BFSBSolver<FPType, Policy> {
 public:
     const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
     void PrintSolverInfo() const override;

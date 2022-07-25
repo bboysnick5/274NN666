@@ -9,6 +9,8 @@
 #ifndef POINTND_INCLUDED
 #define POINTND_INCLUDED
 
+#include "Definition.hpp"
+
 #include <Vc/Vc>
 //#include <oneapi/dpl/execution>
 #include <cmath>
@@ -49,14 +51,6 @@ public:
     typedef std::reverse_iterator<iterator>                              reverse_iterator;
     typedef std::reverse_iterator<const_iterator>                        const_reverse_iterator;
     
-    enum class DistType {
-        kEuc = 0,
-        kEucSq,
-        kMan,
-        kHav,
-        kHavComp
-    };
-    
     
     template <typename... T>
     //PointND(T... ts) : coords{ts...} {}
@@ -93,10 +87,10 @@ public:
     // Usage: FPType d = Distance(one, two);
     // ----------------------------------------------------------------------------
     // Returns the Euclidean distance between two points.
-    template <DistType, typename... VArgs>
+    template <def::DistType, typename... VArgs>
     static value_type dist(const PointND<FPType, N>& pt1, const PointND<FPType, N>& pt2, VArgs... args);
    
-    template <DistType, typename... VArgs>
+    template <def::DistType, typename... VArgs>
     value_type dist(const PointND<FPType, N>&, VArgs... args) const;
     
     // iterator begin();
@@ -196,25 +190,25 @@ typename PointND<FPType, N>::const_iterator PointND<FPType, N>::cend() const {
 }
 
 template <typename FPType, std::uint8_t N>
-template <typename PointND<FPType, N>::DistType DT, typename... VArgs>
+template <typename def::DistType DT, typename... VArgs>
 FPType PointND<FPType, N>::dist(const PointND<FPType, N>& one, const PointND<FPType, N>& two, VArgs... args) {
     switch (DT) {
-        case DistType::kEuc:
+        case def::DistType::kEuc:
             return EucDist(one, two);
-        case DistType::kEucSq:
+        case def::DistType::kEucSq:
             return EucSqDist(one, two);
-        case DistType::kMan:
+        case def::DistType::kMan:
             return ManDist(one, two);
-        case DistType::kHav:
+        case def::DistType::kHav:
             // TODO type-safe
             return HavDist(one, two, {args...});
-        case DistType::kHavComp:
+        case def::DistType::kHavComp:
             return HavDistCompCalcA(one, two);
-        }
+    }
 }
 
 template <typename FPType, std::uint8_t N>
-template <typename PointND<FPType, N>::DistType DT, typename... VArgs>
+template <typename def::DistType DT, typename... VArgs>
 FPType PointND<FPType, N>::dist(const PointND<FPType, N> &other, VArgs ...args) const {
     return PointND<FPType, N>::template dist<DT>(*this, other, args...);
 }

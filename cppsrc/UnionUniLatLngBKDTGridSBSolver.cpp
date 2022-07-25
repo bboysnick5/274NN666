@@ -7,6 +7,7 @@
 //
 
 #include "UnionUniLatLngBKDTGridSBSolver.hpp"
+#include "Algorithm.hpp"
 #include "Utility.hpp"
 #include <omp.h>
 #include <memory>
@@ -16,14 +17,14 @@
 // TO DO:
 // 2. Time per search, store each search time in the test loc data;
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
 UnionUniLatLngBKDTGridSBSolver(FPType alpc, std::size_t maxCacheCellVecSize)
-: BKDTSBSolver<KDTType, FPType, policy>(), kAveActualLocsPerCell_(alpc),
+: BKDTSBSolver<KDTType, FPType, Policy>(), kAveActualLocsPerCell_(alpc),
 kMaxCacheCellVecSize_(maxCacheCellVecSize) {}
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::PrintSolverInfo() const {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::PrintSolverInfo() const {
     std::size_t num_single_locs = 0, num_vec_locs = 0, num_tree_locs = 0, num_unique_vec_locs = 0;
     std::size_t total_num_tree_nodes = 0, total_num_vec_locs = 0;
     std::for_each(grid_cache_.cbegin(), grid_cache_.cend(), [&](const BitCell& cell) mutable {
@@ -56,10 +57,10 @@ void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::PrintSolverInfo() 
               << "Ave tree height: " << std::log2(static_cast<FPType>(total_num_tree_nodes)/num_tree_locs + 1.0) + 1.0 << std::endl;
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-LoopBody(def::PolicyTag<def::ThreadingPolicy::kSingle>) {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
+LoopBody(def::ThreadingPolicyTag<def::ThreadingPolicy::kSingle>) {
     std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
     pt_loc_vec.reserve(this->kMaxCacheCellVecSize_);
     grid_cache_.reserve(row_size_*col_size_);
@@ -74,10 +75,10 @@ LoopBody(def::PolicyTag<def::ThreadingPolicy::kSingle>) {
     }
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-LoopBody(def::PolicyTag<def::ThreadingPolicy::kMultiOmp>) {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
+LoopBody(def::ThreadingPolicyTag<def::ThreadingPolicy::kMultiOmp>) {
     grid_cache_.resize(row_size_*col_size_, 0);
     FPType initCtrLat = 0.5*lat_inc_ - 0.5*def::kMathPi<FPType>;
     FPType initCtrLng = 0.5*lng_inc_ - def::kMathPi<FPType>;
@@ -100,10 +101,10 @@ firstprivate(pt_loc_vec) default(shared) schedule(dynamic, 1) collapse(2)
 }
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
-LoopBody(def::PolicyTag<def::ThreadingPolicy::kMultiHand>) {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
+LoopBody(def::ThreadingPolicyTag<def::ThreadingPolicy::kMultiHand>) {
     std::vector<typename KDT<KDTType, FPType>::node_type> pt_loc_vec;
     pt_loc_vec.reserve(this->kMaxCacheCellVecSize_);
     std::size_t totalCacheCells = row_size_*col_size_;
@@ -128,34 +129,34 @@ LoopBody(def::PolicyTag<def::ThreadingPolicy::kMultiHand>) {
     }
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::FillGridCache() {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::FillGridCache() {
     col_size_ = row_size_;
     lng_inc_ = 2.0*def::kMathPi<FPType>/col_size_ + std::numeric_limits<FPType>::epsilon();
     lng_inc_inverse_ = 1.0/lng_inc_;
     LoopBodyThreadingPolicyDispatch();
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
 LoopBodyThreadingPolicyDispatch() {
-    LoopBody(def::PolicyTag<policy>{});
+    LoopBody(def::ThreadingPolicyTag<Policy>{});
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::calcSideLenFromAlpc() {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::calcSideLenFromAlpc() {
     FPType surfaceArea = 4.0*def::kMathPi<FPType>*SBLoc<FPType>::EARTH_RADIUS*SBLoc<FPType>::EARTH_RADIUS;
     FPType numCells = this->loc_kdt_.size()/kAveActualLocsPerCell_;
     side_len_ = sqrt(surfaceArea/numCells);
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+void UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
 Build(std::span<const SBLoc<FPType>> loc_data_span) {
     num_actual_locs_ = loc_data_span.size();
-    BKDTSBSolver<KDTType, FPType, policy>::GenerateKDT(loc_data_span);
+    BKDTSBSolver<KDTType, FPType, Policy>::GenerateKDT(loc_data_span);
     calcSideLenFromAlpc();
     lat_inc_ = std::fabs(SBLoc<FPType>::deltaLatOnSameLngFromHavDist(side_len_));
     lat_inc_inverse_ = 1.0/lat_inc_;
@@ -166,26 +167,23 @@ Build(std::span<const SBLoc<FPType>> loc_data_span) {
     this->loc_kdt_ = {};
 }
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
 ReturnNNLocFromCacheVariant(const typename SBLoc<FPType>::GeoPtType& geo_pt, const BitCell& cell) const {
     std::uintptr_t ptr = cell.GetRawPtr();
     if (std::size_t raw_cell_size = cell.RawSizeBits(ptr);
         raw_cell_size == 1) {
         return cell.GetSingleLoc(ptr);
     } else if (raw_cell_size != 0) {
-        return utility::MinElementGivenDistFunc(cell.GetLocPairs(ptr), cell.GetLocPairs(ptr) + raw_cell_size,
-                                                [pt_3d = SBLoc<FPType>::GeoPtTo3dEucPt(geo_pt)](const auto& nh) {return pt_3d.template
-                                                    dist<PointND<FPType, 3>::DistType::kEucSq>(nh.key);},
-                                                std::less{})->value;
+        return Algo<Policy, def::DistType::kEucSq>::LinearNNSearch(cell.GetLocPairs(ptr), cell.GetLocPairs(ptr) + raw_cell_size, SBLoc<FPType>::GeoPtTo3dEucPt(geo_pt), [](const auto& euc_search_pt, const auto& nh) {return euc_search_pt.template dist<def::DistType::kEucSq>(nh.key);})->value;
     } else [[unlikely]] {
         return cell.GetCacheTree(ptr)->kNNValue(SBLoc<FPType>::GeoPtTo3dEucPt(geo_pt), 1);
     }
 }
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy>::
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+const SBLoc<FPType>* UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy>::
 FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
     return ReturnNNLocFromCacheVariant(geo_search_pt,
            grid_cache_[static_cast<std::size_t>((geo_search_pt[0]+0.5*def::kMathPi<FPType>)*lat_inc_inverse_)*col_size_ +

@@ -18,8 +18,8 @@
 #include <variant>
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType, policy> {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+class UniLatLngBKDTGridSBSolver : public BKDTSBSolver<KDTType, FPType, Policy> {
 public:
     UniLatLngBKDTGridSBSolver(FPType = 1, std::size_t = 1500);
     void Build(std::span<const SBLoc<FPType>>) override final;

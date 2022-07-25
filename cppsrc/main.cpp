@@ -6,6 +6,7 @@
 //  Copyright © 2016 Yunlong Liu. All rights reserved.
 //
 
+#include "Definition.hpp"
 #include "BFEUCPtSolver.hpp"
 #include "BFSBSolver.hpp"
 #include "BFLocalStorageSBSolver.hpp"
@@ -51,10 +52,10 @@ std::vector<typename SBLoc<FPType>::GeoPtType> GenerateTestLatLngPts(std::size_t
     std::vector<typename SBLoc<FPType>::GeoPtType> test_lat_lng_pts;
     test_lat_lng_pts.reserve(num_tests + 4);
     test_lat_lng_pts.insert(test_lat_lng_pts.end(),
-                    {{def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
-                     {-def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>},
-                     {-def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
-                     {def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>}});
+                            {{def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
+                            {-def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>},
+                            {-def::kMathPi<FPType>*0.5, def::kMathPi<FPType>},
+                            {def::kMathPi<FPType>*0.5, -def::kMathPi<FPType>}});
     std::generate_n(std::back_inserter(test_lat_lng_pts), num_tests, [&bitgen]()->typename SBLoc<FPType>::GeoPtType {
         return {-0.5*def::kMathPi<FPType> + def::kMathPi<FPType>*absl::Uniform(absl::IntervalClosed, bitgen, 0.0, 1.0),
                 -def::kMathPi<FPType> + def::kMathPi<FPType>*absl::Uniform(absl::IntervalClosed, bitgen, 0.0, 2.0)};});
@@ -98,7 +99,7 @@ void AccuracyTestFromRefSolver(const std::vector<typename SBLoc<FPType>::GeoPtTy
                 test_dist_err_total += testLoc->havDist(test_lat_lng_pt);
                 ref_dist_for_err_pts_total += refLoc->havDist(test_lat_lng_pt);
                 ++errot_count;
-                auto[test_lat, test_lng] = test_lat_lng_pt.DataArray();
+                const auto [test_lat, test_lng] = test_lat_lng_pt.DataArray();
                 std::cout << "Test solver this one search time is: " << this_search_duration.count() << "us" << std::endl
                           << (test_dist < ref_dist ? "Test" : "Ref") << " dist is closer" << std::endl
                           << "Test PointND: Lat: " << SBLoc<FPType>::toDegree(test_lat)
@@ -278,6 +279,8 @@ void MainContent(int argc, const char * argv[]) {
 
     for (std::size_t i = 0; i < std::size(solvers); ++i) {
         TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), solvers[i]);
+        solvers[i].reset(); // warm up the memory and cache
+        TimeBuild(std::forward<std::span<const SBLoc<FPType>>>(loc_data_vec), solvers[i]);
         if (to_test_search_time)
             TimeNNSearch(*solvers[i], search_bench_test_lat_lng_pts, search_benchmark_duration_in_secs, bitgen);
         if (to_test_accuracy)
@@ -293,7 +296,6 @@ int main(int argc, const char * argv[]) {
     if (argc >= 3 && std::strcmp(argv[2], "float") == 0){
         MainContent<float>(argc, argv);
     } else {
-        //mainContent<float>(argc, argv);
         MainContent<def::kDefaultDistType>(argc, argv);
     }
     return 0;

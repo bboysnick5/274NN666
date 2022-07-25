@@ -10,10 +10,15 @@
 #define Utility_hpp
 
 #include "Definition.hpp"
+
+#include <Vc/Vc>
+
 #include <stdio.h>
 //#include <execution>
 #include <omp.h>
 #include <utility>
+#include <type_traits>
+
 
 
 /*
@@ -54,89 +59,6 @@ void Sort3(ForwardIterator x, ForwardIterator y, ForwardIterator z, Compare c)
                                 // x < y && x <= z
     if (c(*z, *y))              // if y > z
         std::swap(*y, *z);      // x <= y && y < z
-}
-
-
-template <class ForwardIterator, class GetDist, class Compare>
-static ForwardIterator
-MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp,
-                        def::PolicyTag<def::ThreadingPolicy::kSingle>) {
-    if (first != last) [[likely]] {
-        ForwardIterator i = first;
-        auto bestDist = distFunc(*first);
-        while (++i != last) {
-            if (auto dist = distFunc(*i); comp(dist, bestDist)) {
-                bestDist = dist;
-                first = i;
-            }
-        }
-    }
-    return first;
-}
-
-template <class ForwardIterator, class GetDist, class Compare>
-static ForwardIterator
-MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp,
-                        def::PolicyTag<def::ThreadingPolicy::kMultiOmp>) {
-    if (first == last) [[unlikely]]
-        return first;
-    auto result = first;
-    auto bestDist = distFunc(*first++);
-    #pragma omp parallel
-    {
-        auto this_thread_best_dist = bestDist;
-        ForwardIterator this_thread_best_it = first;
-        #pragma omp for
-        for (ForwardIterator i = first; i < last; ++i) {
-            if (auto this_dist = distFunc(*i); comp(this_dist, this_thread_best_dist)) {
-                this_thread_best_dist = this_dist;
-                this_thread_best_it = i;
-            }
-        }
-        #pragma omp critical
-        {
-            if (comp(this_thread_best_dist, bestDist)) {
-                bestDist = this_thread_best_dist;
-                result = this_thread_best_it;
-            }
-        }
-    }
-    return result;
-    /*
-    if (first == last) [[unlikely]]
-        return first;
-    std::ptrdiff_t result_idx = 0;
-    auto bestDist = distFunc(*first++);
-    auto last_idx = last - first;
-    #pragma omp parallel
-    {
-        auto this_thread_best_dist = bestDist;
-        std::ptrdiff_t this_thread_best_idx = 0;
-        #pragma omp for
-        for (std::ptrdiff_t i = 0; i < last_idx; ++i) {
-            if (auto this_dist = distFunc(*(first+i)); comp(this_dist, this_thread_best_dist)) {
-                this_thread_best_dist = this_dist;
-                this_thread_best_idx = i;
-            }
-        }
-        #pragma omp critical
-        {
-            if (comp(this_thread_best_dist, bestDist)) {
-                bestDist = this_thread_best_dist;
-                result_idx = this_thread_best_idx;
-            }
-        }
-    }
-    return first + result_idx; // this version is compatible with openmp < 4.0, but requires RAI.
-    */
-}
-
-
-template <def::ThreadingPolicy policy = def::ThreadingPolicy::kSingle,
-          class ForwardIterator, class GetDist, class Compare>
-static ForwardIterator
-MinElementGivenDistFunc(ForwardIterator first, ForwardIterator last, GetDist distFunc, Compare comp) {
-    return MinElementGivenDistFunc(first, last, distFunc, comp, def::PolicyTag<policy>{});
 }
 
 };

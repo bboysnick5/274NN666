@@ -30,8 +30,8 @@
 #include <array>
 
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT
-= PointND<FPType, N>::DistType::kEuc>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT
+= def::DistType::kEuc>
 class KDTreeCusMem {
 public:
     
@@ -102,7 +102,7 @@ public:
     // ----------------------------------------------------
     // Returns the dimension of the points stored in this KDTreeCusMem.
     constexpr std::uint8_t dimension() const;
-    typename PointND<value_type, N>::DistType distType() const;
+    typename def::DistType distType() const;
     
     // std::size_t size() const;
     // std::size_t height() const;
@@ -222,13 +222,13 @@ private:
     // when finding the nearest neighbor only.
     ElemType NNValue(const PointND<value_type, N>& key) const;
     
-    template <typename PointND<value_type, N>::DistType thisDt = DT,
-              typename std::enable_if<thisDt == PointND<value_type, N>::DistType::kEuc, int>::type = 0>
+    template <typename def::DistType thisDt = DT,
+              typename std::enable_if<thisDt == def::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType *&, value_type&) const;
     
-    template <typename PointND<value_type, N>::DistType thisDt = DT,
-    typename std::enable_if<thisDt != PointND<value_type, N>::DistType::kEuc, int>::type = 0>
+    template <typename def::DistType thisDt = DT,
+    typename std::enable_if<thisDt != def::DistType::kEuc, int>::type = 0>
     void NNValueHelper(TreeNode*, std::uint8_t dim, const PointND<value_type, N>&,
                        const ElemType*&, value_type&) const;
     
@@ -259,7 +259,7 @@ private:
 // ----------------------------------------------------------
 
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 template <typename ConstRAI,
     typename std::enable_if<std::is_same<typename std::iterator_traits<typename
     std::remove_const_t<ConstRAI>>::iterator_category,
@@ -275,7 +275,7 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(ConstRAI cbegin, ConstRAI ce
                     (constructData.end() - constructData.begin())/2);
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 template <typename RAI, typename std::enable_if<std::is_same<typename
     std::iterator_traits<RAI>::iterator_category,
     std::random_access_iterator_tag>::value && !std::is_const<typename
@@ -335,7 +335,7 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(RAI begin, RAI end)
    */
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(const KDTreeCusMem& rhs)
 : root(new TreeNode()), treeSize(rhs.treeSize) {
     // wrong logic.
@@ -349,7 +349,7 @@ KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(const KDTreeCusMem& rhs)
     treeCopy(root, rhs.root);
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 KDTreeCusMem<FPType, N, ElemType, DT>&
 KDTreeCusMem<FPType, N, ElemType, DT>::operator=(const KDTreeCusMem& rhs) & {
     if (this != &rhs) {
@@ -361,14 +361,14 @@ KDTreeCusMem<FPType, N, ElemType, DT>::operator=(const KDTreeCusMem& rhs) & {
     return *this;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 KDTreeCusMem<FPType, N, ElemType, DT>::KDTreeCusMem(KDTreeCusMem&& rhs) noexcept
 : root(rhs.root), treeSize(rhs.treeSize), pool(std::move(rhs.pool)) {
     rhs.root = nullptr;
     rhs.treeSize = 0;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 KDTreeCusMem<FPType, N, ElemType, DT>& KDTreeCusMem<FPType, N, ElemType, DT>::
 operator=(KDTreeCusMem&& rhs) & noexcept {
     if (this != &rhs) {
@@ -382,7 +382,7 @@ operator=(KDTreeCusMem&& rhs) & noexcept {
 }
 
 /*
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 template <class RAI>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
@@ -425,7 +425,7 @@ RangeCtorHelper(TreeNode*& ndPoolPtr, RAI begin,
 }
 */
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 template <class RAI>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 RangeCtorHelper(TreeNode*& ndPoolPtr, std::uint8_t dim, RAI begin,
@@ -459,7 +459,7 @@ RangeCtorHelper(TreeNode*& ndPoolPtr, std::uint8_t dim, RAI begin,
 }
 
  
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 void KDTreeCusMem<FPType, N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
                                              TreeNode* otherNode
 //TreeNode* ndPoolIt
@@ -481,7 +481,7 @@ void KDTreeCusMem<FPType, N, ElemType, DT>::treeCopy(TreeNode*& thisNode,
     }
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 KDTreeCusMem<FPType, N, ElemType, DT>::~KDTreeCusMem() {
     if (pool)
         pool->destroy_and_free_all<TreeNode>();
@@ -491,39 +491,39 @@ KDTreeCusMem<FPType, N, ElemType, DT>::~KDTreeCusMem() {
 // ----------------- TREE INFORMATION  ----------------------
 // ----------------------------------------------------------
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 constexpr std::uint8_t KDTreeCusMem<FPType, N, ElemType, DT>::dimension() const {
     return N;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-typename PointND<FPType, N>::DistType KDTreeCusMem<FPType, N, ElemType, DT>::distType() const {
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
+typename def::DistType KDTreeCusMem<FPType, N, ElemType, DT>::distType() const {
     return DT;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 std::size_t KDTreeCusMem<FPType, N, ElemType, DT>::size() const {
     return treeSize;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 int KDTreeCusMem<FPType, N, ElemType, DT>::height() const {
     return heightHelper(root);
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 int KDTreeCusMem<FPType, N, ElemType, DT>::heightHelper(TreeNode *n) const {
     return n ? 1 + std::max(heightHelper(n->left),
                             heightHelper(n->right)) : -1;
 }
 
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 bool KDTreeCusMem<FPType, N, ElemType, DT>::empty() const {
     return treeSize == 0;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 void KDTreeCusMem<FPType, N, ElemType, DT>::PrintTreeInfo() const {
     std::cout << "Tree height is " << height()
               << "\nTree size is " << size() << "\n";
@@ -533,14 +533,14 @@ void KDTreeCusMem<FPType, N, ElemType, DT>::PrintTreeInfo() const {
 // ----------------- MODIFIERS AND ACCESS -------------------
 // ----------------------------------------------------------
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 void KDTreeCusMem<FPType, N, ElemType, DT>::Clear() {
     pool->destroy_and_free_all<TreeNode>();
     root = nullptr;
     treeSize = 0;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 insert(const PointND<FPType, N>& pt, const ElemType& value) {
     TreeNode **ndPtr = findNodePtr(pt);
@@ -552,12 +552,12 @@ insert(const PointND<FPType, N>& pt, const ElemType& value) {
     }
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 bool KDTreeCusMem<FPType, N, ElemType, DT>::contains(const PointND<FPType, N>& pt) const {
     return *findNodePtr(pt) != nullptr;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 ElemType& KDTreeCusMem<FPType, N, ElemType, DT>::operator[] (const PointND<FPType, N>& pt) {
     TreeNode **ndPtr = findNodePtr(pt);
     if (!*ndPtr) {
@@ -567,12 +567,12 @@ ElemType& KDTreeCusMem<FPType, N, ElemType, DT>::operator[] (const PointND<FPTyp
     return (*ndPtr)->object;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 ElemType& KDTreeCusMem<FPType, N, ElemType, DT>::at(const PointND<FPType, N>& pt) {
     return const_cast<ElemType&>(static_cast<const KDTreeCusMem&>(*this).at(pt));
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 const ElemType& KDTreeCusMem<FPType, N, ElemType, DT>::at(const PointND<FPType, N>& pt) const {
     TreeNode *const*n = findNodePtr(pt);
     if (!*n) {
@@ -581,13 +581,13 @@ const ElemType& KDTreeCusMem<FPType, N, ElemType, DT>::at(const PointND<FPType, 
     return (*n)->object;
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 typename KDTreeCusMem<FPType, N, ElemType, DT>::TreeNode**
 KDTreeCusMem<FPType, N, ElemType, DT>::findNodePtr(const PointND<FPType, N>& pt) {
     return const_cast<TreeNode**>(static_cast<const KDTreeCusMem*>(this)->findNodePtr(pt));
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 typename KDTreeCusMem<FPType, N, ElemType, DT>::TreeNode*const*
 KDTreeCusMem<FPType, N, ElemType, DT>::findNodePtr(const PointND<FPType, N>& pt) const {
     TreeNode *const*n = &root;
@@ -597,7 +597,7 @@ KDTreeCusMem<FPType, N, ElemType, DT>::findNodePtr(const PointND<FPType, N>& pt)
 }
 
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 ElemType KDTreeCusMem<FPType, N, ElemType, DT>::
 kNNValue(const PointND<FPType, N>& pt, std::size_t k) const {
     if (k == 1)
@@ -644,7 +644,7 @@ kNNValue(const PointND<FPType, N>& pt, std::size_t k) const {
      return frequent; */
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 void KDTreeCusMem<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, std::uint8_t dim,
                                              const PointND<FPType, N>& pt, BoundedPQueue<ElemType, FPType> &bpq) const {
     bpq.enqueue(cur->object, PointND<FPType, N>::template dist<DT>(cur->key, pt));
@@ -660,7 +660,7 @@ void KDTreeCusMem<FPType, N, ElemType, DT>::kNNValueHelper(TreeNode *cur, std::u
     }
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 template <class OutputIter>
 OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPType, N>& pt,
                                                 FPType fence, OutputIter returnIt) const {
@@ -704,7 +704,7 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPT
             hasNext = true;
         }
         curDistSq = PointND<FPType, N>::template
-        dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
+        dist<def::DistType::kEucSq>(cur->key, pt);
         if (curDistSq < bestDistDiffSq) {
             if (curDistSq < bestDistSq) {
                 bestDistSq = curDistSq;
@@ -742,13 +742,13 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPT
 }
 
 /*
- template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+ template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
  void KDTreeCusMem<FPType, N, ElemType, DT>::
  NNsWithFenceHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N>& pt,
  FPType diff, std::vector<std::pair<FPType,
  std::pair<PointND<FPType, N>, ElemType>>> &distKVPairs,
  FPType& bestDistSq, FPType&bestDistDiffSq) const {
- auto distSq = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
+ auto distSq = PointND<FPType, N>::template dist<def::DistType::kEucSq>(cur->key, pt);
  if (distSq < bestDistDiffSq) {
  if (distSq < bestDistSq) {
  bestDistSq = distSq;
@@ -768,7 +768,7 @@ OutputIter KDTreeCusMem<FPType, N, ElemType, DT>::NNsWithFence(const PointND<FPT
  }
  }*/
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 ElemType KDTreeCusMem<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N> &pt) const {
     
     
@@ -807,7 +807,7 @@ ElemType KDTreeCusMem<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>
             hasNext = true;
         }
         next_dim = dim == N - 1 ? 0 : dim + 1;
-        curDist = PointND<FPType, N>::template dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
+        curDist = PointND<FPType, N>::template dist<def::DistType::kEucSq>(cur->key, pt);
         if (curDist < bestDist) {
             bestDist = curDist;
             bestValue = &cur->object;
@@ -870,14 +870,14 @@ ElemType KDTreeCusMem<FPType, N, ElemType, DT>::NNValue(const PointND<FPType, N>
     
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt == PointND<FPType, N>::DistType::kEuc, int>::type>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
+template <typename def::DistType thisDt,
+typename std::enable_if<thisDt == def::DistType::kEuc, int>::type>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
     FPType curDist = PointND<FPType, N>::template
-    dist<PointND<FPType, N>::DistType::kEucSq>(cur->key, pt);
+    dist<def::DistType::kEucSq>(cur->key, pt);
     if (curDist < bestDist) {
         bestDist = curDist;
         bestValue = &cur->object;
@@ -894,9 +894,9 @@ NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
     }
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
-template <typename PointND<FPType, N>::DistType thisDt,
-typename std::enable_if<thisDt != PointND<FPType, N>::DistType::kEuc, int>::type>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
+template <typename def::DistType thisDt,
+typename std::enable_if<thisDt != def::DistType::kEuc, int>::type>
 void KDTreeCusMem<FPType, N, ElemType, DT>::
 NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
               const ElemType *&bestValue, FPType &bestDist) const {
@@ -916,12 +916,12 @@ NNValueHelper(TreeNode *cur, std::uint8_t dim, const PointND<FPType, N> &pt,
     }
 }
 
-template <typename FPType, std::uint8_t N, typename ElemType, typename PointND<FPType, N>::DistType DT>
+template <typename FPType, std::uint8_t N, typename ElemType, typename def::DistType DT>
 FPType KDTreeCusMem<FPType, N, ElemType, DT>::branchMin(const PointND<FPType, N> &trPt,
                                           const PointND<FPType, N> &searchPt, std::size_t idx) const {
     switch (DT) {
-        case PointND<FPType, N>::DistType::kEuc:
-        case PointND<FPType, N>::DistType::kMan:
+        case def::DistType::kEuc:
+        case def::DistType::kMan:
             return std::fabs(trPt[idx] - searchPt[idx]);
             /*
              case DistType::kHav:

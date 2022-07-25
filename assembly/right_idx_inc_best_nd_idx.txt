@@ -1,0 +1,901 @@
+.LCPI0_0:
+  .quad 0x3ff0000000000000 # double 1
+.LCPI0_1:
+  .quad 0x3fc999999999999a # double 0.20000000000000001
+  .quad 0x3fe0000000000000 # double 0.5
+main: # @main
+  push rbx
+  sub rsp, 64
+  mov qword ptr [rsp + 16], 0
+  vxorpd xmm0, xmm0, xmm0
+  call log2@PLT
+  vaddsd xmm0, xmm0, qword ptr [rip + .LCPI0_0]
+  vcvttsd2si rax, xmm0
+  mov dword ptr [rsp + 24], eax
+  mov rbx, rsp
+  mov rdi, rbx
+  xor esi, esi
+  xor edx, edx
+  call void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorHelper<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >)
+  vmovaps xmm0, xmmword ptr [rip + .LCPI0_1] # xmm0 = [2.0000000000000001E-1,5.0E-1]
+  vmovaps xmmword ptr [rsp + 32], xmm0
+  mov qword ptr [rsp + 48], 0
+  lea rsi, [rsp + 32]
+  mov rdi, rbx
+  call KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::NNValue(PointND<double, (unsigned char)3> const&) const
+  mov rdi, qword ptr [rsp]
+  test rdi, rdi
+  je .LBB0_3
+  call operator delete[](void*)
+.LBB0_3:
+  mov rdi, qword ptr [rsp + 8]
+  call operator delete(void*)
+  xor eax, eax
+  add rsp, 64
+  pop rbx
+  ret
+  mov rbx, rax
+  mov rdi, rsp
+  call KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::DeAlloc()
+  mov rdi, rbx
+  call _Unwind_Resume@PLT
+  mov rdi, rax
+  call __clang_call_terminate
+__clang_call_terminate: # @__clang_call_terminate
+  push rax
+  call __cxa_begin_catch
+  call std::terminate()
+.LCPI2_0:
+  .quad 0x7fefffffffffffff # double 1.7976931348623157E+308
+  .quad 0x7fefffffffffffff # double 1.7976931348623157E+308
+.LCPI2_1:
+  .quad 0x0010000000000000 # double 2.2250738585072014E-308
+  .quad 0x0010000000000000 # double 2.2250738585072014E-308
+.LCPI2_2:
+  .quad 0x7fefffffffffffff # double 1.7976931348623157E+308
+.LCPI2_3:
+  .quad 0x0010000000000000 # double 2.2250738585072014E-308
+void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorHelper<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >): # @void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorHelper<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >)
+  push r15
+  push r14
+  push r12
+  push rbx
+  sub rsp, 232
+  mov ebx, dword ptr [rdi + 16]
+  test rbx, rbx
+  je .LBB2_12
+  mov r12, rdx
+  mov r14, rsi
+  mov r15, rdi
+  mov rdi, rbx
+  shl rdi, 5
+  call operator new[](unsigned long)
+  mov qword ptr [r15], rax
+  shl rbx, 3
+  mov esi, offset std::nothrow
+  mov rdi, rbx
+  call operator new(unsigned long, std::nothrow_t const&)
+  mov qword ptr [r15 + 8], rax
+  cmp dword ptr [r15 + 16], 1
+  je .LBB2_2
+  cmp r14, r12
+  je .LBB2_4
+  mov rdx, r12
+  sub rdx, r14
+  add rdx, -32
+  cmp rdx, 256
+  jae .LBB2_7
+  vmovapd xmm3, xmmword ptr [rip + .LCPI2_0] # xmm3 = [1.7976931348623157E+308,1.7976931348623157E+308]
+  vmovapd xmm1, xmmword ptr [rip + .LCPI2_1] # xmm1 = [2.2250738585072014E-308,2.2250738585072014E-308]
+  vmovsd xmm2, qword ptr [rip + .LCPI2_2] # xmm2 = mem[0],zero
+  vmovsd xmm0, qword ptr [rip + .LCPI2_3] # xmm0 = mem[0],zero
+  mov rcx, r14
+  jmp .LBB2_10
+.LBB2_4:
+  vmovapd xmm3, xmmword ptr [rip + .LCPI2_0] # xmm3 = [1.7976931348623157E+308,1.7976931348623157E+308]
+  vmovapd xmm1, xmmword ptr [rip + .LCPI2_1] # xmm1 = [2.2250738585072014E-308,2.2250738585072014E-308]
+  vmovsd xmm2, qword ptr [rip + .LCPI2_2] # xmm2 = mem[0],zero
+  vmovsd xmm0, qword ptr [rip + .LCPI2_3] # xmm0 = mem[0],zero
+  jmp .LBB2_11
+.LBB2_7:
+  shr rdx, 5
+  lea rcx, [rdx + 1]
+  mov esi, ecx
+  and esi, 7
+  test rsi, rsi
+  mov edi, 8
+  cmovne rdi, rsi
+  sub rcx, rdi
+  shl rcx, 5
+  add rcx, r14
+  lea rsi, [r14 + 128]
+  sub rdx, rdi
+  add rdx, 1
+  vbroadcastsd ymm0, qword ptr [rip + .LCPI2_2] # ymm0 = [1.7976931348623157E+308,1.7976931348623157E+308,1.7976931348623157E+308,1.7976931348623157E+308]
+  vbroadcastsd ymm12, qword ptr [rip + .LCPI2_3] # ymm12 = [2.2250738585072014E-308,2.2250738585072014E-308,2.2250738585072014E-308,2.2250738585072014E-308]
+  vmovapd ymm13, ymm12
+  vmovapd ymm2, ymm0
+  vmovapd ymm14, ymm12
+  vmovapd ymm5, ymm12
+  vmovapd ymm6, ymm0
+  vmovapd ymm7, ymm0
+  vmovapd ymm8, ymm12
+  vmovapd ymm9, ymm12
+  vmovapd ymm10, ymm0
+  vmovapd ymm11, ymm0
+.LBB2_8: # =>This Inner Loop Header: Depth=1
+  vmovupd ymmword ptr [rsp + 96], ymm14 # 32-byte Spill
+  vmovupd ymmword ptr [rsp + 128], ymm2 # 32-byte Spill
+  vmovupd ymmword ptr [rsp + 160], ymm0 # 32-byte Spill
+  vmovupd ymmword ptr [rsp + 192], ymm13 # 32-byte Spill
+  vmovapd ymm4, ymm12
+  vmovupd ymm12, ymmword ptr [rsi - 128]
+  vmovupd ymm13, ymmword ptr [rsi - 96]
+  vmovupd ymm14, ymmword ptr [rsi - 64]
+  vmovupd ymm15, ymmword ptr [rsi - 32]
+  vperm2f128 ymm0, ymm12, ymm14, 32 # ymm0 = ymm12[0,1],ymm14[0,1]
+  vperm2f128 ymm1, ymm13, ymm15, 32 # ymm1 = ymm13[0,1],ymm15[0,1]
+  vperm2f128 ymm12, ymm12, ymm14, 49 # ymm12 = ymm12[2,3],ymm14[2,3]
+  vperm2f128 ymm13, ymm13, ymm15, 49 # ymm13 = ymm13[2,3],ymm15[2,3]
+  vunpcklpd ymm12, ymm12, ymm13 # ymm12 = ymm12[0],ymm13[0],ymm12[2],ymm13[2]
+  vunpcklpd ymm13, ymm0, ymm1 # ymm13 = ymm0[0],ymm1[0],ymm0[2],ymm1[2]
+  vunpckhpd ymm0, ymm0, ymm1 # ymm0 = ymm0[1],ymm1[1],ymm0[3],ymm1[3]
+  vmovupd ymm1, ymmword ptr [rsi]
+  vmovupd ymm14, ymmword ptr [rsi + 32]
+  vmovupd ymm15, ymmword ptr [rsi + 64]
+  vmovupd ymm2, ymmword ptr [rsi + 96]
+  vperm2f128 ymm3, ymm1, ymm15, 32 # ymm3 = ymm1[0,1],ymm15[0,1]
+  vperm2f128 ymm1, ymm1, ymm15, 49 # ymm1 = ymm1[2,3],ymm15[2,3]
+  vperm2f128 ymm15, ymm14, ymm2, 32 # ymm15 = ymm14[0,1],ymm2[0,1]
+  vperm2f128 ymm2, ymm14, ymm2, 49 # ymm2 = ymm14[2,3],ymm2[2,3]
+  vmovupd ymm14, ymmword ptr [rsp + 96] # 32-byte Reload
+  vunpcklpd ymm1, ymm1, ymm2 # ymm1 = ymm1[0],ymm2[0],ymm1[2],ymm2[2]
+  vunpcklpd ymm2, ymm3, ymm15 # ymm2 = ymm3[0],ymm15[0],ymm3[2],ymm15[2]
+  vunpckhpd ymm3, ymm3, ymm15 # ymm3 = ymm3[1],ymm15[1],ymm3[3],ymm15[3]
+  vminpd ymm10, ymm13, ymm10
+  vmaxpd ymm8, ymm13, ymm8
+  vmovupd ymm13, ymmword ptr [rsp + 192] # 32-byte Reload
+  vminpd ymm11, ymm11, ymm2
+  vmaxpd ymm9, ymm9, ymm2
+  vmovupd ymm2, ymmword ptr [rsp + 128] # 32-byte Reload
+  vminpd ymm6, ymm0, ymm6
+  vmaxpd ymm14, ymm14, ymm0
+  vmovupd ymm0, ymmword ptr [rsp + 160] # 32-byte Reload
+  vminpd ymm7, ymm3, ymm7
+  vmaxpd ymm5, ymm3, ymm5
+  vminpd ymm0, ymm12, ymm0
+  vmaxpd ymm12, ymm12, ymm4
+  vminpd ymm2, ymm1, ymm2
+  vmaxpd ymm13, ymm13, ymm1
+  add rsi, 256
+  add rdx, -8
+  jne .LBB2_8
+  vminpd ymm3, ymm10, ymm11
+  vextractf128 xmm10, ymm3, 1
+  vmaxpd ymm1, ymm8, ymm9
+  vextractf128 xmm8, ymm1, 1
+  vminpd ymm6, ymm6, ymm7
+  vextractf128 xmm9, ymm6, 1
+  vmaxpd ymm4, ymm14, ymm5
+  vextractf128 xmm5, ymm4, 1
+  vminpd ymm0, ymm0, ymm2
+  vextractf128 xmm2, ymm0, 1
+  vminpd xmm0, xmm0, xmm2
+  vpermilpd xmm2, xmm0, 1 # xmm2 = xmm0[1,0]
+  vminsd xmm2, xmm0, xmm2
+  vmaxpd ymm0, ymm12, ymm13
+  vextractf128 xmm7, ymm0, 1
+  vmaxpd xmm0, xmm0, xmm7
+  vpermilpd xmm7, xmm0, 1 # xmm7 = xmm0[1,0]
+  vmaxsd xmm0, xmm0, xmm7
+  vmaxpd xmm4, xmm4, xmm5
+  vmaxpd xmm1, xmm8, xmm1
+  vunpckhpd xmm5, xmm1, xmm4 # xmm5 = xmm1[1],xmm4[1]
+  vunpcklpd xmm1, xmm1, xmm4 # xmm1 = xmm1[0],xmm4[0]
+  vmaxpd xmm1, xmm1, xmm5
+  vminpd xmm4, xmm9, xmm6
+  vminpd xmm3, xmm10, xmm3
+  vunpckhpd xmm5, xmm3, xmm4 # xmm5 = xmm3[1],xmm4[1]
+  vunpcklpd xmm3, xmm3, xmm4 # xmm3 = xmm3[0],xmm4[0]
+  vminpd xmm3, xmm3, xmm5
+.LBB2_10: # =>This Inner Loop Header: Depth=1
+  vmovupd xmm4, xmmword ptr [rcx]
+  vminpd xmm3, xmm4, xmm3
+  vmaxpd xmm1, xmm4, xmm1
+  vmovsd xmm4, qword ptr [rcx + 16] # xmm4 = mem[0],zero
+  vminsd xmm2, xmm4, xmm2
+  vmaxsd xmm0, xmm4, xmm0
+  add rcx, 32
+  cmp rcx, r12
+  jne .LBB2_10
+.LBB2_11:
+  vsubpd xmm4, xmm1, xmm3
+  vsubsd xmm5, xmm0, xmm2
+  vmovapd xmmword ptr [rsp + 16], xmm4
+  vmovsd qword ptr [rsp + 32], xmm5
+  lea rbx, [rsp + 40]
+  vmovupd xmmword ptr [rsp + 40], xmm1
+  vmovsd qword ptr [rsp + 56], xmm0
+  lea r9, [rsp + 64]
+  vmovapd xmmword ptr [rsp + 64], xmm3
+  vmovsd qword ptr [rsp + 80], xmm2
+  mov rcx, qword ptr [r15]
+  mov qword ptr [rsp + 8], rcx
+  mov qword ptr [rsp], rax
+  lea rax, [rsp + 16]
+  lea rsi, [rsp + 8]
+  mov rdx, rsp
+  mov rdi, r15
+  mov rcx, r14
+  mov r8, r12
+  push rax
+  push rbx
+  vzeroupper
+  call void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)
+  add rsp, 16
+.LBB2_12:
+  add rsp, 232
+  pop rbx
+  pop r12
+  pop r14
+  pop r15
+  ret
+.LBB2_2:
+  mov rax, qword ptr [r14 + 16]
+  mov qword ptr [rsp + 35], rax
+  vmovups xmm0, xmmword ptr [r14]
+  vmovups xmmword ptr [rsp + 19], xmm0
+  mov rax, qword ptr [r15]
+  mov dword ptr [rax], 0
+  mov byte ptr [rax + 4], 3
+  vmovupd xmm0, xmmword ptr [rsp + 16]
+  vmovupd xmm1, xmmword ptr [rsp + 27]
+  vmovupd xmmword ptr [rax + 16], xmm1
+  vmovupd xmmword ptr [rax + 5], xmm0
+  mov rax, qword ptr [r15 + 8]
+  mov rcx, qword ptr [r14 + 24]
+  mov qword ptr [rax], rcx
+  jmp .LBB2_12
+void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&): # @void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)
+  push rbp
+  push r15
+  push r14
+  push r13
+  push r12
+  push rbx
+  sub rsp, 88
+  mov rbx, qword ptr [rsp + 152]
+  vmovsd xmm0, qword ptr [rbx] # xmm0 = mem[0],zero
+  xor eax, eax
+  vucomisd xmm0, qword ptr [rbx + 8]
+  lea rbp, [rbx + 8]
+  setb al
+  cmovae rbp, rbx
+  vmovsd xmm0, qword ptr [rbx + 8*rax] # xmm0 = mem[0],zero
+  vucomisd xmm0, qword ptr [rbx + 16]
+  lea r13, [rbx + 16]
+  cmovae r13, rbp
+  mov qword ptr [rsp + 80], r9 # 8-byte Spill
+  mov r9, r8
+  mov r11, rcx
+  mov r10, rdi
+  sub r13, rbx
+  sar r13, 3
+  mov r15, r8
+  sub r15, rcx
+  mov rcx, r15
+  sar rcx, 5
+  shr r15, 63
+  add r15, rcx
+  sar r15
+  mov r14, r15
+  shl r14, 5
+  lea rbp, [r11 + r14]
+  mov r12, r8
+  mov r8, qword ptr [rsi]
+  mov rax, r8
+  sub r12, r11
+  mov qword ptr [rsp + 56], rdx # 8-byte Spill
+  mov qword ptr [rsp + 48], rsi # 8-byte Spill
+  mov qword ptr [rsp + 72], r8 # 8-byte Spill
+  mov qword ptr [rsp + 64], rdi # 8-byte Spill
+  je .LBB3_3
+  mov rax, r8
+  cmp rbp, r9
+  je .LBB3_3
+  bsr rcx, rcx
+  xor rcx, 63
+  add rcx, rcx
+  xor rcx, 126
+  movzx r8d, r13b
+  mov rdi, r11
+  mov rsi, rbp
+  mov rdx, r9
+  mov qword ptr [rsp + 8], rbp # 8-byte Spill
+  mov rbx, r9
+  mov rbp, r11
+  call void std::__introselect<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)::{lambda(auto:1 const&, auto:2 const&)#1}> >(__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, long, __gnu_cxx::__ops::_Iter_comp_iter<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)::{lambda(auto:1 const&, auto:2 const&)#1}>)
+  mov r11, rbp
+  mov r10, qword ptr [rsp + 64] # 8-byte Reload
+  mov r8, qword ptr [rsp + 72] # 8-byte Reload
+  mov r9, rbx
+  mov rsi, qword ptr [rsp + 48] # 8-byte Reload
+  mov rbp, qword ptr [rsp + 8] # 8-byte Reload
+  mov rdx, qword ptr [rsp + 56] # 8-byte Reload
+  mov rax, qword ptr [rsi]
+.LBB3_3:
+  add r15d, 1
+  mov rcx, qword ptr [rbp + 16]
+  mov qword ptr [rsp + 40], rcx
+  vmovups xmm0, xmmword ptr [rbp]
+  vmovups xmmword ptr [rsp + 24], xmm0
+  lea rcx, [rax + 32]
+  mov qword ptr [rsi], rcx
+  mov dword ptr [rax], r15d
+  mov byte ptr [rax + 4], r13b
+  vmovups xmm0, xmmword ptr [rsp + 21]
+  mov rcx, qword ptr [rsp + 32]
+  mov rdi, qword ptr [rsp + 40]
+  vmovups xmmword ptr [rax + 5], xmm0
+  mov qword ptr [rax + 16], rcx
+  mov qword ptr [rax + 24], rdi
+  mov rax, qword ptr [rdx]
+  lea rcx, [rax + 8]
+  mov qword ptr [rdx], rcx
+  mov rcx, qword ptr [r11 + r14 + 24]
+  mov qword ptr [rax], rcx
+  and r12, -64
+  cmp r12, 64
+  jne .LBB3_7
+  mov rax, qword ptr [r11 + 16]
+  mov qword ptr [rsp + 40], rax
+  vmovups xmm0, xmmword ptr [r11]
+  vmovups xmmword ptr [rsp + 24], xmm0
+  mov rax, qword ptr [rsi]
+  lea rcx, [rax + 32]
+  mov qword ptr [rsi], rcx
+  mov dword ptr [rax], 0
+  mov byte ptr [rax + 4], 3
+  vmovupd xmm0, xmmword ptr [rsp + 21]
+  mov rcx, qword ptr [rsp + 32]
+  mov rdi, qword ptr [rsp + 40]
+  vmovupd xmmword ptr [rax + 5], xmm0
+  mov qword ptr [rax + 16], rcx
+  mov qword ptr [rax + 24], rdi
+  mov rax, qword ptr [rdx]
+  lea rcx, [rax + 8]
+  mov qword ptr [rdx], rcx
+  mov rcx, qword ptr [r11 + 24]
+  mov qword ptr [rax], rcx
+  add rbp, 32
+  cmp rbp, r9
+  je .LBB3_6
+  mov rax, qword ptr [rbp + 16]
+  mov qword ptr [rsp + 40], rax
+  vmovups xmm0, xmmword ptr [rbp]
+  vmovups xmmword ptr [rsp + 24], xmm0
+  mov rax, qword ptr [rsi]
+  lea rcx, [rax + 32]
+  mov qword ptr [rsi], rcx
+  mov dword ptr [rax], 0
+  mov byte ptr [rax + 4], 3
+  vmovupd xmm0, xmmword ptr [rsp + 21]
+  mov rcx, qword ptr [rsp + 32]
+  mov rsi, qword ptr [rsp + 40]
+  vmovupd xmmword ptr [rax + 5], xmm0
+  mov qword ptr [rax + 16], rcx
+  mov qword ptr [rax + 24], rsi
+  mov rax, qword ptr [rdx]
+  lea rcx, [rax + 8]
+  mov qword ptr [rdx], rcx
+  mov rcx, qword ptr [rbp + 24]
+.LBB3_9:
+  mov qword ptr [rax], rcx
+  jmp .LBB3_10
+.LBB3_7:
+  mov r14, qword ptr [rsp + 144]
+  movzx ebx, r13b
+  vmovsd xmm0, qword ptr [r14 + 8*rbx] # xmm0 = mem[0],zero
+  vmovsd qword ptr [rsp + 8], xmm0 # 8-byte Spill
+  vmovsd xmm0, qword ptr [r8 + 8*rbx + 8] # xmm0 = mem[0],zero
+  vmovsd qword ptr [r14 + 8*rbx], xmm0
+  mov r12, qword ptr [rsp + 80] # 8-byte Reload
+  vsubsd xmm0, xmm0, qword ptr [r12 + 8*rbx]
+  mov r13, qword ptr [rsp + 152]
+  vmovsd qword ptr [r13 + 8*rbx], xmm0
+  mov rdi, r10
+  mov rcx, r11
+  mov r8, rbp
+  mov r15, r9
+  mov r9, r12
+  push r13
+  push r14
+  call void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)
+  mov rcx, rbp
+  add rsp, 16
+  vmovsd xmm0, qword ptr [rsp + 8] # 8-byte Reload
+  vmovsd qword ptr [r14 + 8*rbx], xmm0
+  vsubsd xmm0, xmm0, qword ptr [r12 + 8*rbx]
+  vmovsd qword ptr [r13 + 8*rbx], xmm0
+  lea rax, [rbp + 64]
+  cmp rax, r15
+  je .LBB3_8
+  vmovsd xmm0, qword ptr [r12 + 8*rbx] # xmm0 = mem[0],zero
+  vmovsd qword ptr [rsp + 8], xmm0 # 8-byte Spill
+  mov rax, qword ptr [rsp + 72] # 8-byte Reload
+  vmovsd xmm0, qword ptr [rax + 8*rbx + 8] # xmm0 = mem[0],zero
+  vmovsd qword ptr [r12 + 8*rbx], xmm0
+  vmovsd xmm1, qword ptr [r14 + 8*rbx] # xmm1 = mem[0],zero
+  vsubsd xmm0, xmm1, xmm0
+  vmovsd qword ptr [r13 + 8*rbx], xmm0
+  add rcx, 32
+  mov rdi, qword ptr [rsp + 64] # 8-byte Reload
+  mov rsi, qword ptr [rsp + 48] # 8-byte Reload
+  mov rdx, qword ptr [rsp + 56] # 8-byte Reload
+  mov r8, r15
+  mov r9, r12
+  push r13
+  push r14
+  call void KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)
+  add rsp, 16
+  vmovsd xmm1, qword ptr [rsp + 8] # 8-byte Reload
+  vmovsd qword ptr [r12 + 8*rbx], xmm1
+  vmovsd xmm0, qword ptr [r14 + 8*rbx] # xmm0 = mem[0],zero
+  vsubsd xmm0, xmm0, xmm1
+  vmovsd qword ptr [r13 + 8*rbx], xmm0
+  jmp .LBB3_10
+.LBB3_6:
+  mov dword ptr [r8], 0
+.LBB3_10:
+  add rsp, 88
+  pop rbx
+  pop r12
+  pop r13
+  pop r14
+  pop r15
+  pop rbp
+  ret
+.LBB3_8:
+  mov rax, qword ptr [rcx + 48]
+  mov qword ptr [rsp + 40], rax
+  vmovups xmm0, xmmword ptr [rcx + 32]
+  vmovups xmmword ptr [rsp + 24], xmm0
+  mov rsi, qword ptr [rsp + 48] # 8-byte Reload
+  mov rax, qword ptr [rsi]
+  lea rdx, [rax + 32]
+  mov qword ptr [rsi], rdx
+  mov dword ptr [rax], 0
+  mov byte ptr [rax + 4], 3
+  vmovupd xmm0, xmmword ptr [rsp + 21]
+  mov rsi, qword ptr [rsp + 32]
+  mov rdx, qword ptr [rsp + 40]
+  vmovupd xmmword ptr [rax + 5], xmm0
+  mov qword ptr [rax + 16], rsi
+  mov qword ptr [rax + 24], rdx
+  mov rsi, qword ptr [rsp + 56] # 8-byte Reload
+  mov rax, qword ptr [rsi]
+  lea rdx, [rax + 8]
+  mov qword ptr [rsi], rdx
+  mov rcx, qword ptr [rcx + 56]
+  jmp .LBB3_9
+  vmovsd xmm1, qword ptr [r12 + 8*rbx + 32] # xmm1 = mem[0],zero
+  vmovsd xmm2, qword ptr [rdx + 8*rbx] # xmm2 = mem[0],zero
+  vucomisd xmm1, xmm2
+  vmovsd xmm0, qword ptr [r14 + 8*rbx - 32] # xmm0 = mem[0],zero
+  jae .LBB4_8
+  vucomisd xmm2, xmm0
+  jb .LBB4_11
+  vucomisd xmm1, xmm0
+  jae .LBB4_9
+  jmp .LBB4_7
+.LBB4_8: # in Loop: Header=BB4_2 Depth=1
+  vucomisd xmm1, xmm0
+  jae .LBB4_10
+.LBB4_9: # in Loop: Header=BB4_2 Depth=1
+  vmovups ymm0, ymmword ptr [r12]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovups ymm0, ymmword ptr [rax]
+  vmovups ymmword ptr [r12], ymm0
+  vmovups ymm0, ymmword ptr [rsp]
+  vmovups ymmword ptr [rax], ymm0
+  jmp .LBB4_12
+.LBB4_10: # in Loop: Header=BB4_2 Depth=1
+  vucomisd xmm2, xmm0
+  jae .LBB4_11
+.LBB4_7: # in Loop: Header=BB4_2 Depth=1
+  vmovups ymm0, ymmword ptr [r12]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovups ymm0, ymmword ptr [rsi]
+  vmovups ymmword ptr [r12], ymm0
+  vmovups ymm0, ymmword ptr [rsp]
+  vmovups ymmword ptr [rsi], ymm0
+  jmp .LBB4_12
+.LBB4_11: # in Loop: Header=BB4_2 Depth=1
+  vmovups ymm0, ymmword ptr [r12]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovups ymm0, ymmword ptr [rdx]
+  vmovups ymmword ptr [r12], ymm0
+  vmovups ymm0, ymmword ptr [rsp]
+  vmovups ymmword ptr [rdx], ymm0
+.LBB4_12: # in Loop: Header=BB4_2 Depth=1
+  mov rdx, r14
+.LBB4_13: # Parent Loop BB4_2 Depth=1
+  vmovsd xmm0, qword ptr [r12 + 8*rbx] # xmm0 = mem[0],zero
+  add rax, -32
+  mov rsi, rax
+.LBB4_14: # Parent Loop BB4_2 Depth=1
+  vucomisd xmm0, qword ptr [rsi + 8*rbx + 32]
+  lea rsi, [rsi + 32]
+  ja .LBB4_14
+  lea rax, [rsi + 32]
+.LBB4_16: # Parent Loop BB4_2 Depth=1
+  vucomisd xmm0, qword ptr [rdx + 8*rbx - 32]
+  lea rdx, [rdx - 32]
+  jb .LBB4_16
+  cmp rsi, rdx
+  jae .LBB4_19
+  vmovups ymm0, ymmword ptr [rsi]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovups ymm0, ymmword ptr [rdx]
+  vmovups ymmword ptr [rsi], ymm0
+  vmovupd ymm0, ymmword ptr [rsp]
+  vmovupd ymmword ptr [rdx], ymm0
+  jmp .LBB4_13
+.LBB4_20:
+  cmp r12, r14
+  je .LBB4_32
+  lea rax, [r12 + 32]
+  cmp rax, r14
+  je .LBB4_32
+  mov rdi, r12
+  jmp .LBB4_23
+.LBB4_30: # in Loop: Header=BB4_23 Depth=1
+  vmovupd ymm0, ymmword ptr [rsp]
+  vmovupd ymmword ptr [rax], ymm0
+  lea rax, [r15 + 32]
+  mov rdi, r15
+  cmp rax, r14
+  je .LBB4_32
+.LBB4_23: # =>This Loop Header: Depth=1
+  mov r15, rax
+  vmovsd xmm0, qword ptr [rdi + 8*rbx + 32] # xmm0 = mem[0],zero
+  vucomisd xmm0, qword ptr [r12 + 8*rbx]
+  jae .LBB4_27
+  vmovups ymm0, ymmword ptr [r15]
+  vmovups ymmword ptr [rsp], ymm0
+  mov rdx, r15
+  sub rdx, r12
+  je .LBB4_26
+  sub rdi, rdx
+  add rdi, 64
+  mov rsi, r12
+  vzeroupper
+  call memmove@PLT
+.LBB4_26: # in Loop: Header=BB4_23 Depth=1
+  vmovupd ymm0, ymmword ptr [rsp]
+  vmovupd ymmword ptr [r12], ymm0
+  lea rax, [r15 + 32]
+  mov rdi, r15
+  cmp rax, r14
+  jne .LBB4_23
+  jmp .LBB4_32
+.LBB4_27: # in Loop: Header=BB4_23 Depth=1
+  vmovups ymm0, ymmword ptr [r15]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovsd xmm0, qword ptr [rsp + 8*rbx] # xmm0 = mem[0],zero
+  vucomisd xmm0, qword ptr [rdi + 8*rbx]
+  mov rax, r15
+  jae .LBB4_30
+  mov rcx, r15
+.LBB4_29: # Parent Loop BB4_23 Depth=1
+  lea rax, [rcx - 32]
+  vmovupd ymm1, ymmword ptr [rcx - 32]
+  vmovupd ymmword ptr [rcx], ymm1
+  vucomisd xmm0, qword ptr [rcx + 8*rbx - 64]
+  mov rcx, rax
+  jb .LBB4_29
+  jmp .LBB4_30
+.LBB4_3:
+  lea rsi, [r15 + 32]
+  movzx ecx, r8b
+  mov rdi, r12
+  mov rdx, r14
+  vzeroupper
+  call void std::__heap_select<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__ops::_Iter_comp_iter<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)::{lambda(auto:1 const&, auto:2 const&)#1}> >(__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__ops::_Iter_comp_iter<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::RangeCtorRecursion<__gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > > >(KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::MetaNode*&, unsigned long**&, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, __gnu_cxx::__normal_iterator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type*, std::vector<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type, std::allocator<KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::node_type> > >, std::array<double, 3ul>&, std::array<double, 3ul>&, std::array<double, 3ul>&)::{lambda(auto:1 const&, auto:2 const&)#1}>)
+  vmovups ymm0, ymmword ptr [r12]
+  vmovups ymmword ptr [rsp], ymm0
+  vmovups ymm0, ymmword ptr [r15]
+  vmovups ymmword ptr [r12], ymm0
+  vmovupd ymm0, ymmword ptr [rsp]
+  vmovupd ymmword ptr [r15], ymm0
+.LBB4_32:
+  add rsp, 40
+  pop rbx
+  pop r12
+  pop r14
+  pop r15
+  vzeroupper
+  ret
+  vmovsd xmm0, qword ptr [rcx + 8*r8] # xmm0 = mem[0],zero
+  mov rcx, r10
+  shl rcx, 5
+  add rcx, rdi
+  vucomisd xmm0, qword ptr [rcx + 8*r8]
+  jb .LBB5_7
+  mov r10, rbx
+  jmp .LBB5_7
+.LBB5_10: # in Loop: Header=BB5_5 Depth=1
+  test r9, r9
+  jne .LBB5_13
+  cmp r10, r11
+  jne .LBB5_13
+  vmovupd ymm0, ymmword ptr [r15]
+  vmovupd ymmword ptr [r12], ymm0
+  mov r10, r14
+.LBB5_13: # in Loop: Header=BB5_5 Depth=1
+  vmovupd ymm0, ymmword ptr [rsp - 72]
+  vmovupd ymmword ptr [rsp - 40], ymm0
+  cmp r10, rax
+  jle .LBB5_3
+  vmovsd xmm0, qword ptr [rsp + 8*r8 - 40] # xmm0 = mem[0],zero
+.LBB5_15: # Parent Loop BB5_5 Depth=1
+  lea rcx, [r10 - 1]
+  shr rcx, 63
+  lea rbx, [r10 + rcx]
+  add rbx, -1
+  sar rbx
+  mov rbp, rbx
+  shl rbp, 5
+  lea rcx, [rdi + rbp]
+  vucomisd xmm0, qword ptr [rcx + 8*r8]
+  jbe .LBB5_3
+  shl r10, 5
+  vmovups ymm1, ymmword ptr [rdi + rbp]
+  vmovups ymmword ptr [rdi + r10], ymm1
+  mov r10, rbx
+  cmp rbx, rax
+  jg .LBB5_15
+  jmp .LBB5_4
+.LBB5_18:
+  mov r12, qword ptr [rsp - 88] # 8-byte Reload
+  mov rax, qword ptr [rsp - 80] # 8-byte Reload
+  cmp rsi, rdx
+  jae .LBB5_38
+.LBB5_19:
+  mov r11, rax
+  shr r11, 63
+  add r11, rax
+  sar r11
+  lea r10, [r11 + r11]
+  add r10, 1
+  mov r14, r10
+  shl r14, 5
+  add r14, rdi
+  mov r15, r11
+  shl r15, 5
+  add r15, rdi
+  jmp .LBB5_23
+.LBB5_20: # in Loop: Header=BB5_23 Depth=1
+  mov r12, qword ptr [rsp - 88] # 8-byte Reload
+.LBB5_21: # in Loop: Header=BB5_23 Depth=1
+  shl rbx, 5
+  vmovupd ymm0, ymmword ptr [rsp - 72]
+  vmovupd ymmword ptr [rdi + rbx], ymm0
+.LBB5_22: # in Loop: Header=BB5_23 Depth=1
+  add rsi, 32
+  cmp rsi, rdx
+  jae .LBB5_38
+.LBB5_23: # =>This Loop Header: Depth=1
+  vmovsd xmm0, qword ptr [rsi + 8*r8] # xmm0 = mem[0],zero
+  vucomisd xmm0, qword ptr [rdi + 8*r8]
+  jae .LBB5_22
+  vmovups ymm0, ymmword ptr [rsi]
+  vmovups ymmword ptr [rsp - 72], ymm0
+  vmovupd ymm0, ymmword ptr [rdi]
+  vmovupd ymmword ptr [rsi], ymm0
+  cmp r12, 65
+  jl .LBB5_29
+  xor eax, eax
+  jmp .LBB5_27
+.LBB5_26: # in Loop: Header=BB5_27 Depth=2
+  mov rcx, rbx
+  shl rcx, 5
+  shl rax, 5
+  vmovupd ymm0, ymmword ptr [rdi + rcx]
+  vmovupd ymmword ptr [rdi + rax], ymm0
+  mov rax, rbx
+  cmp rbx, r13
+  jge .LBB5_30
+.LBB5_27: # Parent Loop BB5_23 Depth=1
+  lea rbp, [rax + rax]
+  add rbp, 2
+  lea rbx, [rax + rax]
+  add rbx, 1
+  mov rcx, rbp
+  shl rcx, 5
+  add rcx, rdi
+  vmovsd xmm0, qword ptr [rcx + 8*r8] # xmm0 = mem[0],zero
+  mov rcx, rbx
+  shl rcx, 5
+  add rcx, rdi
+  vucomisd xmm0, qword ptr [rcx + 8*r8]
+  jb .LBB5_26
+  mov rbx, rbp
+  jmp .LBB5_26
+.LBB5_29: # in Loop: Header=BB5_23 Depth=1
+  xor ebx, ebx
+.LBB5_30: # in Loop: Header=BB5_23 Depth=1
+  test r9, r9
+  jne .LBB5_33
+  cmp rbx, r11
+  jne .LBB5_33
+  vmovupd ymm0, ymmword ptr [r14]
+  vmovupd ymmword ptr [r15], ymm0
+  mov rbx, r10
+.LBB5_33: # in Loop: Header=BB5_23 Depth=1
+  vmovupd ymm0, ymmword ptr [rsp - 72]
+  vmovupd ymmword ptr [rsp - 40], ymm0
+  test rbx, rbx
+  jle .LBB5_21
+  vmovsd xmm0, qword ptr [rsp + 8*r8 - 40] # xmm0 = mem[0],zero
+.LBB5_35: # Parent Loop BB5_23 Depth=1
+  lea r12, [rbx - 1]
+  mov rbp, r12
+  shr rbp
+  mov rax, rbp
+  shl rax, 5
+  lea rcx, [rdi + rax]
+  vucomisd xmm0, qword ptr [rcx + 8*r8]
+  jbe .LBB5_20
+  shl rbx, 5
+  vmovups ymm1, ymmword ptr [rdi + rax]
+  vmovups ymmword ptr [rdi + rbx], ymm1
+  mov rbx, rbp
+  cmp r12, 1
+  ja .LBB5_35
+  xor ebx, ebx
+  jmp .LBB5_20
+.LBB5_38:
+  pop rbx
+  pop r12
+  pop r13
+  pop r14
+  pop r15
+  pop rbp
+  vzeroupper
+  ret
+KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::DeAlloc(): # @KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::DeAlloc()
+  push rbx
+  mov rbx, rdi
+  mov rdi, qword ptr [rdi]
+  test rdi, rdi
+  je .LBB6_2
+  call operator delete[](void*)
+.LBB6_2:
+  mov rdi, qword ptr [rbx + 8]
+  pop rbx
+  jmp operator delete(void*) # TAILCALL
+KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::NNValue(PointND<double, (unsigned char)3> const&) const: # @KDTreeExpandLongestVec<double, (unsigned char)3, unsigned long*, (PointND<double, (unsigned char)3>::DistType)0>::NNValue(PointND<double, (unsigned char)3> const&) const
+  push r15
+  push r14
+  push rbx
+  sub rsp, 384
+  mov r9, qword ptr [rdi]
+  vmovsd xmm1, qword ptr [r9 + 8] # xmm1 = mem[0],zero
+  vmovsd xmm0, qword ptr [rsi] # xmm0 = mem[0],zero
+  vsubsd xmm2, xmm1, xmm0
+  vmovupd xmm1, xmmword ptr [rsi + 8]
+  vmovupd xmm3, xmmword ptr [r9 + 16]
+  vsubpd xmm3, xmm3, xmm1
+  vmulpd xmm3, xmm3, xmm3
+  vfmadd213sd xmm2, xmm2, xmm3 # xmm2 = (xmm2 * xmm2) + xmm3
+  vpermilpd xmm3, xmm3, 1 # xmm3 = xmm3[1,0]
+  vaddsd xmm3, xmm2, xmm3
+  xor r10d, r10d
+  lea r8, [rsp - 120]
+  vxorpd xmm2, xmm2, xmm2
+  mov r15, r9
+  xor r11d, r11d
+  xor edx, edx
+  jmp .LBB7_1
+.LBB7_4: # in Loop: Header=BB7_1 Depth=1
+  lea eax, [r11 + 1]
+  vmovsd qword ptr [r14], xmm4
+  mov dword ptr [rsp + rcx - 120], eax
+  mov eax, dword ptr [r15]
+  add r11d, eax
+  shl rax, 5
+  add r15, rax
+.LBB7_5: # in Loop: Header=BB7_1 Depth=1
+  vmovsd xmm4, qword ptr [r15 + 8] # xmm4 = mem[0],zero
+  vsubsd xmm4, xmm4, xmm0
+  vmovupd xmm5, xmmword ptr [r15 + 16]
+  vsubpd xmm5, xmm5, xmm1
+  vmulpd xmm5, xmm5, xmm5
+  vfmadd213sd xmm4, xmm4, xmm5 # xmm4 = (xmm4 * xmm4) + xmm5
+  vpermilpd xmm5, xmm5, 1 # xmm5 = xmm5[1,0]
+  vaddsd xmm4, xmm4, xmm5
+  vucomisd xmm4, xmm3
+  vminsd xmm3, xmm4, xmm3
+  cmovb r10d, r11d
+  add rdx, 1
+.LBB7_1: # =>This Loop Header: Depth=1
+  mov rcx, rdx
+  shl rcx, 4
+  mov ebx, dword ptr [r15]
+  movzx eax, byte ptr [r15 + 4]
+  test ebx, ebx
+  je .LBB7_6
+  vmovsd xmm4, qword ptr [rsi + 8*rax] # xmm4 = mem[0],zero
+  vsubsd xmm4, xmm4, qword ptr [r15 + 8*rax + 8]
+  lea r14, [rsp + rcx]
+  add r14, -128
+  vucomisd xmm4, xmm2
+  vmulsd xmm4, xmm4, xmm4
+  jae .LBB7_4
+  add ebx, r11d
+  vmovsd qword ptr [r14], xmm4
+  mov dword ptr [rsp + rcx - 120], ebx
+  add r15, 32
+  add r11d, 1
+  jmp .LBB7_5
+.LBB7_6: # in Loop: Header=BB7_1 Depth=1
+  cmp al, 3
+  je .LBB7_9
+  vmovsd xmm4, qword ptr [r15 + 40] # xmm4 = mem[0],zero
+  vsubsd xmm4, xmm4, xmm0
+  vmovupd xmm5, xmmword ptr [r15 + 48]
+  vsubpd xmm5, xmm5, xmm1
+  vmulpd xmm5, xmm5, xmm5
+  vfmadd213sd xmm4, xmm4, xmm5 # xmm4 = (xmm4 * xmm4) + xmm5
+  vpermilpd xmm5, xmm5, 1 # xmm5 = xmm5[1,0]
+  vaddsd xmm4, xmm4, xmm5
+  vucomisd xmm4, xmm3
+  jae .LBB7_9
+  add r11d, 1
+  vmovapd xmm3, xmm4
+  mov r10d, r11d
+.LBB7_9: # in Loop: Header=BB7_1 Depth=1
+  add rcx, r8
+.LBB7_10: # Parent Loop BB7_1 Depth=1
+  sub rdx, 1
+  jb .LBB7_14
+  lea rax, [rcx - 16]
+  vucomisd xmm3, qword ptr [rcx - 24]
+  mov rcx, rax
+  jbe .LBB7_10
+  mov r11d, dword ptr [rax]
+  mov rax, r11
+  shl rax, 5
+  lea r15, [r9 + rax]
+  vmovsd xmm4, qword ptr [r9 + rax + 8] # xmm4 = mem[0],zero
+  vsubsd xmm4, xmm4, xmm0
+  vmovupd xmm5, xmmword ptr [r9 + rax + 16]
+  vsubpd xmm5, xmm5, xmm1
+  vmulpd xmm5, xmm5, xmm5
+  vfmadd213sd xmm4, xmm4, xmm5 # xmm4 = (xmm4 * xmm4) + xmm5
+  vpermilpd xmm5, xmm5, 1 # xmm5 = xmm5[1,0]
+  vaddsd xmm4, xmm4, xmm5
+  vucomisd xmm4, xmm3
+  jae .LBB7_1
+  vmovapd xmm3, xmm4
+  mov r10d, r11d
+  jmp .LBB7_1
+.LBB7_14:
+  mov rax, qword ptr [rdi + 8]
+  mov ecx, r10d
+  mov rax, qword ptr [rax + 8*rcx]
+  add rsp, 384
+  pop rbx
+  pop r14
+  pop r15
+  ret
+_GLOBAL__sub_I_example.cpp: # @_GLOBAL__sub_I_example.cpp
+  push rax
+  mov edi, offset std::__ioinit
+  call std::ios_base::Init::Init() [complete object constructor]
+  mov edi, offset std::ios_base::Init::~Init() [complete object destructor]
+  mov esi, offset std::__ioinit
+  mov edx, offset __dso_handle
+  pop rax
+  jmp __cxa_atexit # TAILCALL

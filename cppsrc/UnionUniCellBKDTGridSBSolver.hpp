@@ -17,9 +17,9 @@
 #include <iterator>
 
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType,
-          typename FPType, def::ThreadingPolicy policy>
-class UnionUniCellBKDTGridSBSolver final : public UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, policy> {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType,
+          typename FPType, def::ThreadingPolicy Policy>
+class UnionUniCellBKDTGridSBSolver final : public UnionUniLatLngBKDTGridSBSolver<KDTType, FPType, Policy> {
 public:
     UnionUniCellBKDTGridSBSolver(FPType = 1.0, std::size_t = 1500);
     const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
@@ -31,8 +31,8 @@ private:
     std::vector<std::pair<std::size_t, FPType>> col_size_CosLngIncEachRowVec;
     std::size_t totalCacheCells;
     virtual void FillGridCache() override final;
-    virtual void LoopBody(typename def::PolicyTag<def::ThreadingPolicy::kSingle>) override;
-    virtual void LoopBody(typename def::PolicyTag<def::ThreadingPolicy::kMultiOmp>) override;
+    virtual void LoopBody(typename def::ThreadingPolicyTag<def::ThreadingPolicy::kSingle>) override;
+    virtual void LoopBody(typename def::ThreadingPolicyTag<def::ThreadingPolicy::kMultiOmp>) override;
 };
 
 

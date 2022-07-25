@@ -15,8 +15,8 @@
 #include "SBSolver.hpp"
 
 
-template <typename FPType, def::ThreadingPolicy policy>
-class GridSBSolver : public SBSolver<FPType, policy> {
+template <typename FPType, def::ThreadingPolicy Policy>
+class GridSBSolver : public SBSolver<FPType, Policy> {
     
 public:
     void Build(std::span<const SBLoc<FPType>>) override;

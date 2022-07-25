@@ -7,20 +7,21 @@
 //
 
 #include "BFEUCPtSolver.hpp"
+#include "Algorithm.hpp"
 #include "Utility.hpp"
 #include <algorithm>
 
-template <typename FPType, def::ThreadingPolicy policy>
-const SBLoc<FPType>* BFEUCPtSBSolver<FPType, policy>::
+template <typename FPType, def::ThreadingPolicy Policy>
+const SBLoc<FPType>* BFEUCPtSBSolver<FPType, Policy>::
 FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const {
-    return &*utility::MinElementGivenDistFunc<policy>(this->loc_data_span_.rbegin(), this->loc_data_span_.rend(),
-                                              [test_pt = SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt)](const SBLoc<FPType>& l) {
-                                                  return test_pt.template dist<PointND<FPType, 3>::DistType::kEucSq>(l.LocTo3dEucPt());},
-                                              std::less<FPType>());
+    return &*Algo<Policy, def::DistType::kEucSq>::LinearNNSearch(this->loc_data_span_.rbegin(), this->loc_data_span_.rend(),
+           SBLoc<FPType>::GeoPtTo3dEucPt(geo_search_pt),
+           [](const typename SBLoc<FPType>::GeoCart3DPtType& euc_search_pt, const SBLoc<FPType>& loc) {
+               return euc_search_pt.template dist<def::DistType::kEucSq>(loc.LocTo3dEucPt());});
 }
 
-template <typename FPType, def::ThreadingPolicy policy>
-void BFEUCPtSBSolver<FPType, policy>::PrintSolverInfo() const {
+template <typename FPType, def::ThreadingPolicy Policy>
+void BFEUCPtSBSolver<FPType, Policy>::PrintSolverInfo() const {
     std::cout << "This is brute force solver using converted euclidean distance metric.\n";
 }
 

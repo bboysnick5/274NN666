@@ -17,11 +17,11 @@
 #include <stdio.h>
 #include <span>
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType>
-using KDT = KDTType<FPType, 3, const SBLoc<FPType>*, PointND<FPType, 3>::DistType::kEuc>;
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType>
+using KDT = KDTType<FPType, 3, const SBLoc<FPType>*, def::DistType::kEuc>;
 
-template <template <typename FPType, std::uint8_t N, class, typename PointND<FPType, N>::DistType> class KDTType, typename FPType, def::ThreadingPolicy policy>
-class KDTSBSolver : public SBSolver<FPType, policy> {
+template <template <typename FPType, std::uint8_t N, class, typename def::DistType> class KDTType, typename FPType, def::ThreadingPolicy Policy>
+class KDTSBSolver : public SBSolver<FPType, Policy> {
 public:
     void Build(std::span<const SBLoc<FPType>>) override;
     const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
@@ -33,6 +33,7 @@ protected:
     KDT<KDTType, FPType> loc_kdt_;
     virtual void GenerateKDT(std::span<const SBLoc<FPType>>);
 };
+
 
 
 

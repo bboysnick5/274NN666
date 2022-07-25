@@ -96,6 +96,7 @@
 		827F2F2226980DE700ADE12C /* libVc.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libVc.a; path = ../../../../../usr/local/Cellar/vc/1.4.2/lib/libVc.a; sourceTree = "<group>"; };
 		827F2F242698170D00ADE12C /* BFLocalStorageSBSolver.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = BFLocalStorageSBSolver.cpp; sourceTree = "<group>"; };
 		827F2F252698170D00ADE12C /* BFLocalStorageSBSolver.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = BFLocalStorageSBSolver.hpp; sourceTree = "<group>"; };
+		8281A3F026AAAF2000E45E6A /* Algorithm.hpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.h; path = Algorithm.hpp; sourceTree = "<group>"; };
 		82A66E1E1E00382500D5FAFD /* 274F16NearestSB */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = 274F16NearestSB; sourceTree = BUILT_PRODUCTS_DIR; };
 		82A66E291E003B0800D5FAFD /* BFSBSolver.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BFSBSolver.cpp; sourceTree = "<group>"; };
 		82A66E2A1E003B0800D5FAFD /* BFSBSolver.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = BFSBSolver.hpp; sourceTree = "<group>"; };
@@ -188,6 +189,7 @@
 				82A66E311E003B0800D5FAFD /* main.cpp */,
 				8200D42B265CD1E2001A60C5 /* Definition.hpp */,
 				014C5C3E222958A4002406C4 /* Utility.hpp */,
+				8281A3F026AAAF2000E45E6A /* Algorithm.hpp */,
 				82A66E321E003B0800D5FAFD /* Point.hpp */,
 				82A66E2D1E003B0800D5FAFD /* BoundedPQueue.hpp */,
 				82A66E2E1E003B0800D5FAFD /* KDTree.hpp */,
@@ -363,7 +365,7 @@
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
 				LLVM_LTO = NO;
-				MACOSX_DEPLOYMENT_TARGET = 11.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.2;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
@@ -441,7 +443,7 @@
 					/opt/intel/oneapi/tbb/latest/lib,
 				);
 				LLVM_LTO = NO;
-				MACOSX_DEPLOYMENT_TARGET = 11.4;
+				MACOSX_DEPLOYMENT_TARGET = 12.2;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				OTHER_CFLAGS = (
 					"-ltbb",
