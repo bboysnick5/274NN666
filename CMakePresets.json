@@ -65,31 +65,59 @@
         },
         {
             "name": "x64-mac-debug-gcc",
-            "displayName": "x64-mac-gcc-debug",
-            "description": "x64 mac gcc debug",
+            "displayName": "x64-mac-debug-gcc",
+            "description": "x64 mac debug gcc",
             "inherits": "mac",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "gcc",
-                "CMAKE_CXX_COMPILER": "g++",
+                "CMAKE_C_COMPILER": "gcc-12",
+                "CMAKE_CXX_COMPILER": "g++-12",
                 "CMAKE_BUILD_TYPE": "Debug"
             }
         },
         {
             "name": "x64-mac-release-gcc",
             "displayName": "x64-mac-release-gcc",
-            "description": "x64 mac debug gcc",
+            "description": "x64 mac release gcc",
             "inherits": "x64-mac-debug-gcc",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-Ofast -march=native -DNDEBUG"
+            }
+        },
+        {
+            "name": "x64-mac-debug-llvm",
+            "displayName": "x64-mac-debug-llvm",
+            "description": "x64 mac debug llvm",
+            "inherits": "mac",
+            "cacheVariables": {
+                "CMAKE_C_COMPILER": "clang",
+                "CMAKE_CXX_COMPILER": "clang++",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "x64-mac-release-llvm",
+            "displayName": "x64-mac-release-llvm",
+            "description": "x64 mac release llvm",
+            "inherits": "x64-mac-debug-llvm",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_CXX_FLAGS_RELEASE": "-Ofast -march=native -DNDEBUG"
             }
         }
     ],
     "buildPresets": [
         {
-            "name": "default-build-mac",
-            "displayName": "Default",
+            "name": "mac-debug-gcc",
+            "displayName": "mac-debug-gcc",
             "configurePreset": "x64-mac-debug-gcc",
             "description": "Vanilla mac debug build with gcc"
+        },
+        {
+            "name": "mac-debug-llvm",
+            "displayName": "mac-debug-llvm",
+            "configurePreset": "x64-mac-debug-llvm",
+            "description": "Vanilla mac debug build with llvm"
         },
         {
             "name": "default-build-windows",
@@ -111,6 +139,14 @@
             "displayName": "verbose-build-windows-debug-llvm",
             "configurePreset": "x64-mac-debug-gcc",
             "inherits": "verbose-build-windows-debug-llvm"
+        },
+        {
+            "name": "mac-debug-gcc",
+            "description": "",
+            "displayName": "",
+            "inherits": [
+                "mac-debug-gcc"
+            ]
         }
     ],
     "testPresets": [
