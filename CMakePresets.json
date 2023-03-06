@@ -71,7 +71,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "gcc-12",
                 "CMAKE_CXX_COMPILER": "g++-12",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXE_LINKER_FLAGS ": "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold"
             }
         },
         {
@@ -92,7 +93,8 @@
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++",
-                "CMAKE_BUILD_TYPE": "Debug"
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXE_LINKER_FLAGS ": "${CMAKE_EXE_LINKER_FLAGS} -fuse-ld=mold"
             }
         },
         {
@@ -139,14 +141,6 @@
             "displayName": "verbose-build-windows-debug-llvm",
             "configurePreset": "x64-mac-debug-gcc",
             "inherits": "verbose-build-windows-debug-llvm"
-        },
-        {
-            "name": "mac-debug-gcc",
-            "description": "",
-            "displayName": "",
-            "inherits": [
-                "mac-debug-gcc"
-            ]
         }
     ],
     "testPresets": [

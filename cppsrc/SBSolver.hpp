@@ -1,35 +1,50 @@
-//
-//  SBSolver.hpp
-//  274F16NearestSB
-//
-//  Created by Yunlong Liu on 12/10/16.
-//  Copyright © 2016 Yunlong Liu. All rights reserved.
-//
+/*
+ * @Author: Nick Liu
+ * @Date: 2021-06-21 10:18:59
+ * @LastEditTime: 2022-08-11 11:34:36
+ * @LastEditors: Nick Liu
+ * @Description:
+ * @FilePath: /274F201666/cppsrc/SBSolver.hpp
+ */
 
 #ifndef SBSolver_hpp
 #define SBSolver_hpp
 
-#include "SBLoc.hpp"
-#include "Point.hpp"
 #include <stdio.h>
-#include <vector>
+
+#include <boost/mp11.hpp>
 #include <memory>
 #include <span>
+#include <type_traits>
+#include <vector>
 
-template <typename FPType>
-class SBSolverWrapper {
-public:
+#include "Definition.hpp"
+#include "KDTree.hpp"
+#include "KDTreeCusMem.hpp"
+#include "KDTreeExpandLongest.hpp"
+#include "KDTreeExpandLongestVec.hpp"
+#include "Point.hpp"
+#include "SBLoc.hpp"
+#include "SolverConfig.hpp"
+
+template <SolverConfig Config>
+class SBSolver {
+   public:
+    using FPType = typename decltype(Config)::FPType;
+    using KDTType = typename decltype(Config)::KDTType;
+
     virtual void Build(std::span<const SBLoc<FPType>>) = 0;
-    virtual const SBLoc<FPType>* FindNearestLoc(typename SBLoc<FPType>::GeoPtType) const = 0;
+    virtual const SBLoc<FPType>* FindNearestLoc(
+        typename SBLoc<FPType>::GeoPtType) const = 0;
     virtual void PrintSolverInfo() const = 0;
-    virtual ~SBSolverWrapper() = default;
+    virtual ~SBSolver() = default;
 };
 
-template <typename FPType, def::ThreadingPolicy>
-class SBSolver : public SBSolverWrapper<FPType> {
-public:
-    virtual ~SBSolver() {}
+template <SolverConfig Config>
+concept SBSolverC = requires {
+    typename SBSolver<Config>;
 };
 
+    // TODO: add a description string to solver with its name and config
 
 #endif /* SBSolver_hpp */

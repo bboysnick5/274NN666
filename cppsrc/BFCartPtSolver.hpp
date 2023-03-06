@@ -1,25 +1,25 @@
 /*
  * @Author: Nick Liu
  * @Date: 2021-06-21 10:18:59
- * @LastEditTime: 2022-08-08 20:39:04
+ * @LastEditTime: 2022-08-08 17:05:23
  * @LastEditors: Nick Liu
  * @Description:
- * @FilePath: /274F201666/cppsrc/BFSBSolver.hpp
+ * @FilePath: /274F201666/cppsrc/BFCartPtSolver.hpp
  */
 
-#ifndef BFSBSolver_hpp
-#define BFSBSolver_hpp
+#ifndef BFCartPtSolver_hpp
+#define BFCartPtSolver_hpp
 
-#include <concepts>
-#include <memory>
-#include <span>
+#include <stdio.h>
 
-#include "Definition.hpp"
+#include <vector>
+
+#include "BFSBSolver.hpp"
+#include "Point.hpp"
 #include "SBLoc.hpp"
-#include "SBSolver.hpp"
 
 template <SolverConfig Config>
-class BFSBSolver : public SBSolver<Config> {
+class BFCartPtSBSolver final : public BFSBSolver<Config> {
     using FPType = typename decltype(Config)::FPType;
 
    public:
@@ -28,9 +28,8 @@ class BFSBSolver : public SBSolver<Config> {
         typename SBLoc<FPType>::GeoPtType geo_search_pt) const override;
     void PrintSolverInfo() const override;
 
-   protected:
-    std::span<const SBLoc<FPType>> loc_span_;
-    std::vector<typename SBLoc<FPType>::GeoPtType> loc_geo_pt_vec_;
+   private:
+    std::vector<typename SBLoc<FPType>::CartPtType> loc_cart_pt_vec_;
 };
 
-#endif /* BFSBSolver_hpp */
+#endif /* BFCartPtSolver_hpp */
